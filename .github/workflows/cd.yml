@@ -23,6 +23,8 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'gradle'
+      - name: Grant execute permission to Gradle Wrapper
+        run: chmod +x ./gradlew
       - name: Build and push image to Amazon ECR
         run: ./gradlew clean jib -x test
       - name: Deploy to AWS ECS
