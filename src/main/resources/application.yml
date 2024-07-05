@@ -5,6 +5,5 @@ management:
   endpoints:
     web:
       cors:
-        allowed-origins: *
-        allowed-methods: *
-        allowed-headers: *
+        allowed-origins: http://localhost:5173
+        allowed-methods: GET
