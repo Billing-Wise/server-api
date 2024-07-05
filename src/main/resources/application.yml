@@ -5,5 +5,7 @@ management:
   endpoints:
     web:
       cors:
-        allowed-origins: http://localhost:5173
+        allowed-origins:
+          - http://localhost:5173
+          - https://billingwise.site
         allowed-methods: GET
