@@ -1,2 +1,10 @@
 server:
   port: 8081
+
+management:
+  endpoints:
+    web:
+      cors:
+        allowed-origins: *
+        allowed-methods: *
+        allowed-headers: *
