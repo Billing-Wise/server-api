@@ -1,9 +1,5 @@
 name: CI
 on:
-  push:
-    branches:
-      - prod
-      - dev
   pull_request:
 jobs:
   sonarcloud:
