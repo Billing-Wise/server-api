@@ -66,22 +66,12 @@ public class AuthControllerTest extends AbstractRestDocsTests {
 
         //then
         result.andExpect(status().isOk()).andDo(document("auth/register",
-                        requestFields(
-                                        fieldWithPath("authCode").description(
-                                                "고객 인증 코드 (* required)").type(
-                                                JsonFieldType.STRING),
-                                        fieldWithPath("email").description(
-                                                "이메일 (* required)").type(
-                                                JsonFieldType.STRING),
-                                        fieldWithPath("password").description(
-                                                "비밀번호 (* required)").type(
-                                                JsonFieldType.STRING),
-                                        fieldWithPath("name").description(
-                                                "이름 (* required)").type(
-                                                JsonFieldType.STRING),
-                                        fieldWithPath("phone").description(
-                                                "전화번호 (* required)").type(
-                                                JsonFieldType.STRING)
-                                )));
+            requestFields(
+                    fieldWithPath("authCode").description("고객 인증 코드 (* required)").type(JsonFieldType.STRING),
+                    fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
+                    fieldWithPath("password").description("비밀번호 (* required)").type(JsonFieldType.STRING),
+                    fieldWithPath("name").description("이름 (* required)").type(JsonFieldType.STRING),
+                    fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING)
+            )));
     }
 }
