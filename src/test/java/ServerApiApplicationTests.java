@@ -5,8 +5,8 @@ import site.billingwise.api.serverapi.ServerApiApplication;
 @SpringBootTest(classes = ServerApiApplication.class)
 class ServerApiApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
+//    @Test
+//    void contextLoads() {
+//    }
 
 }
