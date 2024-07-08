@@ -10,6 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: create secure file
+        run: |
+          cd src/main/resources
+          touch secure.properties
+          echo "${{ secrets.SECURE }}" >> secure.properties
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

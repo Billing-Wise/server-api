@@ -6,7 +6,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaAuditing
 @PropertySource("classpath:secure.properties")
 public class ServerApiApplication {
 

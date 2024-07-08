@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - prod
+      - dev
 
 permissions:
   contents: read
@@ -23,6 +24,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: create secure file
+        run: |
+          cd src/main/resources
+          touch secure.properties
+          echo "${{ secrets.SECURE }}" >> secure.properties
 
       - name: Set up Pages
         uses: actions/configure-pages@v2
