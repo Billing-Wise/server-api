@@ -43,4 +43,7 @@ public class Item extends BaseEntity {
     @OneToMany(mappedBy = "item")
     private List<Contract> contractList = new ArrayList<>();
 
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }
