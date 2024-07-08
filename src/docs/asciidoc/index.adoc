@@ -6,3 +6,4 @@
 :seclinks:
 
 include::api/auth.adoc[]
+include::api/item.adoc[]

@@ -23,7 +23,7 @@ public class ItemService {
     private final ClientRepository clientRepository;
     
     @Transactional
-    public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile){
+    public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
         // 시큐리티 설정 후 바뀔 겁니다.
         Client client = clientRepository.findById((long)3).get();
 

@@ -18,32 +18,31 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class S3Service {
 
-  @Value("${aws.s3.bucket}")
-  private String bucket;
+	@Value("${aws.s3.bucket}")
+	private String bucket;
 
-  private final AmazonS3 amazonS3;
+	private final AmazonS3 amazonS3;
 
-  public String upload(MultipartFile multipartFile, String directory){
-    String pathDelimiter = "/";
+	public String upload(MultipartFile multipartFile, String directory) {
+		String pathDelimiter = "/";
 
-    String fileName = multipartFile.getOriginalFilename();
-    String uuid = UUID.randomUUID().toString();
-    String saveFileName = directory + pathDelimiter + uuid + "_" + fileName;
+		String fileName = multipartFile.getOriginalFilename();
+		String uuid = UUID.randomUUID().toString();
+		String saveFileName = directory + pathDelimiter + uuid + "_" + fileName;
 
-    ObjectMetadata objectMetadata = new ObjectMetadata();
-    objectMetadata.setContentType(multipartFile.getContentType());
-    objectMetadata.setContentLength(multipartFile.getSize());
-	try {
-		amazonS3.putObject(bucket, saveFileName, multipartFile.getInputStream(), objectMetadata);
-	} catch (Exception e) {
-		throw new GlobalException(FailureInfo.INVALID_IMAGE);
+		ObjectMetadata objectMetadata = new ObjectMetadata();
+		objectMetadata.setContentType(multipartFile.getContentType());
+		objectMetadata.setContentLength(multipartFile.getSize());
+		try {
+			amazonS3.putObject(bucket, saveFileName, multipartFile.getInputStream(), objectMetadata);
+		} catch (Exception e) {
+			throw new GlobalException(FailureInfo.INVALID_IMAGE);
+		}
+
+		return amazonS3.getUrl(bucket, saveFileName).toString();
 	}
-    
 
-    return amazonS3.getUrl(bucket, saveFileName).toString();
-  }
-
-  public void delete(String filePath, String directory) throws AmazonS3Exception {
-    amazonS3.deleteObject(bucket, directory + "/" + new File(filePath).getName());
-  }
+	public void delete(String filePath, String directory) throws AmazonS3Exception {
+		amazonS3.deleteObject(bucket, directory + "/" + new File(filePath).getName());
+	}
 }
