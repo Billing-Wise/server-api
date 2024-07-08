@@ -3,11 +3,13 @@ package site.billingwise.api.serverapi.domain.auth.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 
 @Getter
+@Builder
 public class RegisterDto {
 
     @NotBlank(message = "고객 코드를 입력해주세요.")

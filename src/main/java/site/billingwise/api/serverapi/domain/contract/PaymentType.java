@@ -23,6 +23,9 @@ public class PaymentType extends BaseEntity {
     @Column(length = 50, nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Boolean isBasic;
+
     @OneToMany(mappedBy = "paymentType")
     private List<Contract> contractList = new ArrayList<>();
 
