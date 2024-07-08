@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - prod
+      - dev
 
 permissions:
   contents: read
