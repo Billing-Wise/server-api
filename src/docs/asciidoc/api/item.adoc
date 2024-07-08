@@ -1,0 +1,15 @@
+== 상품 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+상품 관련 API입니다.
+
+=== 상품 생성
+
+상품을 생성합니다. 이미지 파일 등록은 선택입니다.
+
+operation::item/create[snippets='http-request,request-parts,request-part-data-fields,http-response']
+
