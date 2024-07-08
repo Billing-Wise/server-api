@@ -1,9 +1,8 @@
-package site.billingwise.api.serverapi;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import site.billingwise.api.serverapi.ServerApiApplication;
 
-@SpringBootTest
+@SpringBootTest(classes = ServerApiApplication.class)
 class ServerApiApplicationTests {
 
 //    @Test
