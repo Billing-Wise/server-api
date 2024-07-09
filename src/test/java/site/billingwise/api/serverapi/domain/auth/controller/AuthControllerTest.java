@@ -111,12 +111,27 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         willDoNothing().given(authService).logout();
 
         // when
+        ResultActions result = mockMvc.perform(post(url));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/logout"));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급")
+    void reissue() throws Exception {
+        String url = "/api/v1/auth/reissue";
+
+        // given
+        willDoNothing().given(authService).reissue();
+
+        // when
         ResultActions result = mockMvc.perform(post(url)
-                        .cookie(new Cookie("refresh", "REFRESH_TOKEN")));
+                .cookie(new Cookie("refresh", "REFRESH_TOKEN")));
 
 
-                //then
-        result.andExpect(status().isOk()).andDo(document("auth/logout",
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/reissue",
                 requestCookies(cookieWithName("refresh").description("리프레시 토큰"))));
     }
 }
