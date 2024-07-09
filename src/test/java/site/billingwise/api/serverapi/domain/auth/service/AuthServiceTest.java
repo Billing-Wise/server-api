@@ -1,24 +1,35 @@
 package site.billingwise.api.serverapi.domain.auth.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithUserDetails;
 import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.user.Client;
+import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.domain.user.repository.UserRepository;
+import site.billingwise.api.serverapi.global.WithMockCustomUser;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
+import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.util.CookieUtil;
+import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 import java.util.Optional;
 
@@ -33,6 +44,9 @@ class AuthServiceTest {
     private ClientRepository clientRepository;
 
     @Mock
+    private RefreshTokenRedisRepository refreshTokenRedisRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -45,14 +59,28 @@ class AuthServiceTest {
     private JwtProvider jwtProvider;
 
     @Mock
+    private HttpServletRequest request;
+
+    @Mock
     private HttpServletResponse response;
 
     @InjectMocks
     private AuthService authService;
 
+    MockedStatic<SecurityUtil> mockSecurityUtils;
+    MockedStatic<CookieUtil> mockCookieUtil;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        mockSecurityUtils = mockStatic(SecurityUtil.class);
+        mockCookieUtil = mockStatic(CookieUtil.class);
+    }
+
+    @AfterEach
+    void afterEach() {
+        mockSecurityUtils.close();
+        mockCookieUtil.close();
     }
 
     @Test
@@ -157,5 +185,27 @@ class AuthServiceTest {
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtProvider, never()).addAccessToken(any(Authentication.class), any(HttpServletResponse.class));
         verify(jwtProvider, never()).addRefreshToken(any(Authentication.class), any(HttpServletResponse.class));
+    }
+
+    @Test
+    void logout_Success() {
+        Long userId = 1L;
+
+        User mockUser = User.builder().id(userId).build();
+        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
+
+        authService.logout();
+
+        verify(refreshTokenRedisRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    void logout_NoCurrentUser() {
+        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.empty());
+
+        authService.logout();
+
+        verify(refreshTokenRedisRepository, never()).deleteById(any(Long.class));
+
     }
 }
