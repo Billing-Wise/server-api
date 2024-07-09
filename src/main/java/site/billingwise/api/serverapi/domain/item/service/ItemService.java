@@ -21,7 +21,7 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final S3Service s3Service;
 
-    private String itemImageDirectory;
+    private String itemImageDirectory = "item";
 
     // 나중에 지우면 됩니다.
     private final ClientRepository clientRepository;
