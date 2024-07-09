@@ -31,6 +31,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.auth.controller.AuthController;
+import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 
@@ -73,5 +74,31 @@ public class AuthControllerTest extends AbstractRestDocsTests {
                     fieldWithPath("name").description("이름 (* required)").type(JsonFieldType.STRING),
                     fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING)
             )));
+    }
+
+    @Test
+    @DisplayName("로그인")
+    void login() throws Exception {
+        String url = "/api/v1/auth/login";
+
+        LoginDto loginDto = LoginDto.builder()
+                .email("test@gmail.com")
+                .password("test1234!")
+                .build();
+
+        // given
+        willDoNothing().given(authService).login(loginDto);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/login",
+                requestFields(
+                        fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("password").description("비밀번호 (* required)").type(JsonFieldType.STRING)
+                )));
     }
 }
