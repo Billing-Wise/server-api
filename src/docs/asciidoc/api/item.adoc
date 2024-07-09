@@ -9,7 +9,29 @@
 
 === 상품 생성
 
-상품을 생성합니다. 이미지 파일 등록은 선택입니다.
+상품을 생성
 
 operation::item/create[snippets='http-request,request-parts,request-part-data-fields,http-response']
+
+
+=== 상품 정보 수정
+
+상품 정보를 수정합니다.
+
+operation::item/edit-info[snippets='http-request,path-parameters,request-fields,http-response']
+
+
+=== 상품 이미지 수정
+
+상품 이미지를 수정합니다.
+
+operation::item/edit-image[snippets='http-request,path-parameters,request-parts,http-response']
+
+
+=== 상품 삭제
+
+상품 정보를 삭제합니다.
+
+operation::item/delete[snippets='http-request,path-parameters,http-response']
+
 

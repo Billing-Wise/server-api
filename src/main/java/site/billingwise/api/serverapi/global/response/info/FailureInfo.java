@@ -18,7 +18,10 @@ public enum FailureInfo {
     NOT_EXIST_USER(404, "존재하지 않는 사용자입니다."),
 
     // image
-    INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다.");
+    INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),
+    
+    // item
+    NO_ITEM(400, "해당 상품은 존재하지 않습니다.");
 
     private final Integer code;
     private final String message;

@@ -1,6 +1,9 @@
 package site.billingwise.api.serverapi.domain.item.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -14,96 +17,258 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.service.S3Service;
 
 class ItemServiceTest {
 
-    @Mock
-    private ItemRepository itemRepository;
+	@Mock
+	private ItemRepository itemRepository;
 
-    @Mock
-    private S3Service s3Service;
+	@Mock
+	private S3Service s3Service;
 
-    @Mock
-    private ClientRepository clientRepository;
+	@Mock
+	private ClientRepository clientRepository;
 
-    @InjectMocks
-    private ItemService itemService;
+	@InjectMocks
+	private ItemService itemService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+	private Item existingItem;
 
-    @Test
-    void createItemWithImage() {
-        // Arrange
-        CreateItemDto createItemDto = CreateItemDto.builder()
-                .name("Test Item")
-                .description("Test Description")
-                .price((long) 1000)
-                .build();
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
 
-        MockMultipartFile multipartFile = new MockMultipartFile(
-                "file",
-                "test.jpg",
-                "image/jpeg",
-                "test image content".getBytes()
-        );
+		existingItem = Item.builder()
+				.id(1L)
+				.name("Old Name")
+				.price(1000L)
+				.description("Old Description")
+				.imageUrl("test.png")
+				.build();
+	}
 
-        Client client = Client.builder().build();
-        when(clientRepository.findById(any(Long.class))).thenReturn(Optional.of(client));
+	@Test
+	void createItemWithImage() {
+		// given
+		CreateItemDto createItemDto = CreateItemDto.builder()
+				.name("Test Item")
+				.description("Test Description")
+				.price((long) 1000)
+				.build();
 
-        Item item = Item.builder()
-                .name(createItemDto.getName())
-                .description(createItemDto.getDescription())
-                .price(createItemDto.getPrice())
-                .client(client)
-                .build();
+		MockMultipartFile multipartFile = new MockMultipartFile(
+				"file",
+				"test.jpg",
+				"image/jpeg",
+				"test image content".getBytes());
 
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
-        when(s3Service.upload(eq(multipartFile), eq("item"))).thenReturn("s3://bucket/test.jpg");
+		Client client = Client.builder().build();
+		when(clientRepository.findById(any(Long.class))).thenReturn(Optional.of(client));
 
-        // Act
-        itemService.createItem(createItemDto, multipartFile);
+		Item item = Item.builder()
+				.name(createItemDto.getName())
+				.description(createItemDto.getDescription())
+				.price(createItemDto.getPrice())
+				.client(client)
+				.build();
 
-        // Assert
-        verify(clientRepository, times(1)).findById(any(Long.class));
-        verify(itemRepository, times(2)).save(any(Item.class));
-        verify(s3Service, times(1)).upload(eq(multipartFile), eq("item"));
-        verifyNoMoreInteractions(itemRepository, s3Service, clientRepository);
-    }
+		when(itemRepository.save(any(Item.class))).thenReturn(item);
+		when(s3Service.upload(eq(multipartFile), eq("item"))).thenReturn("s3://bucket/test.jpg");
 
-    @Test
-    void createItemWithoutImage() {
-        // Arrange
-        CreateItemDto createItemDto = CreateItemDto.builder()
-                .name("Test Item")
-                .description("Test Description")
-                .price((long) 1000)
-                .build();
+		// when
+		itemService.createItem(createItemDto, multipartFile);
 
-        Client client = Client.builder().build();
-        when(clientRepository.findById(any(Long.class))).thenReturn(Optional.of(client));
+		// then
+		verify(clientRepository, times(1)).findById(any(Long.class));
+		verify(itemRepository, times(1)).save(any(Item.class));
+		verify(s3Service, times(1)).upload(eq(multipartFile), eq(itemService.itemImageDirectory));
+		verifyNoMoreInteractions(itemRepository, s3Service, clientRepository);
+	}
 
-        Item item = Item.builder()
-                .name(createItemDto.getName())
-                .description(createItemDto.getDescription())
-                .price(createItemDto.getPrice())
-                .client(client)
-                .build();
+	@Test
+	void createItemWithoutImage() {
+		// given
+		CreateItemDto createItemDto = CreateItemDto.builder()
+				.name("Test Item")
+				.description("Test Description")
+				.price((long) 1000)
+				.build();
 
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
+		Client client = Client.builder().build();
+		when(clientRepository.findById(any(Long.class))).thenReturn(Optional.of(client));
 
-        // Act
-        itemService.createItem(createItemDto, null);
+		Item item = Item.builder()
+				.name(createItemDto.getName())
+				.description(createItemDto.getDescription())
+				.price(createItemDto.getPrice())
+				.client(client)
+				.build();
 
-        // Assert
-        verify(clientRepository, times(1)).findById(any(Long.class));
-        verify(itemRepository, times(1)).save(any(Item.class));
-        verifyNoMoreInteractions(itemRepository, s3Service, clientRepository);
-    }
+		when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+		// when
+		itemService.createItem(createItemDto, null);
+
+		// then
+		verify(clientRepository, times(1)).findById(any(Long.class));
+		verify(itemRepository, times(1)).save(any(Item.class));
+		verifyNoMoreInteractions(itemRepository, s3Service, clientRepository);
+	}
+
+	@Test
+	void editItem() {
+		// given
+		Long itemId = 6L;
+
+		EditItemDto editItemDto = EditItemDto.builder()
+				.name("New Name")
+				.price(1000L)
+				.description("New Description")
+				.build();
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+
+		// when
+		itemService.editItem(itemId, editItemDto);
+
+		// then
+		verify(itemRepository, times(1)).findById(itemId);
+
+		assert (existingItem.getName().equals("New Name"));
+		assert (existingItem.getPrice().equals(1000L));
+		assert (existingItem.getDescription().equals("New Description"));
+	}
+
+	@Test
+	void editItemNotFound() {
+		// given
+		Long itemId = 1L;
+		EditItemDto editItemDto = EditItemDto.builder()
+				.name("New Name")
+				.price(1000L)
+				.description("New Description")
+				.build();
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThrows(GlobalException.class, () -> itemService.editItem(itemId, editItemDto));
+		verify(itemRepository, times(1)).findById(itemId);
+	}
+
+	@Test
+	void editItemWithValidImage() {
+		// given
+		Long itemId = 1L;
+		MockMultipartFile multipartFile = new MockMultipartFile(
+				"file",
+				"test.png",
+				"image/png",
+				"some-image".getBytes());
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+		when(s3Service.upload(any(), any())).thenReturn("image-url");
+
+		// when
+		itemService.editItemImage(itemId, multipartFile);
+
+		// then
+		verify(itemRepository).findById(itemId);
+		verify(s3Service).upload(multipartFile, itemService.itemImageDirectory);
+	}
+
+	@Test
+	void editItemWithInvalidImage() {
+		// given
+		Long itemId = 1L;
+		MockMultipartFile multipartFile = new MockMultipartFile(
+				"file",
+				"test.txt",
+				"text/plain",
+				"some-text".getBytes());
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+
+		// when
+		GlobalException exception = assertThrows(GlobalException.class, () -> {
+			itemService.editItemImage(itemId, multipartFile);
+		});
+
+		// then
+		verify(itemRepository).findById(itemId);
+		assert (exception.getFailureInfo().equals(FailureInfo.INVALID_IMAGE));
+	}
+
+	@Test
+	void editItemImageNotFound() {
+		// given
+		Long itemId = 1L;
+		MockMultipartFile multipartFile = new MockMultipartFile(
+				"file",
+				"test.png",
+				"image/png",
+				"some-image".getBytes());
+
+		when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+		// when
+		GlobalException exception = assertThrows(GlobalException.class, () -> {
+			itemService.editItemImage(itemId, multipartFile);
+		});
+
+		// then
+		verify(itemRepository).findById(itemId);
+		assert (exception.getFailureInfo().equals(FailureInfo.NO_ITEM));
+	}
+
+	@Test
+	void deleteItemNoDefaultImage() {
+		Long itemId = 1L;
+		String imageUrl = "https://example.com/image.jpg";
+
+		Item item = Item.builder()
+				.id(itemId)
+				.imageUrl(imageUrl)
+				.build();
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+		itemService.deleteItem(itemId);
+
+		verify(s3Service).delete(eq(imageUrl), eq(itemService.itemImageDirectory));
+		verify(itemRepository).delete(eq(item));
+	}
+
+	@Test
+	void deleteItemDefaultImage() {
+		Long itemId = 1L;
+
+		Item item = Item.builder()
+				.id(itemId)
+				.imageUrl(itemService.defaultImageUrl)
+				.build();
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+		itemService.deleteItem(itemId);
+
+		verify(s3Service, never()).delete(anyString(), anyString());
+		verify(itemRepository).delete(eq(item));
+	}
+
+	@Test
+	void deleteItemNotFound() {
+		Long itemId = 1L;
+
+		when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+		assertThrows(GlobalException.class, () -> itemService.deleteItem(itemId));
+	}
 }
