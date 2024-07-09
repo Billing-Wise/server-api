@@ -19,13 +19,13 @@ public class CreateItemDto {
 
 	private String description;
 
-	public Item toEntity(Client client) {
+	public Item toEntity(Client client, String imageUrl) {
 		Item item = Item.builder()
 						.client(client)
 						.name(name)
 						.description(description)
 						.price(price)
-						.imageUrl("https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png")
+						.imageUrl(imageUrl)
 						.isBasic(true)
 						.build();
 		return item;

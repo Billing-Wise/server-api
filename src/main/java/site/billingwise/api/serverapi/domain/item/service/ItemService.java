@@ -22,7 +22,8 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final S3Service s3Service;
 
-    private String itemImageDirectory = "item";
+    public String itemImageDirectory = "item";
+    public String defaultImageUrl = "https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png";
 
     // 나중에 지우면 됩니다.
     private final ClientRepository clientRepository;
@@ -32,7 +33,7 @@ public class ItemService {
         // 시큐리티 설정 후 바뀔 겁니다.
         Client client = clientRepository.findById((long) 3).get();
 
-        Item item = createItemDto.toEntity(client);
+        Item item = createItemDto.toEntity(client, defaultImageUrl);
         itemRepository.save(item);
 
         if (multipartFile != null) {
@@ -41,6 +42,7 @@ public class ItemService {
 
     }
 
+    @Transactional
     public void editItem(Long itemId, EditItemDto editItemDto) {
 
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
@@ -49,9 +51,9 @@ public class ItemService {
         item.setPrice(editItemDto.getPrice());
         item.setDescription(editItemDto.getDescription());
 
-        itemRepository.save(item);
     }
 
+    @Transactional
     public void editItemImage(Long itemId, MultipartFile multipartFile) {
 
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
@@ -67,6 +69,16 @@ public class ItemService {
 
     }
 
+    public void deleteItem(Long itemId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+
+        if (!item.getImageUrl().equals(defaultImageUrl)) {
+            s3Service.delete(item.getImageUrl(), itemImageDirectory);
+        }
+
+        itemRepository.delete(item);
+    }
+
     private void uploadImage(Item item, MultipartFile multipartFile) {
 
         if (!multipartFile.getContentType().startsWith("image/")) {
@@ -75,8 +87,6 @@ public class ItemService {
 
         String imageUrl = s3Service.upload(multipartFile, itemImageDirectory);
         item.setImageUrl(imageUrl);
-
-        itemRepository.save(item);
 
     }
 

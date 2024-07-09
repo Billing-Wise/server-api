@@ -18,14 +18,20 @@ operation::item/create[snippets='http-request,request-parts,request-part-data-fi
 
 상품 정보를 수정합니다.
 
-operation::item/edit-info[snippets='http-request,request-fields,http-response']
+operation::item/edit-info[snippets='http-request,path-parameters,request-fields,http-response']
 
 
 === 상품 이미지 수정
 
 상품 이미지를 수정합니다.
 
-operation::item/edit-image[snippets='http-request,request-parts,http-response']
+operation::item/edit-image[snippets='http-request,path-parameters,request-parts,http-response']
 
+
+=== 상품 삭제
+
+상품 정보를 삭제합니다.
+
+operation::item/delete[snippets='http-request,path-parameters,http-response']
 
 

@@ -121,7 +121,6 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 	void editItem() throws Exception {
 
 		// given
-		Long itemId = 3L;
 		String url = "/api/v1/items/{itemId}";
 
 		EditItemDto editItemDto = EditItemDto.builder()
@@ -130,27 +129,27 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				.description("UPDATED")
 				.build();
 
-		willDoNothing().given(itemService).editItem(itemId, editItemDto);
+		willDoNothing().given(itemService).editItem(anyLong(), eq(editItemDto));
 
 		// when
-		ResultActions result = mockMvc.perform(put(url, itemId)
+		ResultActions result = mockMvc.perform(put(url, ITEM_ID)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(editItemDto)));
 
-        //then
-        result.andExpect(status().isOk()).andDo(document("item/edit-info",
-            requestFields(
-                    fieldWithPath("name").description("상품명 (* required)").type(JsonFieldType.STRING),
-                    fieldWithPath("price").description("상품 가격 (* required)").type(JsonFieldType.NUMBER),
-                    fieldWithPath("description").description("상세 설명").type(JsonFieldType.STRING)
-            )));
+		// then
+		result.andExpect(status().isOk()).andDo(document("item/edit-info",
+				pathParameters(
+						parameterWithName("itemId").description("상품 ID")),
+				requestFields(
+						fieldWithPath("name").description("상품명 (* required)").type(JsonFieldType.STRING),
+						fieldWithPath("price").description("상품 가격 (* required)").type(JsonFieldType.NUMBER),
+						fieldWithPath("description").description("상세 설명").type(JsonFieldType.STRING))));
 	}
 
 	@Test
 	@DisplayName("상품 이미지 수정")
 	void editItemImage() throws Exception {
 		// given
-		Long itemId = 3L;
 		String url = "/api/v1/items/{itemId}/image";
 
 		MockMultipartFile itemImage = new MockMultipartFile(
@@ -160,7 +159,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 		// when
 		ResultActions result = mockMvc.perform(
-				multipart(url, itemId)
+				multipart(url, ITEM_ID)
 						.file(itemImage)
 						.with(request -> {
 							request.setMethod("PUT");
@@ -174,8 +173,25 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 								parameterWithName("itemId").description("상품 ID")),
 						requestParts(
 								partWithName("image").description("상품 이미지"))));
+	}
 
-		Mockito.verify(itemService, Mockito.times(1)).editItemImage(ArgumentMatchers.eq(itemId),
-				ArgumentMatchers.any());
+	@Test
+	@DisplayName("상품 삭제")
+	void deleteItem() throws Exception {
+
+		// given
+		String url = "/api/v1/items/{itemId}";
+
+		willDoNothing().given(itemService).deleteItem(ITEM_ID);
+
+		// when
+		ResultActions result = mockMvc.perform(
+				delete(url, ITEM_ID));
+
+		// then
+		result.andExpect(status().isOk())
+				.andDo(document("item/delete",
+						pathParameters(
+								parameterWithName("itemId").description("상품 ID"))));
 	}
 }

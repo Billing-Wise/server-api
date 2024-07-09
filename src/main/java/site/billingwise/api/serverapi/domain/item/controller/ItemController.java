@@ -16,6 +16,7 @@ import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -55,6 +56,15 @@ public class ItemController {
         itemService.editItemImage(itemId, multipartFile);
 
         return new BaseResponse(SuccessInfo.ITEM_IMAGE_EDITED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{itemId}")
+    public BaseResponse deleteItem(@PathVariable Long itemId) {
+
+        itemService.deleteItem(itemId);
+
+        return new BaseResponse(SuccessInfo.ITEM_DELETED);
     }
 
 }
