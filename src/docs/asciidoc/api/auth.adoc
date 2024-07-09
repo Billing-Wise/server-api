@@ -38,3 +38,9 @@ Content-Length: 74
 }
 ----
 
+=== 로그아웃
+
+로그아웃을 합니다. 액세스 토큰과 리프레시 토큰 쿠키를 삭제합니다.
+
+operation::auth/logout[snippets='http-request,request-cookies,http-response']
+
