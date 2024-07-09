@@ -13,6 +13,7 @@ public enum SuccessInfo {
 
     // Item
     ITEM_CREATED("상품 생성이 성공하였습니다."),
+    ITEM_EDITED("상품 정보 수정이 성공하였습니다"),
     ITEM_IMAGE_EDITED("상품 이미지 수정이 성공하였습니다.");
 
     private final Integer code = 200;

@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -38,6 +39,17 @@ public class ItemService {
             uploadImage(item, multipartFile);
         }
 
+    }
+
+    public void editItem(Long itemId, EditItemDto editItemDto) {
+
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+
+        item.setName(editItemDto.getName());
+        item.setPrice(editItemDto.getPrice());
+        item.setDescription(editItemDto.getDescription());
+
+        itemRepository.save(item);
     }
 
     public void editItemImage(Long itemId, MultipartFile multipartFile) {

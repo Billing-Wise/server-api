@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,12 +30,21 @@ public class ItemController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
-    public BaseResponse createItem(@Valid @RequestPart(name = "data") CreateItemDto writePostRequestDto,
+    public BaseResponse createItem(@Valid @RequestPart(name = "data") CreateItemDto createItemDto,
             @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
 
-        itemService.createItem(writePostRequestDto, multipartFile);
+        itemService.createItem(createItemDto, multipartFile);
 
         return new BaseResponse(SuccessInfo.ITEM_CREATED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{itemId}")
+    public BaseResponse editItem(@PathVariable Long itemId, @Valid @RequestBody EditItemDto editItemDto) {
+
+        itemService.editItem(itemId, editItemDto);
+
+        return new BaseResponse(SuccessInfo.ITEM_EDITED);
     }
 
     @ResponseStatus(HttpStatus.OK)

@@ -49,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.service.S3Service;
@@ -116,8 +117,38 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 	}
 
 	@Test
-	@DisplayName("상품 이미지 수정")
+	@DisplayName("상품 정보 수정")
 	void editItem() throws Exception {
+
+		// given
+		Long itemId = 3L;
+		String url = "/api/v1/items/{itemId}";
+
+		EditItemDto editItemDto = EditItemDto.builder()
+				.name("UPDATED")
+				.price(100000L)
+				.description("UPDATED")
+				.build();
+
+		willDoNothing().given(itemService).editItem(itemId, editItemDto);
+
+		// when
+		ResultActions result = mockMvc.perform(put(url, itemId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(editItemDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("item/edit-info",
+            requestFields(
+                    fieldWithPath("name").description("상품명 (* required)").type(JsonFieldType.STRING),
+                    fieldWithPath("price").description("상품 가격 (* required)").type(JsonFieldType.NUMBER),
+                    fieldWithPath("description").description("상세 설명").type(JsonFieldType.STRING)
+            )));
+	}
+
+	@Test
+	@DisplayName("상품 이미지 수정")
+	void editItemImage() throws Exception {
 		// given
 		Long itemId = 3L;
 		String url = "/api/v1/items/{itemId}/image";
@@ -125,9 +156,9 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		MockMultipartFile itemImage = new MockMultipartFile(
 				"image", "item.png", "image/png", "item data".getBytes());
 
-		// when
-		Mockito.doNothing().when(itemService).editItemImage(anyLong(), eq(itemImage));
+		willDoNothing().given(itemService).editItemImage(anyLong(), eq(itemImage));
 
+		// when
 		ResultActions result = mockMvc.perform(
 				multipart(url, itemId)
 						.file(itemImage)
