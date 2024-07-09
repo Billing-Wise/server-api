@@ -15,9 +15,9 @@ import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -29,21 +29,21 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
     public BaseResponse createItem(@Valid @RequestPart(name = "data") CreateItemDto writePostRequestDto,
-                               @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
+            @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
 
         itemService.createItem(writePostRequestDto, multipartFile);
-        
+
         return new BaseResponse(SuccessInfo.ITEM_CREATED);
     }
 
-    // @ResponseStatus(HttpStatus.OK)
-    // @PutMapping("/{itemId}/image")
-    // public BaseResponse editItemImage(@PathParam Long itemId,
-    //                            @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{itemId}/image")
+    public BaseResponse editItemImage(@PathVariable Long itemId,
+            @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
 
-    //     itemService.createItem(writePostRequestDto, multipartFile);
-        
-    //     return new BaseResponse(SuccessInfo.ITEM_CREATED);
-    // }
-    
+        itemService.editItemImage(itemId, multipartFile);
+
+        return new BaseResponse(SuccessInfo.ITEM_IMAGE_EDITED);
+    }
+
 }
