@@ -2,6 +2,8 @@ package site.billingwise.api.serverapi.domain.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 
 @Entity
@@ -9,6 +11,8 @@ import site.billingwise.api.serverapi.domain.common.BaseEntity;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SQLDelete(sql = "UPDATE user SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class User extends BaseEntity {
 
     @Id

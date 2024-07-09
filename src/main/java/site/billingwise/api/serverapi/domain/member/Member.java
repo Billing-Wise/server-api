@@ -2,6 +2,8 @@ package site.billingwise.api.serverapi.domain.member;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.user.Client;
@@ -17,6 +19,8 @@ import java.util.List;
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = {"client_id", "email"})
 })
+@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class Member extends BaseEntity {
 
     @Id
