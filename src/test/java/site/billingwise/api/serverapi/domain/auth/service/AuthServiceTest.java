@@ -129,7 +129,8 @@ class AuthServiceTest {
                 .password("test1234!")
                 .build();
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
 
@@ -148,7 +149,7 @@ class AuthServiceTest {
                 .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(new AuthenticationException("Bad credentials") {});
+                .thenThrow(new AuthenticationException("Bad credentials") { });
 
         GlobalException exception = assertThrows(GlobalException.class, () -> authService.login(loginDto));
         assertEquals(FailureInfo.WRONG_LOGIN_INFO, exception.getFailureInfo());
