@@ -8,6 +8,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+      password:
+
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -30,4 +32,4 @@ spring:
 app:
   auth:
     token:
-      secret-key: zhtkgytjdqlfflddhkdlwm
+      secret-key: jwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocal
