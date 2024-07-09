@@ -32,11 +32,14 @@ import static org.mockito.ArgumentMatchers.any;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,60 +56,95 @@ import site.billingwise.api.serverapi.global.service.S3Service;
 @WebMvcTest(ItemController.class)
 public class ItemControllerTest extends AbstractRestDocsTests {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+	static final Long ITEM_ID = 3L;
 
-    @MockBean
-    ItemService itemService;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-    @MockBean
-    S3Service s3Service;
+	@MockBean
+	ItemService itemService;
 
-    @MockBean
-    ClientRepository clientRepository;
+	@MockBean
+	S3Service s3Service;
 
-    @Test
-    @DisplayName("상품 생성")
-    void createItem() throws Exception {
-        String url = "/api/v1/items";
+	@MockBean
+	ClientRepository clientRepository;
 
-        // given
-        CreateItemDto createItemDto = CreateItemDto.builder()
-                .name("NAME")
-                .price((long) 10000)
-                .description("Description")
-                .build();
+	@Test
+	@DisplayName("상품 생성")
+	void createItem() throws Exception {
+		String url = "/api/v1/items";
 
-        String createItemJsonDto = objectMapper.writeValueAsString(createItemDto);
+		// given
+		CreateItemDto createItemDto = CreateItemDto.builder()
+				.name("NAME")
+				.price((long) 10000)
+				.description("Description")
+				.build();
 
-        MockMultipartFile data = new MockMultipartFile("data", "item", "application/json",
-                createItemJsonDto.getBytes(
-                        StandardCharsets.UTF_8));
+		String createItemJsonDto = objectMapper.writeValueAsString(createItemDto);
 
-        MockMultipartFile itemImage = new MockMultipartFile(
-                "image", "item.png", "image/png", "item data".getBytes());
+		MockMultipartFile data = new MockMultipartFile("data", "item", "application/json",
+				createItemJsonDto.getBytes(
+						StandardCharsets.UTF_8));
 
-        willDoNothing().given(itemService).createItem(createItemDto, itemImage);
+		MockMultipartFile itemImage = new MockMultipartFile(
+				"image", "item.png", "image/png", "item data".getBytes());
 
-        // when
-        ResultActions result = mockMvc.perform(multipart(url)
-                .file(data)
-                .file(itemImage)
-                .contentType(MediaType.MULTIPART_FORM_DATA));
+		willDoNothing().given(itemService).createItem(createItemDto, itemImage);
 
-        // then
-        result.andExpect(status().isOk())
-                .andDo(document("item/create",
-                        requestParts(
-                                partWithName("data").description("상품 정보"),
-                                partWithName("image").description("상품 이미지")),
-                        requestPartFields("data",
-                                fieldWithPath("name").description("상품명 (* required)")
-                                        .type(JsonFieldType.STRING),
-                                fieldWithPath("price").description("상품 가격 (* required)")
-                                        .type(JsonFieldType.NUMBER),
-                                fieldWithPath("description").description("상품 상세 설명")
-                                        .type(JsonFieldType.STRING))));
+		// when
+		ResultActions result = mockMvc.perform(multipart(url)
+				.file(data)
+				.file(itemImage)
+				.contentType(MediaType.MULTIPART_FORM_DATA));
 
-    }
+		// then
+		result.andExpect(status().isOk())
+				.andDo(document("item/create",
+						requestParts(
+								partWithName("data").description("상품 정보"),
+								partWithName("image").description("상품 이미지")),
+						requestPartFields("data",
+								fieldWithPath("name").description("상품명 (* required)")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("price").description("상품 가격 (* required)")
+										.type(JsonFieldType.NUMBER),
+								fieldWithPath("description").description("상품 상세 설명")
+										.type(JsonFieldType.STRING))));
+
+	}
+
+	@Test
+	@DisplayName("상품 이미지 수정")
+	void editItem() throws Exception {
+		// given
+		Long itemId = 3L;
+		String url = "/api/v1/items/{itemId}/image";
+
+		MockMultipartFile itemImage = new MockMultipartFile(
+				"image", "item.png", "image/png", "item data".getBytes());
+
+		// when
+		Mockito.doNothing().when(itemService).editItemImage(anyLong(), eq(itemImage));
+
+		ResultActions result = mockMvc.perform(
+				multipart(url, itemId)
+						.file(itemImage)
+						.with(request -> {
+							request.setMethod("PUT");
+							return request;
+						}));
+
+		// then
+		result.andExpect(status().isOk())
+				.andDo(document("item/edit-image",
+						pathParameters(
+								parameterWithName("itemId").description("상품 ID")),
+						requestParts(
+								partWithName("image").description("상품 이미지"))));
+
+		Mockito.verify(itemService, Mockito.times(1)).editItemImage(ArgumentMatchers.eq(itemId),
+				ArgumentMatchers.any());
+	}
 }
