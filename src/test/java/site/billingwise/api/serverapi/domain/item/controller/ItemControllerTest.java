@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -26,21 +27,29 @@ import static org.springframework.restdocs.request.RequestDocumentation.partWith
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import static org.mockito.ArgumentMatchers.any;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.restdocs.payload.PayloadDocumentation;
+import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,11 +59,13 @@ import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.service.S3Service;
 
 @WebMvcTest(ItemController.class)
+@AutoConfigureMockMvc
 public class ItemControllerTest extends AbstractRestDocsTests {
 
 	static final Long ITEM_ID = 3L;
@@ -193,5 +204,50 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				.andDo(document("item/delete",
 						pathParameters(
 								parameterWithName("itemId").description("상품 ID"))));
+	}
+
+	@Test
+	@DisplayName("상품 상세 조회")
+	void getItem() throws Exception {
+		// given
+		String url = "/api/v1/items/{itemId}";
+
+		GetItemDto getItemDto = GetItemDto.builder()
+				.id(1L)
+				.name("Name")
+				.description("Item Description")
+				.price(1000L)
+				.imageUrl("http://example.com/image.jpg")
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
+				.contractCount(5L)
+				.build();
+
+		given(itemService.getItem(anyLong())).willReturn(getItemDto);
+
+		// when
+		ResultActions result = mockMvc.perform(get(url, 1L));
+
+		// then
+		result.andExpect(status().isOk())
+				.andDo(document("item/get",
+						pathParameters(
+								parameterWithName("itemId").description("상품ID")),
+						responseFields(
+								fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+								fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+								fieldWithPath("data.id").description("상품 ID").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.name").description("상품명").type(JsonFieldType.STRING),
+								fieldWithPath("data.description").description("상품 설명")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.price").description("상품 가격").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.imageUrl").description("상품 이미지 URL")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.createdAt").description("상품 생성일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.updatedAt").description("상품 정보 수정일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.contractCount").description("관련 계약수")
+										.type(JsonFieldType.NUMBER))));
 	}
 }

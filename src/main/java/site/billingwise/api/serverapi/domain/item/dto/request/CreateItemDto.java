@@ -2,13 +2,17 @@ package site.billingwise.api.serverapi.domain.item.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.user.Client;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateItemDto {
 
 	@NotBlank(message = "상품명은 필수 입력값입니다.")

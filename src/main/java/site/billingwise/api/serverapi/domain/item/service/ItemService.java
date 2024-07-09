@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -77,6 +78,23 @@ public class ItemService {
         }
 
         itemRepository.delete(item);
+    }
+
+    public GetItemDto getItem(Long itemId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+
+        GetItemDto getItemDto = GetItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .price(item.getPrice())
+                .description(item.getDescription())
+                .imageUrl(item.getImageUrl())
+                .createdAt(item.getCreatedAt())
+                .updatedAt(item.getUpdatedAt())
+                .contractCount(item.getContractCount())
+                .build();
+
+        return getItemDto;
     }
 
     private void uploadImage(Item item, MultipartFile multipartFile) {

@@ -5,11 +5,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,6 +22,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -230,6 +235,7 @@ class ItemServiceTest {
 
 	@Test
 	void deleteItemNoDefaultImage() {
+		// given
 		Long itemId = 1L;
 		String imageUrl = "https://example.com/image.jpg";
 
@@ -240,14 +246,17 @@ class ItemServiceTest {
 
 		when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
+		// when
 		itemService.deleteItem(itemId);
 
+		// then
 		verify(s3Service).delete(eq(imageUrl), eq(itemService.itemImageDirectory));
 		verify(itemRepository).delete(eq(item));
 	}
 
 	@Test
 	void deleteItemDefaultImage() {
+		// given
 		Long itemId = 1L;
 
 		Item item = Item.builder()
@@ -257,18 +266,69 @@ class ItemServiceTest {
 
 		when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
+		// when
 		itemService.deleteItem(itemId);
 
+		// then
 		verify(s3Service, never()).delete(anyString(), anyString());
 		verify(itemRepository).delete(eq(item));
 	}
 
 	@Test
 	void deleteItemNotFound() {
+		// given
 		Long itemId = 1L;
 
 		when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
 
+		// when, then
 		assertThrows(GlobalException.class, () -> itemService.deleteItem(itemId));
+	}
+
+	@Test
+	void getItem() {
+		// given
+		Long itemId = 1L;
+
+		Item item = Item.builder()
+				.id(itemId)
+				.name("Name")
+				.price(1000L)
+				.description("Item Description")
+				.imageUrl("http://example.com/image.jpg")
+				.contractCount(5L)
+				.build();
+
+		given(itemRepository.findById(itemId)).willReturn(Optional.of(item));
+
+		// when
+		GetItemDto getItemDto = itemService.getItem(itemId);
+
+		// then
+		assertThat(getItemDto.getId()).isEqualTo(itemId);
+		assertThat(getItemDto.getName()).isEqualTo("Name");
+		assertThat(getItemDto.getPrice()).isEqualTo(1000L);
+		assertThat(getItemDto.getDescription()).isEqualTo("Item Description");
+		assertThat(getItemDto.getImageUrl()).isEqualTo("http://example.com/image.jpg");
+		assertThat(getItemDto.getCreatedAt()).isEqualTo(item.getCreatedAt());
+		assertThat(getItemDto.getUpdatedAt()).isEqualTo(item.getUpdatedAt());
+		assertThat(getItemDto.getContractCount()).isEqualTo(5L);
+
+		verify(itemRepository).findById(itemId);
+	}
+
+	@Test
+	void getItemNotFound() {
+		// given
+		Long itemId = 1L;
+		given(itemRepository.findById(itemId)).willReturn(Optional.empty());
+
+		// when
+		GlobalException exception = assertThrows(GlobalException.class, () -> itemService.getItem(itemId));
+
+		// then
+		assertThat(exception.getFailureInfo()).isEqualTo(FailureInfo.NO_ITEM);
+
+		verify(itemRepository).findById(itemId);
 	}
 }
