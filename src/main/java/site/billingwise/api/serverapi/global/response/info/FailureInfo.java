@@ -14,8 +14,10 @@ public enum FailureInfo {
 
     // jwt
     ACCESS_TOKEN_NULL(401, "액세스 토큰이 누락되었습니다."),
-    NOT_VALID_ACCESS_TOKEN(401, "유효하지 않은 액세스 토큰입니다."),
+    INVALID_ACCESS_TOKEN(401, "유효하지 않은 액세스 토큰입니다."),
     EXPIRED_ACCESS_TOKEN(419, "만료된 액세스 토큰입니다."),
+    REFRESH_TOKEN_NULL(401, "리프레시 토큰이 누락되었습니다."),
+    INVALID_REFRESH_TOKEN(401, "유효하지 않은 리프레시 토큰입니다."),
 
     // auth
     UNAUTHORIZED_AUTH_CODE(401, "유효하지 않은 인증 코드입니다."),

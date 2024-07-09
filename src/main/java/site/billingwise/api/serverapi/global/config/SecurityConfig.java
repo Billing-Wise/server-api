@@ -29,7 +29,6 @@ import static site.billingwise.api.serverapi.global.config.WebConfig.ALLOWED_ORI
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtProvider jwtProvider;
     private final JwtFilter jwtFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -63,7 +62,7 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http
-                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         http
                 .exceptionHandling((exception) -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -82,7 +81,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        for(String url : ALLOWED_ORIGIN_LIST) {
+        for (String url : ALLOWED_ORIGIN_LIST) {
             config.addAllowedOriginPattern(url);
         }
         source.registerCorsConfiguration("/**", config);

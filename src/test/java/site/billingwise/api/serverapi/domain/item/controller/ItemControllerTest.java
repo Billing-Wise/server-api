@@ -59,9 +59,6 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 	static final Long ITEM_ID = 3L;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	@MockBean
 	ItemService itemService;
 

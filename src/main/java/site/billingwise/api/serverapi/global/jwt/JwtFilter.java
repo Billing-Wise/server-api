@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtProvider.isExpiredToken(accessToken)) {
                 request.setAttribute("exception", FailureInfo.EXPIRED_ACCESS_TOKEN);
             } else {
-                request.setAttribute("exception", FailureInfo.NOT_VALID_ACCESS_TOKEN);
+                request.setAttribute("exception", FailureInfo.INVALID_ACCESS_TOKEN);
             }
             filterChain.doFilter(request, response);
             return;

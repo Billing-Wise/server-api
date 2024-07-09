@@ -34,12 +34,10 @@ import site.billingwise.api.serverapi.domain.auth.controller.AuthController;
 import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
+import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     AuthService authService;
