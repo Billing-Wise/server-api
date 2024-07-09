@@ -12,9 +12,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import site.billingwise.api.serverapi.global.jwt.JwtAccessDeniedHandler;
+import site.billingwise.api.serverapi.global.jwt.JwtAuthenticationEntryPoint;
+import site.billingwise.api.serverapi.global.jwt.JwtFilter;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 
 import java.util.Collections;
+
+import static site.billingwise.api.serverapi.global.config.WebConfig.ALLOWED_ORIGIN_LIST;
 
 @Configuration
 @EnableWebSecurity
@@ -22,8 +30,9 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-//    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-//    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtFilter jwtFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
@@ -36,9 +45,9 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    private static final String[] WHITE_LIST = {
+    private static final String[] PERMIT_LIST = {
         "/actuator/health",
-        "/api/v1/**"
+        "/api/v1/auth/**"
     };
 
     @Bean
@@ -53,17 +62,30 @@ public class SecurityConfig {
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//        http
-//                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
-//        http
-//                .exceptionHandling((exception) -> exception
-//                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-//                        .accessDeniedHandler(jwtAccessDeniedHandler)))
+        http
+                .addFilterBefore(new JwtFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+        http
+                .exceptionHandling((exception) -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler));
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers(PERMIT_LIST).permitAll()
                         .anyRequest().authenticated());
 
         return http.build();
+    }
+
+    public CorsConfigurationSource corsConfigurationSource() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        for(String url : ALLOWED_ORIGIN_LIST) {
+            config.addAllowedOriginPattern(url);
+        }
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
