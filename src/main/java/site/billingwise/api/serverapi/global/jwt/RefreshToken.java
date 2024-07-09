@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.TimeToLive;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-@RedisHash(value = "id")
+@RedisHash(value = "refresh_token")
 public class RefreshToken {
 
     @Id

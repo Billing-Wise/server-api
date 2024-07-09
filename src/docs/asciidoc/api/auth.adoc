@@ -38,3 +38,34 @@ Content-Length: 74
 }
 ----
 
+=== 로그아웃
+
+로그아웃을 합니다. 액세스 토큰과 리프레시 토큰 쿠키를 삭제합니다.
+
+operation::auth/logout[snippets='http-request,http-response']
+
+=== 토큰 재발급
+
+액세스 토큰과 리프레시 토큰을 재발급을 합니다. 리프레시 토큰이 필요합니다.
+
+operation::auth/reissue[snippets='http-request,request-cookies']
+
+==== HTTP response
+
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Set-Cookie: access=ACCESS_TOKEN
+Set-Cookie: refresh=REFRESH_TOKEN
+Content-Type: application/json;charset=UTF-8
+Content-Length: 74
+
+{
+    "code": 200,
+    "message": "토큰 재발급이 성공하였습니다."
+}
+----
+

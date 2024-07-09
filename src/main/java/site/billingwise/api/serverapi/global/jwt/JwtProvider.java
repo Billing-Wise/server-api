@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class JwtProvider {
-    private static final Long ACCESS_TOKEN_EXPIRE_LENGTH = 1000L * 60 * 60;    // 1hour
-    private static final Long REFRESH_TOKEN_EXPIRE_LENGTH = 1000L * 60 * 60 * 24 * 7;  // 1week
+    private static final Long ACCESS_TOKEN_EXPIRE_LENGTH = 1000L * 60 * 60;    // 1h
+    private static final Long REFRESH_TOKEN_EXPIRE_LENGTH = 1000L * 60 * 60 * 24;  // 1d
     private final SecretKey secretKey;
     private static final String AUTHORITIES_KEY = "role";
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
@@ -42,16 +42,16 @@ public class JwtProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
 
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        Long userId = user.getId();
+        String email = customUserDetails.getUsername();
         String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         return Jwts.builder()
                 .signWith(secretKey)
-                .setSubject(String.valueOf(userId))
+                .setSubject(email)
                 .claim(AUTHORITIES_KEY, role)
                 .setIssuer("billingwise")
                 .setIssuedAt(now)
@@ -59,12 +59,16 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createRefreshToken() {
+    public String createRefreshToken(Authentication authentication) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_LENGTH);
 
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        String email = customUserDetails.getUsername();
+
         return Jwts.builder()
                 .signWith(secretKey)
+                .setSubject(email)
                 .setIssuer("billingwise")
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -78,7 +82,7 @@ public class JwtProvider {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .maxAge(ACCESS_TOKEN_EXPIRE_LENGTH / 1000)
+                .maxAge(REFRESH_TOKEN_EXPIRE_LENGTH / 1000)
                 .path("/")
                 .build();
 
@@ -86,7 +90,7 @@ public class JwtProvider {
     }
 
     public void addRefreshToken(Authentication authentication, HttpServletResponse response) {
-        String refreshToken = createRefreshToken();
+        String refreshToken = createRefreshToken(authentication);
 
         saveRefreshToken(authentication, refreshToken);
 
@@ -102,41 +106,48 @@ public class JwtProvider {
     }
 
     private void saveRefreshToken(Authentication authentication, String refreshToken) {
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
         refreshTokenRedisRepository.save(RefreshToken.builder()
-                .id(user.getId())
+                .id(customUserDetails.getUser().getId())
                 .token(refreshToken)
                 .expiredTime(REFRESH_TOKEN_EXPIRE_LENGTH)
                 .build());
     }
 
-    public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken);
+    public Authentication getAuthentication(String token) {
+        Claims claims = parseClaims(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(
+                userDetails, userDetails.getPassword(), userDetails.getAuthorities());
     }
 
-    public Boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean isExpiredToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token.");
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT token.");
-        } catch (MalformedJwtException e) {
-            log.info("Malformed Jwt token.");
+            return true;
         } catch (Exception e) {
             log.info(e.getMessage());
         }
         return false;
     }
 
-    private Claims parseClaims(String accessToken) {
+    private Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(secretKey).build()
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
