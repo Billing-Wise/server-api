@@ -42,3 +42,10 @@ operation::item/delete[snippets='http-request,path-parameters,http-response']
 operation::item/get[snippets='http-request,path-parameters,http-response,response-fields']
 
 
+=== 상품 상세 조회
+
+상품 상세 정보를 조회합니다.
+
+operation::item/get[snippets='http-request,http-response,response-fields']
+
+

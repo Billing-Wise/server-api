@@ -33,7 +33,9 @@ public class ItemService {
 
     @Transactional
     public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
-        Client client = clientRepository.findById(getClientId()).orElseThrow(() -> new GlobalException(FailureInfo.CLIENT_NOT_FOUND));
+        Client client = clientRepository.findById(getClientId()).orElseThrow(() -> 
+            new GlobalException(FailureInfo.CLIENT_NOT_FOUND)
+        );
 
         Item item = createItemDto.toEntity(client, defaultImageUrl);
         itemRepository.save(item);
@@ -120,7 +122,7 @@ public class ItemService {
 
     private Long getClientId() {
         // 스프링 시큐리티를 활용한 로직 추가
-        return 3l;
+        return 3L;
     }
 
     private void isOwner(Item item, Long clientId) {
