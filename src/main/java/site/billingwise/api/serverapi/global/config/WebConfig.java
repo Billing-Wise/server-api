@@ -15,7 +15,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://billingwise.site",
                         "https://*.billingwise.site"
                         )
-                .allowedMethods("*");
+                .allowedMethods("*")
+                .allowCredentials(true);
     }
 }
 
