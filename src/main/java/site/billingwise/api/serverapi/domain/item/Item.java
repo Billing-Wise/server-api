@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.user.Client;
 
 import java.util.ArrayList;
@@ -62,5 +63,20 @@ public class Item extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public GetItemDto toDto() {
+        GetItemDto getItemDto = GetItemDto.builder()
+                .id(id)
+                .name(name)
+                .price(price)
+                .description(description)
+                .imageUrl(imageUrl)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
+                .contractCount(contractCount)
+                .build();
+
+        return getItemDto;
     }
 }

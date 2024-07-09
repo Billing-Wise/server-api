@@ -1,9 +1,13 @@
 package site.billingwise.api.serverapi.domain.item.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
@@ -21,18 +25,15 @@ import site.billingwise.api.serverapi.global.service.S3Service;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final ClientRepository clientRepository;
     private final S3Service s3Service;
 
     public String itemImageDirectory = "item";
     public String defaultImageUrl = "https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png";
 
-    // 나중에 지우면 됩니다.
-    private final ClientRepository clientRepository;
-
     @Transactional
     public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
-        // 시큐리티 설정 후 바뀔 겁니다.
-        Client client = clientRepository.findById((long) 3).get();
+        Client client = clientRepository.findById(getClientId()).orElseThrow(() -> new GlobalException(FailureInfo.CLIENT_NOT_FOUND));
 
         Item item = createItemDto.toEntity(client, defaultImageUrl);
         itemRepository.save(item);
@@ -45,8 +46,8 @@ public class ItemService {
 
     @Transactional
     public void editItem(Long itemId, EditItemDto editItemDto) {
-
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
+        isOwner(item, getClientId());
 
         item.setName(editItemDto.getName());
         item.setPrice(editItemDto.getPrice());
@@ -56,8 +57,9 @@ public class ItemService {
 
     @Transactional
     public void editItemImage(Long itemId, MultipartFile multipartFile) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
+        isOwner(item, getClientId());
 
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
         String prevImageUrl = item.getImageUrl();
 
         if (multipartFile != null) {
@@ -71,7 +73,8 @@ public class ItemService {
     }
 
     public void deleteItem(Long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
+        isOwner(item, getClientId());
 
         if (!item.getImageUrl().equals(defaultImageUrl)) {
             s3Service.delete(item.getImageUrl(), itemImageDirectory);
@@ -80,21 +83,28 @@ public class ItemService {
         itemRepository.delete(item);
     }
 
+    @Transactional(readOnly = true)
     public GetItemDto getItem(Long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.NO_ITEM));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
+        isOwner(item, getClientId());
 
-        GetItemDto getItemDto = GetItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .price(item.getPrice())
-                .description(item.getDescription())
-                .imageUrl(item.getImageUrl())
-                .createdAt(item.getCreatedAt())
-                .updatedAt(item.getUpdatedAt())
-                .contractCount(item.getContractCount())
-                .build();
+        GetItemDto getItemDto = item.toDto();
 
         return getItemDto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetItemDto> getItemList(String itemName, Pageable pageable) {
+        Page<Item> itemList = null;
+
+        if (itemName == null) {
+            itemList = itemRepository.findAllByClientId(pageable, getClientId());
+        } else {
+            itemList = itemRepository.findAllByNameContainingIgnoreCase(itemName, pageable);
+        }
+
+        List<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto()).getContent();
+        return getItemDtoList;
     }
 
     private void uploadImage(Item item, MultipartFile multipartFile) {
@@ -106,6 +116,17 @@ public class ItemService {
         String imageUrl = s3Service.upload(multipartFile, itemImageDirectory);
         item.setImageUrl(imageUrl);
 
+    }
+
+    private Long getClientId() {
+        // 스프링 시큐리티를 활용한 로직 추가
+        return 3l;
+    }
+
+    private void isOwner(Item item, Long clientId) {
+        if (item.getClient().getId() != clientId) {
+            throw new GlobalException(FailureInfo.ITEM_ACCESS_DENIED);
+        }
     }
 
 }

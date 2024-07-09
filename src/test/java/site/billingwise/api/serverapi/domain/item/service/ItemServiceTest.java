@@ -230,7 +230,7 @@ class ItemServiceTest {
 
 		// then
 		verify(itemRepository).findById(itemId);
-		assert (exception.getFailureInfo().equals(FailureInfo.NO_ITEM));
+		assert (exception.getFailureInfo().equals(FailureInfo.ITEM_NOT_FOUND));
 	}
 
 	@Test
@@ -327,7 +327,7 @@ class ItemServiceTest {
 		GlobalException exception = assertThrows(GlobalException.class, () -> itemService.getItem(itemId));
 
 		// then
-		assertThat(exception.getFailureInfo()).isEqualTo(FailureInfo.NO_ITEM);
+		assertThat(exception.getFailureInfo()).isEqualTo(FailureInfo.ITEM_NOT_FOUND);
 
 		verify(itemRepository).findById(itemId);
 	}
