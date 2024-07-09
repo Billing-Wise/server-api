@@ -13,3 +13,28 @@
 
 operation::auth/register[snippets='http-request,request-fields,http-response']
 
+=== 로그인
+
+이메일과 비밀번호를 통해 로그인을 합니다. 성공 시 액세스 토큰과 리프레시 토큰을 쿠키로 반환합니다.
+
+operation::auth/login[snippets='http-request,request-fields']
+
+==== HTTP response
+
+[source,http,options="nowrap"]
+----
+HTTP/1.1 200 OK
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Set-Cookie: access=ACCESS_TOKEN
+Set-Cookie: refresh=REFRESH_TOKEN
+Content-Type: application/json;charset=UTF-8
+Content-Length: 74
+
+{
+    "code": 200,
+    "message": "로그인이 성공하였습니다."
+}
+----
+

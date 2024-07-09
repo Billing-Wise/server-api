@@ -2,6 +2,8 @@ package site.billingwise.api.serverapi.domain.item;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
@@ -17,6 +19,8 @@ import org.hibernate.annotations.Formula;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SQLDelete(sql = "UPDATE item SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class Item extends BaseEntity {
 
     @Id
