@@ -198,28 +198,52 @@ class AuthServiceTest {
         User mockUser = User.builder().id(userId).build();
         when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
 
-        mockCookieUtil.when(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), anyString())).thenAnswer(invocation -> null);
+        mockCookieUtil.when(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                anyString()
+        )).thenAnswer(invocation -> null);
 
         authService.logout();
 
         verify(refreshTokenRedisRepository, times(1)).deleteById(userId);
 
-        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), eq("access")), times(1));
-        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), eq("refresh")), times(1));
+        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                eq("access")),
+                times(1));
+        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                eq("refresh")),
+                times(1));
     }
 
     @Test
     void logout_NoCurrentUser() {
         when(SecurityUtil.getCurrentUser()).thenReturn(Optional.empty());
 
-        mockCookieUtil.when(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), anyString())).thenAnswer(invocation -> null);
+        mockCookieUtil.when(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                anyString()
+        )).thenAnswer(invocation -> null);
 
         authService.logout();
 
         verify(refreshTokenRedisRepository, never()).deleteById(any(Long.class));
 
-        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), eq("access")), times(1));
-        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(any(HttpServletRequest.class), any(HttpServletResponse.class), eq("refresh")), times(1));
+        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                eq("access")),
+                times(1));
+        mockCookieUtil.verify(() -> CookieUtil.deleteCookie(
+                any(HttpServletRequest.class),
+                any(HttpServletResponse.class),
+                eq("refresh")),
+                times(1));
 
     }
 
