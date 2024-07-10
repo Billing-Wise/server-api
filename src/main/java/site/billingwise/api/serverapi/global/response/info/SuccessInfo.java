@@ -11,6 +11,7 @@ public enum SuccessInfo {
     REGISTER("사용자 등록이 성공하였습니다."),
     LOGIN("로그인이 성공하였습니다."),
     LOGOUT("로그아웃이 성공하였습니다."),
+    AVAILABLE_EMAIL("사용 가능한 이메일입니다."),
 
     // Jwt
     REISSUE("토큰 재발급이 성공하였습니다."),

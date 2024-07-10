@@ -15,17 +15,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContext;
-import org.springframework.security.test.context.support.WithUserDetails;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
-import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.domain.user.repository.UserRepository;
-import site.billingwise.api.serverapi.global.WithMockCustomUser;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 import site.billingwise.api.serverapi.global.jwt.RefreshToken;
@@ -343,5 +339,28 @@ class AuthServiceTest {
 
         GlobalException exception = assertThrows(GlobalException.class, () -> authService.reissue());
         assertEquals(FailureInfo.INVALID_REFRESH_TOKEN, exception.getFailureInfo());
+    }
+
+    @Test
+    void checkEmailDuplication_EmailAlreadyExists() {
+        String email = "test@gmail.com";
+
+        when(userRepository.existsByEmail(email)).thenReturn(true);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> authService.checkEmailDuplication(email));
+        assertEquals(FailureInfo.ALREADY_EXIST_EMAIL, exception.getFailureInfo());
+
+        verify(userRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void checkEmailDuplication_EmailNotExists() {
+        String email = "test@gmail.com";
+
+        when(userRepository.existsByEmail(email)).thenReturn(false);
+
+        assertDoesNotThrow(() -> authService.checkEmailDuplication(email));
+
+        verify(userRepository, times(1)).existsByEmail(email);
     }
 }

@@ -1,8 +1,6 @@
 package site.billingwise.api.serverapi.domain.auth.controller;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -10,33 +8,25 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito.*;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.auth.controller.AuthController;
-import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
-import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
@@ -133,5 +123,27 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         //then
         result.andExpect(status().isOk()).andDo(document("auth/reissue",
                 requestCookies(cookieWithName("refresh").description("리프레시 토큰"))));
+    }
+
+    @Test
+    @DisplayName("이메일 중복 체크")
+    void checkEmailDuplication() throws Exception {
+        String url = "/api/v1/auth/email/duplication";
+
+        EmailDto emailDto = new EmailDto("test@gmail.com");
+
+        // given
+        willDoNothing().given(authService).checkEmailDuplication(emailDto.getEmail());
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/email/duplication",
+                requestFields(
+                        fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING)
+                )));
     }
 }

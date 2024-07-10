@@ -4,15 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
-import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
-import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 @Slf4j
@@ -47,6 +44,13 @@ public class AuthController {
     public BaseResponse reissue() {
         authService.reissue();
         return new BaseResponse(SuccessInfo.REISSUE);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/email/duplication")
+    public BaseResponse checkEmailDuplication(@Valid @RequestBody EmailDto emailDto) {
+        authService.checkEmailDuplication(emailDto.getEmail());
+        return new BaseResponse(SuccessInfo.AVAILABLE_EMAIL);
     }
 
 }
