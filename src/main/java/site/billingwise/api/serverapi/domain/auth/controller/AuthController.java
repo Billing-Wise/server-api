@@ -48,7 +48,7 @@ public class AuthController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/email/duplication")
-    public BaseResponse checkEmailDuplication(@Valid @RequestBody EmailDto emailDto){
+    public BaseResponse checkEmailDuplication(@Valid @RequestBody EmailDto emailDto) {
         authService.checkEmailDuplication(emailDto.getEmail());
         return new BaseResponse(SuccessInfo.AVAILABLE_EMAIL);
     }
