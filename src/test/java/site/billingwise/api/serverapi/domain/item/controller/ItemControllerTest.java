@@ -257,7 +257,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 
 	@Test
-    @DisplayName("상품 목록 조회")
+	@DisplayName("상품 목록 조회")
     void getItemList() throws Exception {
         // given
         String url = "/api/v1/items";
