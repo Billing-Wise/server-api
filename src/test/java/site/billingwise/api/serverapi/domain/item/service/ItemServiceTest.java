@@ -445,7 +445,7 @@ class ItemServiceTest {
 
 		List<Item> items = Arrays.asList(item1, item2);
 		Page<Item> itemPage = new PageImpl<>(items, pageable, items.size());
-		
+
 		when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
 		given(itemRepository.findAllByNameContainingIgnoreCaseAndClientId(anyString(), any(Pageable.class), anyLong()))
 				.willReturn(itemPage);
@@ -469,7 +469,8 @@ class ItemServiceTest {
 		assertThat(itemList.get(1).getImageUrl()).isEqualTo("http://example.com/item2.jpg");
 		assertThat(itemList.get(1).getContractCount()).isEqualTo(10L);
 
-		verify(itemRepository).findAllByNameContainingIgnoreCaseAndClientId(anyString(), any(Pageable.class), anyLong());
+		verify(itemRepository).findAllByNameContainingIgnoreCaseAndClientId(
+				anyString(), any(Pageable.class), anyLong());
 	}
 
 }
