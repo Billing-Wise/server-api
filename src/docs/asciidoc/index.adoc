@@ -7,3 +7,4 @@
 
 include::api/auth.adoc[]
 include::api/item.adoc[]
+include::api/member.adoc[]

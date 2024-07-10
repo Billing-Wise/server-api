@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;

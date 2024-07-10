@@ -1,7 +1,6 @@
 package site.billingwise.api.serverapi.domain.member.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 
 import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
@@ -48,7 +47,7 @@ public class MemberController {
     public BaseResponse deleteMember(@PathVariable("memberId") Long memberId) {
         memberService.deleteMember(memberId);
 
-        return new BaseResponse(SuccessInfo.MEMBER_UPDATED);
+        return new BaseResponse(SuccessInfo.MEMBER_DELETED);
     }
 
 }
