@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE client SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE client SET is_deleted = true WHERE client_id = ?")
 @Where(clause = "is_deleted = false")
 public class Client extends BaseEntity {
 

@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE invoice_type SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE invoice_type SET is_deleted = true WHERE invoice_type_id = ?")
 @Where(clause = "is_deleted = false")
 public class InvoiceType extends BaseEntity {
 

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE invoice SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE invoice SET is_deleted = true WHERE invoice_id = ?")
 @Where(clause = "is_deleted = false")
 public class Invoice extends BaseEntity {
 

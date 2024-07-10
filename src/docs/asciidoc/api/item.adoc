@@ -9,7 +9,7 @@
 
 === 상품 생성
 
-상품을 생성
+상품을 생성합니다.
 
 operation::item/create[snippets='request-cookies,http-request,request-parts,request-part-data-fields,http-response']
 

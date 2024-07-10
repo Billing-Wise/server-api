@@ -11,7 +11,7 @@ import site.billingwise.api.serverapi.domain.common.BaseEntity;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE consent_account SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE consent_account SET is_deleted = true WHERE member_id = ?")
 @Where(clause = "is_deleted = false")
 public class ConsentAccount extends BaseEntity {
 
