@@ -22,6 +22,7 @@ import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 import site.billingwise.api.serverapi.global.jwt.RefreshToken;
 import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
+import site.billingwise.api.serverapi.global.mail.MailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -113,4 +114,6 @@ public class AuthService {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
         }
     }
+
+
 }

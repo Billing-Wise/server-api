@@ -27,6 +27,9 @@ public enum FailureInfo {
     NOT_EXIST_USER(404, "존재하지 않는 사용자입니다."),
     ALREADY_EXIST_EMAIL(409, "이미 사용 중인 이메일입니다."),
 
+    // mail
+    SEND_MAIL_CODE_FAIL(554, "메일 인증코드 전송을 실패했습니다"),
+
     // image
     INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),
     
