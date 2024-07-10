@@ -6,10 +6,13 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.user.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Getter
@@ -47,6 +50,9 @@ public class Item extends BaseEntity {
     @OneToMany(mappedBy = "item")
     private List<Contract> contractList = new ArrayList<>();
 
+    @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.item_id = item_id)")
+    private Long contractCount;
+
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
@@ -61,5 +67,20 @@ public class Item extends BaseEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public GetItemDto toDto() {
+        GetItemDto getItemDto = GetItemDto.builder()
+                .id(id)
+                .name(name)
+                .price(price)
+                .description(description)
+                .imageUrl(imageUrl)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
+                .contractCount(contractCount)
+                .build();
+
+        return getItemDto;
     }
 }

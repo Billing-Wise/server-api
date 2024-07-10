@@ -35,3 +35,17 @@ operation::item/edit-image[snippets='http-request,path-parameters,request-parts,
 operation::item/delete[snippets='http-request,path-parameters,http-response']
 
 
+=== 상품 상세 조회
+
+상품 상세 정보를 조회합니다.
+
+operation::item/get[snippets='http-request,path-parameters,http-response,response-fields']
+
+
+=== 상품 목록 조회
+
+상품 상세 정보를 조회합니다.
+
+operation::item/get[snippets='http-request,http-response,response-fields']
+
+
