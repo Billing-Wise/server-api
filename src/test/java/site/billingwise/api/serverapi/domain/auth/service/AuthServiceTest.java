@@ -340,4 +340,27 @@ class AuthServiceTest {
         GlobalException exception = assertThrows(GlobalException.class, () -> authService.reissue());
         assertEquals(FailureInfo.INVALID_REFRESH_TOKEN, exception.getFailureInfo());
     }
+
+    @Test
+    void checkEmailDuplication_EmailAlreadyExists() {
+        String email = "test@gmail.com";
+
+        when(userRepository.existsByEmail(email)).thenReturn(true);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> authService.checkEmailDuplication(email));
+        assertEquals(FailureInfo.ALREADY_EXIST_EMAIL, exception.getFailureInfo());
+
+        verify(userRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void checkEmailDuplication_EmailNotExists() {
+        String email = "test@gmail.com";
+
+        when(userRepository.existsByEmail(email)).thenReturn(false);
+
+        assertDoesNotThrow(() -> authService.checkEmailDuplication(email));
+
+        verify(userRepository, times(1)).existsByEmail(email);
+    }
 }
