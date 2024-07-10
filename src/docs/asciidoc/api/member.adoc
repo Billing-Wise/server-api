@@ -1,0 +1,28 @@
+== 상품 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+회원 관련 API입니다.
+
+=== 회원 생성
+
+회원을 생성합니다.
+
+operation::member/create[snippets='request-cookies,http-request,request-fields,http-response']
+
+
+=== 회원 수정
+
+회원 정보를 수정합니다.
+
+operation::member/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response']
+
+
+=== 회원 삭제
+
+회원 정보를 삭제합니다.
+
+operation::member/delete[snippets='request-cookies,http-request,path-parameters,http-response']

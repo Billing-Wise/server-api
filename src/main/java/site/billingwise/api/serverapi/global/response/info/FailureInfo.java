@@ -36,7 +36,11 @@ public enum FailureInfo {
     
     // item
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
-    ITEM_ACCESS_DENIED(403, "접근 권한이 없는 상품입니다.");
+    ITEM_ACCESS_DENIED(403, "접근 권한이 없는 상품입니다."),
+
+    // member
+    NOT_EXIST_MEMBER(400, "존재하지 않는 회원입니다."),
+    MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다.");
 
     private final Integer code;
     private final String message;
