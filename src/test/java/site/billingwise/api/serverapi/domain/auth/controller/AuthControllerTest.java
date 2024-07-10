@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
@@ -122,5 +123,27 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         //then
         result.andExpect(status().isOk()).andDo(document("auth/reissue",
                 requestCookies(cookieWithName("refresh").description("리프레시 토큰"))));
+    }
+
+    @Test
+    @DisplayName("이메일 중복 체크")
+    void checkEmailDuplication() throws Exception {
+        String url = "/api/v1/auth/email/duplication";
+
+        EmailDto emailDto = new EmailDto("test@gmail.com");
+
+        // given
+        willDoNothing().given(authService).checkEmailDuplication(emailDto.getEmail());
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/email/duplication",
+                requestFields(
+                        fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING)
+                )));
     }
 }

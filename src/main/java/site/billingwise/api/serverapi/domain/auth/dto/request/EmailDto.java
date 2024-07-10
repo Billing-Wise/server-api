@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class EmailDto {
 
     @NotBlank(message = "이메일을 입력해주세요.")
