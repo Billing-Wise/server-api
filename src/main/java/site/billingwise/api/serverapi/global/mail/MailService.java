@@ -38,13 +38,13 @@ public class MailService {
 
             MimeMessage message = createMailCode(email);
             mailSender.send(message);
-        }catch(Exception e) {
+        } catch (Exception e) {
             log.error("exception", e);
             throw new GlobalException(FailureInfo.SEND_MAIL_CODE_FAIL);
         }
     }
 
-    public MimeMessage createMailCode(String email){
+    public MimeMessage createMailCode(String email) {
         code = new Random().nextInt(900000) + 100000;
         MimeMessage message = mailSender.createMimeMessage();
 
