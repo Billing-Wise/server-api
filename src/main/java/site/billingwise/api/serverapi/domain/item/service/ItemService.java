@@ -14,18 +14,17 @@ import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
-import site.billingwise.api.serverapi.domain.user.Client;
-import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
+import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.service.S3Service;
+import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService {
 
     private final ItemRepository itemRepository;
-    private final ClientRepository clientRepository;
     private final S3Service s3Service;
 
     public String itemImageDirectory = "item";
@@ -33,11 +32,9 @@ public class ItemService {
 
     @Transactional
     public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
-        Client client = clientRepository.findById(getClientId()).orElseThrow(() -> 
-            new GlobalException(FailureInfo.CLIENT_NOT_FOUND)
-        );
+        User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        Item item = createItemDto.toEntity(client, defaultImageUrl);
+        Item item = createItemDto.toEntity(user.getClient(), defaultImageUrl);
         itemRepository.save(item);
 
         if (multipartFile != null) {
@@ -48,8 +45,7 @@ public class ItemService {
 
     @Transactional
     public void editItem(Long itemId, EditItemDto editItemDto) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
-        isOwner(item, getClientId());
+        Item item = getCurrentItem(itemId);
 
         item.setName(editItemDto.getName());
         item.setPrice(editItemDto.getPrice());
@@ -59,8 +55,7 @@ public class ItemService {
 
     @Transactional
     public void editItemImage(Long itemId, MultipartFile multipartFile) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
-        isOwner(item, getClientId());
+        Item item = getCurrentItem(itemId);
 
         String prevImageUrl = item.getImageUrl();
 
@@ -75,8 +70,7 @@ public class ItemService {
     }
 
     public void deleteItem(Long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
-        isOwner(item, getClientId());
+        Item item = getCurrentItem(itemId);
 
         if (!item.getImageUrl().equals(defaultImageUrl)) {
             s3Service.delete(item.getImageUrl(), itemImageDirectory);
@@ -87,8 +81,7 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public GetItemDto getItem(Long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
-        isOwner(item, getClientId());
+        Item item = getCurrentItem(itemId);
 
         GetItemDto getItemDto = item.toDto();
 
@@ -97,12 +90,16 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public List<GetItemDto> getItemList(String itemName, Pageable pageable) {
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
         Page<Item> itemList = null;
 
         if (itemName == null) {
-            itemList = itemRepository.findAllByClientId(pageable, getClientId());
+            itemList = itemRepository.findAllByClientId(pageable, user.getClient().getId());
         } else {
-            itemList = itemRepository.findAllByNameContainingIgnoreCase(itemName, pageable);
+            itemList = itemRepository
+                    .findAllByNameByClientIdContainingIgnoreCase(itemName, pageable, user.getClient().getId());
         }
 
         List<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto()).getContent();
@@ -120,15 +117,18 @@ public class ItemService {
 
     }
 
-    private Long getClientId() {
-        // 스프링 시큐리티를 활용한 로직 추가
-        return 3L;
-    }
+    private Item getCurrentItem(Long itemId) {
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-    private void isOwner(Item item, Long clientId) {
-        if (item.getClient().getId() != clientId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(
+                () -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
+
+        if (item.getClient().getId() != user.getClient().getId()) {
             throw new GlobalException(FailureInfo.ITEM_ACCESS_DENIED);
         }
+
+        return item;
     }
 
 }
