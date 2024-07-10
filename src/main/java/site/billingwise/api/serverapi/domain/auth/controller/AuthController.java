@@ -5,11 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
-import site.billingwise.api.serverapi.global.mail.MailService;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
@@ -19,7 +20,7 @@ import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 @RequestMapping("api/v1/auth")
 public class AuthController {
     private final AuthService authService;
-    private final MailService mailService;
+    private final EmailService emailService;
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/register")
     public BaseResponse register(@Valid @RequestBody RegisterDto registerDto) {
@@ -58,8 +59,15 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/email/code")
     public BaseResponse sendEmailCode(@Valid @RequestBody EmailDto emailDto) {
-        mailService.sendMailCode(emailDto.getEmail());
+        emailService.sendMailCode(emailDto.getEmail());
         return new BaseResponse(SuccessInfo.SEND_MAIL_CODE);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/email/code")
+    public BaseResponse authenticateEmail(@Valid @RequestBody EmailCodeDto emailCodeDto) {
+        authService.authenticateEmail(emailCodeDto);
+        return new BaseResponse(SuccessInfo.AUTHENTICATE_EMAIL);
     }
 
 }
