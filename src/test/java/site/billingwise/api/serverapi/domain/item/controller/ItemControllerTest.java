@@ -6,18 +6,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.restdocs.payload.PayloadDocumentation.beneathPath;
+import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestPartFields;
@@ -27,40 +21,25 @@ import static org.springframework.restdocs.request.RequestDocumentation.partWith
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-import static org.mockito.ArgumentMatchers.any;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.restdocs.payload.PayloadDocumentation;
-import org.springframework.restdocs.request.RequestDocumentation;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
@@ -110,11 +89,14 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		ResultActions result = mockMvc.perform(multipart(url)
 				.file(data)
 				.file(itemImage)
+				.cookie(new Cookie("access", "ACCESS_TOKEN"))
 				.contentType(MediaType.MULTIPART_FORM_DATA));
 
 		// then
 		result.andExpect(status().isOk())
 				.andDo(document("item/create",
+						requestCookies(
+								cookieWithName("access").description("엑세스 토큰")),
 						requestParts(
 								partWithName("data").description("상품 정보"),
 								partWithName("image").description("상품 이미지")),
@@ -145,11 +127,14 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 		// when
 		ResultActions result = mockMvc.perform(put(url, ITEM_ID)
+				.cookie(new Cookie("access", "ACCESS_TOKEN"))
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(editItemDto)));
 
 		// then
 		result.andExpect(status().isOk()).andDo(document("item/edit-info",
+				requestCookies(
+						cookieWithName("access").description("엑세스 토큰")),
 				pathParameters(
 						parameterWithName("itemId").description("상품 ID")),
 				requestFields(
@@ -170,17 +155,19 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		willDoNothing().given(itemService).editItemImage(anyLong(), eq(itemImage));
 
 		// when
-		ResultActions result = mockMvc.perform(
-				multipart(url, ITEM_ID)
-						.file(itemImage)
-						.with(request -> {
-							request.setMethod("PUT");
-							return request;
-						}));
+		ResultActions result = mockMvc.perform(multipart(url, ITEM_ID)
+				.file(itemImage)
+				.cookie(new Cookie("access", "ACCESS_TOKEN"))
+				.with(request -> {
+					request.setMethod("PUT");
+					return request;
+				}));
 
 		// then
 		result.andExpect(status().isOk())
 				.andDo(document("item/edit-image",
+						requestCookies(
+								cookieWithName("access").description("엑세스 토큰")),
 						pathParameters(
 								parameterWithName("itemId").description("상품 ID")),
 						requestParts(
@@ -197,12 +184,14 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		willDoNothing().given(itemService).deleteItem(ITEM_ID);
 
 		// when
-		ResultActions result = mockMvc.perform(
-				delete(url, ITEM_ID));
+		ResultActions result = mockMvc.perform(delete(url, ITEM_ID)
+				.cookie(new Cookie("access", "ACCESS_TOKEN")));
 
 		// then
 		result.andExpect(status().isOk())
 				.andDo(document("item/delete",
+						requestCookies(
+								cookieWithName("access").description("엑세스 토큰")),
 						pathParameters(
 								parameterWithName("itemId").description("상품 ID"))));
 	}
@@ -227,16 +216,20 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		given(itemService.getItem(anyLong())).willReturn(getItemDto);
 
 		// when
-		ResultActions result = mockMvc.perform(get(url, 1L));
+		ResultActions result = mockMvc.perform(get(url, 1L)
+				.cookie(new Cookie("access", "ACCESS_TOKEN")));
 
 		// then
 		result.andExpect(status().isOk())
 				.andDo(document("item/get",
+						requestCookies(
+								cookieWithName("access").description("엑세스 토큰")),
 						pathParameters(
 								parameterWithName("itemId").description("상품ID")),
 						responseFields(
 								fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
 								fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+								fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
 								fieldWithPath("data.id").description("상품 ID").type(JsonFieldType.NUMBER),
 								fieldWithPath("data.name").description("상품명").type(JsonFieldType.STRING),
 								fieldWithPath("data.description").description("상품 설명")
@@ -252,65 +245,64 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 										.type(JsonFieldType.NUMBER))));
 	}
 
-
 	@Test
 	@DisplayName("상품 목록 조회")
-    void getItemList() throws Exception {
-        // given
-        String url = "/api/v1/items";
+	void getItemList() throws Exception {
+		// given
+		String url = "/api/v1/items";
 
-        GetItemDto item1 = GetItemDto.builder()
-                .id(1L)
-                .name("Item 1")
-                .description("Item 1 Description")
-                .price(1000L)
-                .imageUrl("http://example.com/item1.jpg")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .contractCount(5L)
-                .build();
+		GetItemDto item1 = GetItemDto.builder()
+				.id(1L)
+				.name("Item 1")
+				.description("Item 1 Description")
+				.price(1000L)
+				.imageUrl("http://example.com/item1.jpg")
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
+				.contractCount(5L)
+				.build();
 
-        GetItemDto item2 = GetItemDto.builder()
-                .id(2L)
-                .name("Item 2")
-                .description("Item 2 Description")
-                .price(2000L)
-                .imageUrl("http://example.com/item2.jpg")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .contractCount(10L)
-                .build();
+		GetItemDto item2 = GetItemDto.builder()
+				.id(2L)
+				.name("Item 2")
+				.description("Item 2 Description")
+				.price(2000L)
+				.imageUrl("http://example.com/item2.jpg")
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
+				.contractCount(10L)
+				.build();
 
-        List<GetItemDto> itemList = Arrays.asList(item1, item2);
+		List<GetItemDto> itemList = Arrays.asList(item1, item2);
 
-        // 서비스 메서드 Mock 설정
-        given(itemService.getItemList(anyString(), any(Pageable.class))).willReturn(itemList);
+		// 서비스 메서드 Mock 설정
+		given(itemService.getItemList(anyString(), any(Pageable.class))).willReturn(itemList);
 
-        // when
-        ResultActions result = mockMvc.perform(get(url)
-                .param("name", "Item")
-                .contentType(MediaType.APPLICATION_JSON));
+		// when
+		ResultActions result = mockMvc.perform(get(url)
+				.param("name", "Item")
+				.cookie(new Cookie("access", "ACCESS_TOKEN"))
+				.contentType(MediaType.APPLICATION_JSON));
 
-        // then
-        result.andDo(document("item/list",
-                pathParameters(
-                        parameterWithName("name").optional().description("상품명"),
-                        parameterWithName("page").optional().description("페이지 번호 (기본값: 0)"),
-                        parameterWithName("size").optional().description("페이지 크기 (기본값: 20)")
-                ),
-                responseFields(
-                        fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
-                        fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
-                        fieldWithPath("data").description("응답 데이터").type(JsonFieldType.ARRAY),
-                        fieldWithPath("data[].id").description("상품 ID").type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].name").description("상품명").type(JsonFieldType.STRING),
-                        fieldWithPath("data[].description").description("상품 설명").type(JsonFieldType.STRING),
-                        fieldWithPath("data[].price").description("상품 가격").type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].imageUrl").description("상품 이미지 URL").type(JsonFieldType.STRING),
-                        fieldWithPath("data[].createdAt").description("상품 생성일").type(JsonFieldType.STRING),
-                        fieldWithPath("data[].updatedAt").description("상품 정보 수정일").type(JsonFieldType.STRING),
-                        fieldWithPath("data[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER)
-                )
-        ));
-    }
+		// then
+		result.andDo(document("item/get-list",
+				requestCookies(
+						cookieWithName("access").description("엑세스 토큰")),
+				pathParameters(
+						parameterWithName("name").optional().description("상품명"),
+						parameterWithName("page").optional().description("페이지 번호 (기본값: 0)"),
+						parameterWithName("size").optional().description("페이지 크기 (기본값: 20)")),
+				responseFields(
+						fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+						fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+						fieldWithPath("data").description("응답 데이터").type(JsonFieldType.ARRAY),
+						fieldWithPath("data[].id").description("상품 ID").type(JsonFieldType.NUMBER),
+						fieldWithPath("data[].name").description("상품명").type(JsonFieldType.STRING),
+						fieldWithPath("data[].description").description("상품 설명").type(JsonFieldType.STRING),
+						fieldWithPath("data[].price").description("상품 가격").type(JsonFieldType.NUMBER),
+						fieldWithPath("data[].imageUrl").description("상품 이미지 URL").type(JsonFieldType.STRING),
+						fieldWithPath("data[].createdAt").description("상품 생성일").type(JsonFieldType.STRING),
+						fieldWithPath("data[].updatedAt").description("상품 정보 수정일").type(JsonFieldType.STRING),
+						fieldWithPath("data[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER))));
+	}
 }
