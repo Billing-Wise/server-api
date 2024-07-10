@@ -9,6 +9,7 @@ import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
+import site.billingwise.api.serverapi.global.mail.MailService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
@@ -18,6 +19,7 @@ import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 @RequestMapping("api/v1/auth")
 public class AuthController {
     private final AuthService authService;
+    private final MailService mailService;
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/register")
     public BaseResponse register(@Valid @RequestBody RegisterDto registerDto) {
@@ -51,6 +53,13 @@ public class AuthController {
     public BaseResponse checkEmailDuplication(@Valid @RequestBody EmailDto emailDto) {
         authService.checkEmailDuplication(emailDto.getEmail());
         return new BaseResponse(SuccessInfo.AVAILABLE_EMAIL);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/email/code")
+    public BaseResponse sendEmailCode(@Valid @RequestBody EmailDto emailDto) {
+        mailService.sendMailCode(emailDto.getEmail());
+        return new BaseResponse(SuccessInfo.SEND_MAIL_CODE);
     }
 
 }
