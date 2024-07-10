@@ -3,12 +3,15 @@ package site.billingwise.api.serverapi.domain.member.controller;
 import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
+import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
+import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -48,6 +51,14 @@ public class MemberController {
         memberService.deleteMember(memberId);
 
         return new BaseResponse(SuccessInfo.MEMBER_DELETED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{memberId}")
+    public DataResponse<Member> getMember(@PathVariable("memberId") Long memberId) {
+        Member member = memberService.getMember(memberId);
+
+        return new DataResponse<>(SuccessInfo.MEMBER_LOADED, member);
     }
 
 }

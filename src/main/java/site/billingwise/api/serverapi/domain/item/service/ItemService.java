@@ -59,14 +59,14 @@ public class ItemService {
 
         String prevImageUrl = item.getImageUrl();
 
-        if (multipartFile != null) {
-            uploadImage(item, multipartFile);
-        } else {
+        if (multipartFile == null) {
             throw new GlobalException(FailureInfo.INVALID_IMAGE);
         }
 
+        uploadImage(item, multipartFile);
         s3Service.delete(prevImageUrl, itemImageDirectory);
-
+        return;
+        
     }
 
     public void deleteItem(Long itemId) {

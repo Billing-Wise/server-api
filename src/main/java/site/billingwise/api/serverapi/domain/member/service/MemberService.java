@@ -16,7 +16,7 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
-    
+
     public void createMember(CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
@@ -51,7 +51,8 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Member getMember(Long memberId) {
-        Member member = getCurrentMember(memberId);
+        Member member = memberRepository.findByIdWithContractsWithInvoicesWithPaymentStatus(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_MEMBER));
 
         return member;
     }
