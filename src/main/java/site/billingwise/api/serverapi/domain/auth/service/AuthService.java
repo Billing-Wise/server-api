@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.user.Client;
@@ -22,7 +23,8 @@ import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 import site.billingwise.api.serverapi.global.jwt.RefreshToken;
 import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
-import site.billingwise.api.serverapi.global.mail.MailService;
+import site.billingwise.api.serverapi.global.mail.EmailCode;
+import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -37,6 +39,7 @@ public class AuthService {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private final EmailCodeRedisRepository emailCodeRedisRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
@@ -116,4 +119,12 @@ public class AuthService {
     }
 
 
+    public void authenticateEmail(EmailCodeDto emailCodeDto) {
+        EmailCode emailCode = emailCodeRedisRepository.findById(emailCodeDto.getEmail())
+                .orElseThrow(() -> new GlobalException(FailureInfo.INVALID_MAIL_CODE));
+
+        if (!emailCode.getCode().equals(emailCodeDto.getCode())) {
+            throw new GlobalException(FailureInfo.INVALID_MAIL_CODE);
+        }
+    }
 }

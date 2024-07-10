@@ -27,7 +27,7 @@ import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
-import site.billingwise.api.serverapi.global.mail.MailService;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
@@ -36,7 +36,7 @@ public class AuthControllerTest extends AbstractRestDocsTests {
     AuthService authService;
 
     @MockBean
-    MailService mailService;
+    EmailService emailService;
 
     @Test
     @DisplayName("사용자 등록")
@@ -159,7 +159,7 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         EmailDto emailDto = new EmailDto("test@gmail.com");
 
         // given
-        willDoNothing().given(mailService).sendMailCode(emailDto.getEmail());
+        willDoNothing().given(emailService).sendMailCode(emailDto.getEmail());
 
         // when
         ResultActions result = mockMvc.perform(post(url)

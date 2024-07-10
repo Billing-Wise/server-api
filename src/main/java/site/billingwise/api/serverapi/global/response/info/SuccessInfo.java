@@ -13,6 +13,7 @@ public enum SuccessInfo {
     LOGOUT("로그아웃이 성공하였습니다."),
     AVAILABLE_EMAIL("사용 가능한 이메일입니다."),
     SEND_MAIL_CODE("이메일 인증코드가 전송되었습다"),
+    AUTHENTICATE_EMAIL("이메일 인증이 성공하였습니다."),
 
     // Jwt
     REISSUE("토큰 재발급이 성공하였습니다."),
