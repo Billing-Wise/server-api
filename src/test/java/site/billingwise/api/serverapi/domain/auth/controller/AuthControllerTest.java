@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -18,6 +19,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -34,12 +36,10 @@ import site.billingwise.api.serverapi.domain.auth.controller.AuthController;
 import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
+import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     AuthService authService;
@@ -100,5 +100,38 @@ public class AuthControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("password").description("비밀번호 (* required)").type(JsonFieldType.STRING)
                 )));
+    }
+
+    @Test
+    @DisplayName("로그아웃")
+    void logout() throws Exception {
+        String url = "/api/v1/auth/logout";
+
+        // given
+        willDoNothing().given(authService).logout();
+
+        // when
+        ResultActions result = mockMvc.perform(post(url));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/logout"));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급")
+    void reissue() throws Exception {
+        String url = "/api/v1/auth/reissue";
+
+        // given
+        willDoNothing().given(authService).reissue();
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .cookie(new Cookie("refresh", "REFRESH_TOKEN")));
+
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/reissue",
+                requestCookies(cookieWithName("refresh").description("리프레시 토큰"))));
     }
 }

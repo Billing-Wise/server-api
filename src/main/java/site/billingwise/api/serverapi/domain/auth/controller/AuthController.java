@@ -2,9 +2,12 @@ package site.billingwise.api.serverapi.domain.auth.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
 import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
@@ -12,6 +15,7 @@ import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/auth")
@@ -29,6 +33,20 @@ public class AuthController {
     public BaseResponse login(@Valid @RequestBody LoginDto loginDto) {
         authService.login(loginDto);
         return new BaseResponse(SuccessInfo.LOGIN);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/logout")
+    public BaseResponse logout() {
+        authService.logout();
+        return new BaseResponse(SuccessInfo.LOGOUT);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/reissue")
+    public BaseResponse reissue() {
+        authService.reissue();
+        return new BaseResponse(SuccessInfo.REISSUE);
     }
 
 }
