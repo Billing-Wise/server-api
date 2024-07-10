@@ -25,6 +25,7 @@ public enum FailureInfo {
     CLIENT_NOT_FOUND(401, "존재하지 않는 고객입니다."),
     WRONG_LOGIN_INFO(401, "잘못된 이메일 혹은 비밀번호입니다."),
     NOT_EXIST_USER(404, "존재하지 않는 사용자입니다."),
+    ALREADY_EXIST_EMAIL(409, "이미 사용 중인 이메일입니다."),
 
     // image
     INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),
