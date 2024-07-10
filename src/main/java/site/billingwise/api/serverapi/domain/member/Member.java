@@ -19,7 +19,7 @@ import java.util.List;
 @Table(uniqueConstraints = {
     @UniqueConstraint(columnNames = {"client_id", "email"})
 })
-@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id = ?")
 @Where(clause = "is_deleted = false")
 public class Member extends BaseEntity {
 
@@ -49,4 +49,20 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private List<Contract> contractList = new ArrayList<>();
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setemail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

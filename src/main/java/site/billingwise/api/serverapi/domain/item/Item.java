@@ -19,7 +19,7 @@ import org.hibernate.annotations.Formula;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE item SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE item SET is_deleted = true WHERE item_id = ?")
 @Where(clause = "is_deleted = false")
 public class Item extends BaseEntity {
 

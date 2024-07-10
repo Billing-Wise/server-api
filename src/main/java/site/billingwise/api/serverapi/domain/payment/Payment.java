@@ -12,7 +12,7 @@ import site.billingwise.api.serverapi.domain.invoice.Invoice;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE payment SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE payment SET is_deleted = true WHERE invoice_id = ?")
 @Where(clause = "is_deleted = false")
 public class Payment extends BaseEntity {
 
