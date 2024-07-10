@@ -1,24 +1,19 @@
 package site.billingwise.api.serverapi.domain.auth.service;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
-import site.billingwise.api.serverapi.domain.auth.dto.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -111,5 +106,11 @@ public class AuthService {
 
         jwtProvider.addAccessToken(authentication, response);
         jwtProvider.addRefreshToken(authentication, response);
+    }
+
+    public void checkEmailDuplication(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
+        }
     }
 }
