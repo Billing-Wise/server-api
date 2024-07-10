@@ -99,7 +99,7 @@ public class ItemService {
             itemList = itemRepository.findAllByClientId(pageable, user.getClient().getId());
         } else {
             itemList = itemRepository
-                    .findAllByNameByClientIdContainingIgnoreCase(itemName, pageable, user.getClient().getId());
+                    .findAllByNameContainingIgnoreCaseAndClientId(itemName, pageable, user.getClient().getId());
         }
 
         List<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto()).getContent();
