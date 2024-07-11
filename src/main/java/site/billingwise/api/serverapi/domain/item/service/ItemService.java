@@ -2,6 +2,7 @@ package site.billingwise.api.serverapi.domain.item.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,11 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final S3Service s3Service;
 
-    public String itemImageDirectory = "item";
-    public String defaultImageUrl = "https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png";
+    @Value("${aws.s3.item-directory}")
+    private String itemImageDirectory;
+
+    @Value("${aws.s3.base-image-url}")
+    private String defaultImageUrl;
 
     @Transactional
     public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
@@ -59,14 +63,14 @@ public class ItemService {
 
         String prevImageUrl = item.getImageUrl();
 
-        if (multipartFile != null) {
-            uploadImage(item, multipartFile);
-        } else {
+        if (multipartFile == null) {
             throw new GlobalException(FailureInfo.INVALID_IMAGE);
         }
 
+        uploadImage(item, multipartFile);
         s3Service.delete(prevImageUrl, itemImageDirectory);
-
+        return;
+        
     }
 
     public void deleteItem(Long itemId) {

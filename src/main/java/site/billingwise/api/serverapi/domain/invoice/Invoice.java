@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
@@ -53,6 +56,6 @@ public class Invoice extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime dueDate;
 
-    @OneToOne(mappedBy = "invoice", fetch = FetchType.LAZY)
-    private Payment payment;
+    // @OneToOne(mappedBy = "invoice", fetch = FetchType.LAZY)
+    // private Payment payment;
 }

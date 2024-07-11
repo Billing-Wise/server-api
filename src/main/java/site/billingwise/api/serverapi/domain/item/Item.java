@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
@@ -30,20 +33,26 @@ public class Item extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JsonBackReference
+    private Client client;  
 
+    @Setter
     @Column(length = 50, nullable = false)
     private String name;
 
+    @Setter
     @Column(nullable = false)
     private String description;
 
+    @Setter
     @Column(nullable = false)
     private Long price;
 
+    @Setter
     @Column(length = 512, nullable = false)
     private String imageUrl;
 
+    @Setter
     @Column(nullable = false)
     private Boolean isBasic;
 
@@ -52,22 +61,6 @@ public class Item extends BaseEntity {
 
     @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.item_id = item_id)")
     private Long contractCount;
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setPrice(Long price) {
-        this.price = price;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public GetItemDto toDto() {
         GetItemDto getItemDto = GetItemDto.builder()

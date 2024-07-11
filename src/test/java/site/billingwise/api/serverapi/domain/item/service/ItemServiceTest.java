@@ -291,7 +291,7 @@ class ItemServiceTest {
 
 		Item item = Item.builder()
 				.id(itemId)
-				.imageUrl(itemService.defaultImageUrl)
+				.imageUrl(defaultImageUrl)
 				.client(mockClient)
 				.build();
 

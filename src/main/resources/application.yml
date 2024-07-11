@@ -23,6 +23,8 @@ aws:
     secret-key: ${AWS_S3_SECRET_KEY}
     region: ${AWS_S3_REGION}
     bucket: ${AWS_S3_BUCKET}
+    base-image-url: https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png
+    item-directory: item
 
 logging:
   level:

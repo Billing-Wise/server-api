@@ -275,7 +275,6 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 		List<GetItemDto> itemList = Arrays.asList(item1, item2);
 
-		// 서비스 메서드 Mock 설정
 		given(itemService.getItemList(anyString(), any(Pageable.class))).willReturn(itemList);
 
 		// when
