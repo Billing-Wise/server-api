@@ -8,14 +8,14 @@ import java.util.NoSuchElementException;
 public class EnumUtil {
 
     public static <T extends Enum<T> & EnumField> Long toId(T enumClass) {
-        if(enumClass == null) {
+        if (enumClass == null) {
             return null;
         }
         return enumClass.getId();
     }
 
     public static <T extends Enum<T> & EnumField> T toEnum(Class<T> enumClass, Long id) {
-        if(id == null) {
+        if (id == null) {
             return null;
         }
         return EnumSet.allOf(enumClass).stream()
