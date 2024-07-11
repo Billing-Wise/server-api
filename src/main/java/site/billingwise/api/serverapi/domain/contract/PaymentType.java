@@ -5,34 +5,22 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
+import site.billingwise.api.serverapi.domain.common.EnumField;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-@Entity
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE payment_type SET is_deleted = true WHERE payment_type_id = ?")
-@Where(clause = "is_deleted = false")
-public class PaymentType extends BaseEntity {
+@RequiredArgsConstructor
+public enum PaymentType implements EnumField {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_type_id")
-    private Long id;
+    PAYER_PAYMENT(1L, "납부자 결제"),
+    AUTO_TRANSFER(2L, "자동 이체");
 
-    @Column(length = 50, nullable = false)
-    private String name;
+    private final Long id;
+    private final String name;
 
-    @Column(nullable = false)
-    private Boolean isBasic;
 
-    @OneToMany(mappedBy = "paymentType")
-    private List<Contract> contractList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "paymentType")
-    private List<Invoice> invoiceList = new ArrayList<>();
 }
