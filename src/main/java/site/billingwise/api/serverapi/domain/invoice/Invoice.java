@@ -8,6 +8,9 @@ import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
 import site.billingwise.api.serverapi.domain.payment.Payment;
+import site.billingwise.api.serverapi.global.converter.InvoiceTypeConverter;
+import site.billingwise.api.serverapi.global.converter.PaymentStatusConverter;
+import site.billingwise.api.serverapi.global.converter.PaymentTypeConverter;
 
 import java.time.LocalDateTime;
 
@@ -29,16 +32,16 @@ public class Invoice extends BaseEntity {
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_type_id", nullable = false)
+    @Convert(converter = InvoiceTypeConverter.class)
+    @Column(name = "invoice_type_id", nullable = false)
     private InvoiceType invoiceType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_type_id", nullable = false)
+    @Convert(converter = PaymentTypeConverter.class)
+    @Column(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_status_id", nullable = false)
+    @Convert(converter = PaymentStatusConverter.class)
+    @Column(name = "payment_status_id", nullable = false)
     private PaymentStatus paymentStatus;
 
     @Column(nullable = false)
