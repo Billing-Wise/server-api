@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.user.Client;
@@ -26,6 +27,8 @@ import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.jwt.JwtProvider;
 import site.billingwise.api.serverapi.global.jwt.RefreshToken;
 import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
+import site.billingwise.api.serverapi.global.mail.EmailCode;
+import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -44,6 +47,9 @@ class AuthServiceTest {
 
     @Mock
     private RefreshTokenRedisRepository refreshTokenRedisRepository;
+
+    @Mock
+    private EmailCodeRedisRepository emailCodeRedisRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -362,5 +368,62 @@ class AuthServiceTest {
         assertDoesNotThrow(() -> authService.checkEmailDuplication(email));
 
         verify(userRepository, times(1)).existsByEmail(email);
+    }
+
+    @Test
+    void authenticateEmail_Success() {
+        String email = "test@example.com";
+        Integer validCode = 123456;
+
+        EmailCodeDto emailCodeDto = new EmailCodeDto(email, validCode);
+
+
+        EmailCode storedEmailCode = EmailCode.builder()
+                .email(email)
+                .code(validCode)
+                .build();
+
+        when(emailCodeRedisRepository.findById(email)).thenReturn(Optional.of(storedEmailCode));
+
+        assertDoesNotThrow(() -> authService.authenticateEmail(emailCodeDto));
+
+        verify(emailCodeRedisRepository, times(1)).findById(email);
+    }
+
+    @Test
+    void authenticateEmail_InvalidCode() {
+        String email = "test@example.com";
+        Integer invalidCode = 654321;
+
+        EmailCodeDto emailCodeDto = new EmailCodeDto(email, invalidCode);
+
+        EmailCode storedEmailCode = EmailCode.builder()
+                .email(email)
+                .code(123456)
+                .build();
+
+        when(emailCodeRedisRepository.findById(email)).thenReturn(Optional.of(storedEmailCode));
+
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticateEmail(emailCodeDto));
+        verify(emailCodeRedisRepository, times(1)).findById(email);
+        verifyNoMoreInteractions(emailCodeRedisRepository);
+        assertEquals(FailureInfo.INVALID_MAIL_CODE, exception.getFailureInfo());
+    }
+
+    @Test
+    void authenticateEmail_CodeNotFound() {
+        String email = "test@example.com";
+        Integer validCode = 123456;
+
+        EmailCodeDto emailCodeDto = new EmailCodeDto(email, validCode);
+
+        when(emailCodeRedisRepository.findById(anyString())).thenReturn(Optional.empty());
+
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticateEmail(emailCodeDto));
+        verify(emailCodeRedisRepository, times(1)).findById(email);
+        verifyNoMoreInteractions(emailCodeRedisRepository);
+        assertEquals(FailureInfo.INVALID_MAIL_CODE, exception.getFailureInfo());
     }
 }

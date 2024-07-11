@@ -29,6 +29,7 @@ public enum FailureInfo {
 
     // mail
     SEND_MAIL_CODE_FAIL(554, "메일 인증코드 전송을 실패했습니다"),
+    INVALID_MAIL_CODE(401, "유효하지 않은 메일 인증 코드입니다."),
 
     // image
     INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),

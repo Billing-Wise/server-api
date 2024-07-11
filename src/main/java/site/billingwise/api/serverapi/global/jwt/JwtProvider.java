@@ -111,7 +111,7 @@ public class JwtProvider {
         refreshTokenRedisRepository.save(RefreshToken.builder()
                 .id(customUserDetails.getUser().getId())
                 .token(refreshToken)
-                .expiredTime(REFRESH_TOKEN_EXPIRE_LENGTH)
+                .expiredTime(REFRESH_TOKEN_EXPIRE_LENGTH / 1000)
                 .build());
     }
 

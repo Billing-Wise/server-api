@@ -10,11 +10,11 @@ import org.springframework.data.redis.core.TimeToLive;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @RedisHash(value = "mail_code")
-public class MailCode {
+public class EmailCode {
 
     @Id
     private String email;
-    private int code;
+    private Integer code;
 
     @TimeToLive
     private long expiredTime;

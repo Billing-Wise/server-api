@@ -23,11 +23,12 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
+import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
 import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
-import site.billingwise.api.serverapi.global.mail.MailService;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
@@ -36,7 +37,7 @@ public class AuthControllerTest extends AbstractRestDocsTests {
     AuthService authService;
 
     @MockBean
-    MailService mailService;
+    EmailService emailService;
 
     @Test
     @DisplayName("사용자 등록")
@@ -159,7 +160,7 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         EmailDto emailDto = new EmailDto("test@gmail.com");
 
         // given
-        willDoNothing().given(mailService).sendMailCode(emailDto.getEmail());
+        willDoNothing().given(emailService).sendMailCode(emailDto.getEmail());
 
         // when
         ResultActions result = mockMvc.perform(post(url)
@@ -170,6 +171,30 @@ public class AuthControllerTest extends AbstractRestDocsTests {
         result.andExpect(status().isOk()).andDo(document("auth/email/code",
                 requestFields(
                         fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING)
+                )));
+    }
+
+    @Test
+    @DisplayName("이메일 인증")
+    void authenticateEmail() throws Exception {
+        String url = "/api/v1/auth/email/code";
+
+        EmailCodeDto emailCodeDto = new EmailCodeDto("test@gmail.com", 123123);
+
+        // given
+        willDoNothing().given(authService).authenticateEmail(emailCodeDto);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(emailCodeDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/email/code/authenticate",
+                requestFields(
+                        fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("code").description("코드 (* required)").type(JsonFieldType.NUMBER)
+
                 )));
     }
 }

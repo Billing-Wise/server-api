@@ -14,29 +14,30 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MailService {
+public class EmailService {
 
-    private static final Long MAIL_CODE_EXPIRE_LENGTH = 1000L * 60 * 3;    // 3m
+    private static final Long MAIL_CODE_EXPIRE_LENGTH = 1L * 60 * 3;    // 3m
 
     private final JavaMailSender mailSender;
 
-    private final MailCodeRedisRepository mailCodeRedisRepository;
+    private final EmailCodeRedisRepository emailCodeRedisRepository;
 
     @Value("${spring.mail.username}")
     private String fromMail;
 
-    private int code;
+    private Integer code;
 
     public void sendMailCode(String email) {
         try {
-            mailCodeRedisRepository.save(
-                    MailCode.builder()
+            MimeMessage message = createMailCode(email);
+
+            emailCodeRedisRepository.save(
+                    EmailCode.builder()
                             .email(email)
                             .code(code)
                             .expiredTime(MAIL_CODE_EXPIRE_LENGTH)
                             .build());
 
-            MimeMessage message = createMailCode(email);
             mailSender.send(message);
         } catch (Exception e) {
             log.error("exception", e);
