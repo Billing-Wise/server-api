@@ -26,6 +26,8 @@ import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
 import site.billingwise.api.serverapi.global.mail.EmailCode;
 import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.PhoneCodeRedisRepository;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
@@ -40,6 +42,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final EmailCodeRedisRepository emailCodeRedisRepository;
+    private final PhoneCodeRedisRepository phoneCodeRedisRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
@@ -127,4 +130,5 @@ public class AuthService {
             throw new GlobalException(FailureInfo.INVALID_MAIL_CODE);
         }
     }
+
 }

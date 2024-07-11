@@ -24,6 +24,13 @@ aws:
     region: ${AWS_S3_REGION}
     bucket: ${AWS_S3_BUCKET}
 
+coolsms:
+  api:
+    key: ${COOLSMS_API_KEY}
+    secret: ${COOLSMS_SECRET_KEY}
+    sender: ${COOLSMS_SENDER}
+    url: https://api.coolsms.co.kr
+
 logging:
   level:
     org:

@@ -23,12 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 import site.billingwise.api.serverapi.global.mail.EmailService;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest extends AbstractRestDocsTests {
@@ -38,6 +36,9 @@ public class AuthControllerTest extends AbstractRestDocsTests {
 
     @MockBean
     EmailService emailService;
+
+    @MockBean
+    SmsService smsService;
 
     @Test
     @DisplayName("사용자 등록")
@@ -49,7 +50,7 @@ public class AuthControllerTest extends AbstractRestDocsTests {
                 .email("test@gmail.com")
                 .password("test1234!")
                 .name("홍길동")
-                .phone("010-1111-1111")
+                .phone("01011111111")
                 .build();
 
         // given
@@ -195,6 +196,28 @@ public class AuthControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("code").description("코드 (* required)").type(JsonFieldType.NUMBER)
 
+                )));
+    }
+
+    @Test
+    @DisplayName("전화번호 인증 코드 전송")
+    void sendPhoneCode() throws Exception {
+        String url = "/api/v1/auth/phone/code";
+
+        PhoneDto phoneDto = new PhoneDto("01011111111");
+
+        // given
+        willDoNothing().given(smsService).sendPhoneCode(phoneDto.getPhone());
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(phoneDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/phone/code",
+                requestFields(
+                        fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING)
                 )));
     }
 }
