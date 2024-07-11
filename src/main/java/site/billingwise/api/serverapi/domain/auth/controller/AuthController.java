@@ -1,6 +1,7 @@
 package site.billingwise.api.serverapi.domain.auth.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
+import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 import site.billingwise.api.serverapi.global.sms.SmsService;
 
@@ -76,5 +78,18 @@ public class AuthController {
         smsService.sendPhoneCode(phoneDto.getPhone());
         return new BaseResponse(SuccessInfo.SEND_PHONE_CODE);
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/phone/code")
+    public BaseResponse authenticatePhone(@Valid @RequestBody PhoneCodeDto phoneCodeDto) {
+        authService.authenticatePhone(phoneCodeDto.getPhone(), phoneCodeDto.getCode());
+        return new BaseResponse(SuccessInfo.AUTHENTICATE_PHONE);
+    }
+
+//    @ResponseStatus(HttpStatus.OK)
+//    @GetMapping("/email")
+//    public DataResponse<EmailDto> findEmail(@Valid @RequestBody FindEmailDto findEmailDto) {
+//        return new DataResponse<>(SuccessInfo.FIND_EMAIL, authService.findEmail(findEmailDto));
+//    }
 
 }

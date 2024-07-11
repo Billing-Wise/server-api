@@ -220,4 +220,28 @@ public class AuthControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING)
                 )));
     }
+
+    @Test
+    @DisplayName("전화번호 인증")
+    void authenticatePhone() throws Exception {
+        String url = "/api/v1/auth/phone/code";
+
+        PhoneCodeDto phoneCodeDto = new PhoneCodeDto("01012341234", 123123);
+
+        // given
+        willDoNothing().given(authService).authenticatePhone(phoneCodeDto.getPhone(), phoneCodeDto.getCode());
+
+        // when
+        ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(phoneCodeDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("auth/phone/code/authenticate",
+                requestFields(
+                        fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("code").description("코드 (* required)").type(JsonFieldType.NUMBER)
+
+                )));
+    }
 }

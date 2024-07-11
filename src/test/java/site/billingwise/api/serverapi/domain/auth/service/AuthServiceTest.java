@@ -30,6 +30,8 @@ import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
 import site.billingwise.api.serverapi.global.mail.EmailCode;
 import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.PhoneCode;
+import site.billingwise.api.serverapi.global.sms.PhoneCodeRedisRepository;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
@@ -50,6 +52,9 @@ class AuthServiceTest {
 
     @Mock
     private EmailCodeRedisRepository emailCodeRedisRepository;
+
+    @Mock
+    private PhoneCodeRedisRepository phoneCodeRedisRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -425,5 +430,59 @@ class AuthServiceTest {
         verify(emailCodeRedisRepository, times(1)).findById(email);
         verifyNoMoreInteractions(emailCodeRedisRepository);
         assertEquals(FailureInfo.INVALID_MAIL_CODE, exception.getFailureInfo());
+    }
+
+    @Test
+    void authenticatePhone_Success() {
+        String validPhone = "01012341234";
+        Integer validCode = 123456;
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(validPhone)
+                .code(validCode)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(validPhone)).thenReturn(Optional.of(phoneCode));
+
+        assertDoesNotThrow(() -> authService.authenticatePhone(validPhone, validCode));
+        verify(phoneCodeRedisRepository, times(1)).findById(validPhone);
+    }
+
+    @Test
+    void authenticatePhone_PhoneNotFound() {
+
+        String inValidPhone = "01012341234";
+        Integer validCode = 123456;
+
+        // Arrange
+        when(phoneCodeRedisRepository.findById(inValidPhone)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticatePhone(inValidPhone, validCode));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+        verify(phoneCodeRedisRepository, times(1)).findById(inValidPhone);
+    }
+
+    @Test
+    void authenticatePhone_CodeMismatch() {
+
+        String validPhone = "01012341234";
+        Integer inValidCode = 123456;
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(validPhone)
+                .code(inValidCode)
+                .build();
+
+        // Arrange
+        when(phoneCodeRedisRepository.findById(validPhone)).thenReturn(Optional.of(phoneCode));
+        Integer invalidCode = 5678;
+
+        // Act & Assert
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticatePhone(validPhone, invalidCode));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+        verify(phoneCodeRedisRepository, times(1)).findById(validPhone);
     }
 }

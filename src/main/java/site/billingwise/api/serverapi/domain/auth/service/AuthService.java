@@ -12,9 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -26,6 +24,7 @@ import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
 import site.billingwise.api.serverapi.global.mail.EmailCode;
 import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.PhoneCode;
 import site.billingwise.api.serverapi.global.sms.PhoneCodeRedisRepository;
 import site.billingwise.api.serverapi.global.sms.SmsService;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
@@ -131,4 +130,19 @@ public class AuthService {
         }
     }
 
+    public void authenticatePhone(String phone, Integer code) {
+        PhoneCode phoneCode = phoneCodeRedisRepository.findById(phone)
+                .orElseThrow(() -> new GlobalException(FailureInfo.INVALID_PHONE_CODE));
+
+        if (!phoneCode.getCode().equals(code)) {
+            throw new GlobalException(FailureInfo.INVALID_PHONE_CODE);
+        }
+    }
+
+//    public EmailDto findEmail(FindEmailDto findEmailDto) {
+//
+//        phoneCodeRedisRepository.findById(findEmailDto.getPhone())
+//
+//        userRepository.findByEmail(fin)
+//    }
 }
