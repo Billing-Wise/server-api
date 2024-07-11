@@ -1,6 +1,7 @@
 package site.billingwise.api.serverapi.domain.auth.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -180,10 +181,13 @@ public class AuthControllerTest extends AbstractRestDocsTests {
     void authenticateEmail() throws Exception {
         String url = "/api/v1/auth/email/code";
 
-        EmailCodeDto emailCodeDto = new EmailCodeDto("test@gmail.com", 123123);
+        String email = "test@gmail.com";
+        Integer code = 123123;
+
+        EmailCodeDto emailCodeDto = new EmailCodeDto(email, code);
 
         // given
-        willDoNothing().given(authService).authenticateEmail(emailCodeDto);
+        willDoNothing().given(authService).authenticateEmail(email, code);
 
         // when
         ResultActions result = mockMvc.perform(put(url)
@@ -244,4 +248,72 @@ public class AuthControllerTest extends AbstractRestDocsTests {
 
                 )));
     }
+
+    @Test
+    @DisplayName("이메일 찾기")
+    void findEmail() throws Exception {
+        String url = "/api/v1/auth/email";
+
+        FindEmailDto findEmailDto = FindEmailDto.builder()
+                .name("홍길동")
+                .phone("01012341234")
+                .code(123123)
+                .build();
+
+        EmailDto emailDto = new EmailDto("test@gmail.com");
+
+        // given
+        given(authService.findEmail(any(FindEmailDto.class))).willReturn(emailDto);
+
+        // when
+        ResultActions result = mockMvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(findEmailDto)));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("auth/email/find",
+                        requestFields(
+                                fieldWithPath("name").description("이름 (* required)").type(JsonFieldType.STRING),
+                                fieldWithPath("phone").description("전화번호 (* required)").type(JsonFieldType.STRING),
+                                fieldWithPath("code").description("인증 코드 (* required)").type(JsonFieldType.NUMBER)
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+                                fieldWithPath("data.email").description("찾은 이메일").type(JsonFieldType.STRING)
+                        )));
+    }
+
+    @Test
+    @DisplayName("비밀번호 찾기")
+    void findPassword() throws Exception {
+        String url = "/api/v1/auth/password";
+
+        FindPasswordDto findPasswordDto = FindPasswordDto.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .newPassword("test1234!")
+                .newPasswordCheck("test1234!")
+                .build();
+
+        // given
+        willDoNothing().given(authService).findPassword(findPasswordDto);
+
+        // when
+        ResultActions result = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(findPasswordDto)));
+
+        // then
+        result.andExpect(status().isOk()).andDo(document("auth/password/find",
+                requestFields(
+                        fieldWithPath("email").description("이메일 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("code").description("코드 (* required)").type(JsonFieldType.NUMBER),
+                        fieldWithPath("newPassword").description("새 비밀번호 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("newPasswordCheck").description("새 비밀번호 확인 (* required)")
+                                .type(JsonFieldType.STRING)
+                )));
+    }
+
 }

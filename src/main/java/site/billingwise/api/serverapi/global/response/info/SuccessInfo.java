@@ -17,6 +17,7 @@ public enum SuccessInfo {
     SEND_PHONE_CODE("전화번호 인증코드가 전송되었습니다."),
     AUTHENTICATE_PHONE("전화번호 인증이 성공하였습니다."),
     FIND_EMAIL("이메일 찾기가 성공하였습니다."),
+    FIND_PASSWORD("비밀번호 찾기가 성공하였습니다."),
 
     // Jwt
     REISSUE("토큰 재발급이 성공하였습니다."),

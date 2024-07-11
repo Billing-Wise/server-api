@@ -18,6 +18,7 @@ public enum FailureInfo {
     EXPIRED_ACCESS_TOKEN(419, "만료된 액세스 토큰입니다."),
     REFRESH_TOKEN_NULL(401, "리프레시 토큰이 누락되었습니다."),
     INVALID_REFRESH_TOKEN(401, "유효하지 않은 리프레시 토큰입니다."),
+    NEW_PASSWORD_MISMATCH(400, "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
 
     // auth
     UNAUTHORIZED_AUTH_CODE(401, "유효하지 않은 인증 코드입니다."),

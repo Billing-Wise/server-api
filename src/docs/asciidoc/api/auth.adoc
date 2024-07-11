@@ -98,3 +98,15 @@ operation::auth/phone/code[snippets='http-request,request-fields,http-response']
 전화번호 인증을 합니다. 인증 코드의 유효 기간은 3분입니다.
 
 operation::auth/phone/code/authenticate[snippets='http-request,request-fields,http-response']
+
+=== 이메일 찾기
+
+이메일 찾기입니다.
+
+operation::auth/email/find[snippets='http-request,request-fields,http-response,response-fields']
+
+=== 비밀번호 찾기
+
+비밀번호 찾기입니다.
+
+operation::auth/password/find[snippets='http-request,request-fields,http-response']

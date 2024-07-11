@@ -1,7 +1,6 @@
 package site.billingwise.api.serverapi.domain.auth.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -68,7 +67,7 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/email/code")
     public BaseResponse authenticateEmail(@Valid @RequestBody EmailCodeDto emailCodeDto) {
-        authService.authenticateEmail(emailCodeDto);
+        authService.authenticateEmail(emailCodeDto.getEmail(), emailCodeDto.getCode());
         return new BaseResponse(SuccessInfo.AUTHENTICATE_EMAIL);
     }
 
@@ -86,10 +85,17 @@ public class AuthController {
         return new BaseResponse(SuccessInfo.AUTHENTICATE_PHONE);
     }
 
-//    @ResponseStatus(HttpStatus.OK)
-//    @GetMapping("/email")
-//    public DataResponse<EmailDto> findEmail(@Valid @RequestBody FindEmailDto findEmailDto) {
-//        return new DataResponse<>(SuccessInfo.FIND_EMAIL, authService.findEmail(findEmailDto));
-//    }
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/email")
+    public DataResponse<EmailDto> findEmail(@Valid @RequestBody FindEmailDto findEmailDto) {
+        return new DataResponse<>(SuccessInfo.FIND_EMAIL, authService.findEmail(findEmailDto));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/password")
+    public BaseResponse findPassword(@Valid @RequestBody FindPasswordDto findPasswordDto) {
+        authService.findPassword(findPasswordDto);
+        return new BaseResponse(SuccessInfo.FIND_PASSWORD);
+    }
 
 }
