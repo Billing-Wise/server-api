@@ -5,14 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
+import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 
 @Slf4j
 @RestController
@@ -21,6 +20,8 @@ import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 public class AuthController {
     private final AuthService authService;
     private final EmailService emailService;
+    private final SmsService smsService;
+
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/register")
     public BaseResponse register(@Valid @RequestBody RegisterDto registerDto) {
@@ -66,8 +67,35 @@ public class AuthController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/email/code")
     public BaseResponse authenticateEmail(@Valid @RequestBody EmailCodeDto emailCodeDto) {
-        authService.authenticateEmail(emailCodeDto);
+        authService.authenticateEmail(emailCodeDto.getEmail(), emailCodeDto.getCode());
         return new BaseResponse(SuccessInfo.AUTHENTICATE_EMAIL);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/phone/code")
+    public BaseResponse sendPhoneCode(@Valid @RequestBody PhoneDto phoneDto) {
+        smsService.sendPhoneCode(phoneDto.getPhone());
+        return new BaseResponse(SuccessInfo.SEND_PHONE_CODE);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/phone/code")
+    public BaseResponse authenticatePhone(@Valid @RequestBody PhoneCodeDto phoneCodeDto) {
+        authService.authenticatePhone(phoneCodeDto.getPhone(), phoneCodeDto.getCode());
+        return new BaseResponse(SuccessInfo.AUTHENTICATE_PHONE);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/email")
+    public DataResponse<EmailDto> findEmail(@Valid @RequestBody FindEmailDto findEmailDto) {
+        return new DataResponse<>(SuccessInfo.FIND_EMAIL, authService.findEmail(findEmailDto));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/password")
+    public BaseResponse findPassword(@Valid @RequestBody FindPasswordDto findPasswordDto) {
+        authService.findPassword(findPasswordDto);
+        return new BaseResponse(SuccessInfo.FIND_PASSWORD);
     }
 
 }

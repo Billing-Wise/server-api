@@ -80,6 +80,9 @@ dependencies {
 
     // AWS S3 https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-core
 	implementation 'io.awspring.cloud:spring-cloud-aws-core:2.4.4'
+
+    // sms
+    implementation 'net.nurigo:sdk:4.3.0'
 }
 
 jar {
