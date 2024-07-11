@@ -4,12 +4,18 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.user.Client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -32,15 +38,19 @@ public class Member extends BaseEntity {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
+    @Setter
     @Column(length = 50, nullable = false)
     private String name;
 
+    @Setter
     @Column(nullable = false)
     private String description;
 
+    @Setter
     @Column(nullable = false)
     private String email;
 
+    @Setter
     @Column(length = 20, nullable = false)
     private String phone;
 
@@ -48,21 +58,5 @@ public class Member extends BaseEntity {
     private ConsentAccount consentAccount;
 
     @OneToMany(mappedBy = "member")
-    private List<Contract> contractList = new ArrayList<>();
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setemail(String email) {
-        this.email = email;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    private Set<Contract> contractList;
 }

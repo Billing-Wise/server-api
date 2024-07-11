@@ -14,10 +14,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT m FROM Member m " +
-        "LEFT JOIN FETCH m.contractList c " +
-        "LEFT JOIN FETCH c.invoiceList i " +
-        "LEFT JOIN FETCH i.paymentStatus p " +
-        "WHERE m.id = :memberId")
+    @Query("SELECT m FROM Member m "
+            + "LEFT JOIN FETCH m.consentAccount a "
+            + "LEFT JOIN FETCH m.contractList c "
+            + "LEFT JOIN FETCH c.invoiceList i "
+            + "WHERE m.id = :memberId")
     Optional<Member> findByIdWithContractsWithInvoicesWithPaymentStatus(@Param("memberId") Long memberId);
 }

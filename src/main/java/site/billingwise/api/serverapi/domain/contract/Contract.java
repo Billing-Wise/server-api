@@ -5,6 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.InvoiceType;
@@ -13,6 +17,8 @@ import site.billingwise.api.serverapi.domain.member.Member;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity
 @Getter
@@ -65,7 +71,7 @@ public class Contract extends BaseEntity {
     @Column(nullable = false)
     private Boolean isEasyConsent;
 
-    @OneToMany(mappedBy = "contract")
-    private List<Invoice> invoiceList = new ArrayList<>();
+    @OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
+    private Set<Invoice> invoiceList;
 
 }

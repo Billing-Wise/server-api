@@ -38,7 +38,7 @@ public class MemberService {
         }
 
         member.setName(createMemberDto.getName());
-        member.setemail(createMemberDto.getEmail());
+        member.setEmail(createMemberDto.getEmail());
         member.setPhone(createMemberDto.getPhone());
         member.setDescription(createMemberDto.getDescription());
     }
@@ -54,7 +54,7 @@ public class MemberService {
         Member member = memberRepository.findByIdWithContractsWithInvoicesWithPaymentStatus(memberId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_MEMBER));
 
-        return member;
+        return null;
     }
 
     private Member getCurrentMember(Long memberId) {

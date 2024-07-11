@@ -1,6 +1,7 @@
 package site.billingwise.api.serverapi.domain.member.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,4 +24,5 @@ public class GetMemberDetailDto {
     private Long totalUnpaidAmount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<GetContractDetailDto> contractList;
 }
