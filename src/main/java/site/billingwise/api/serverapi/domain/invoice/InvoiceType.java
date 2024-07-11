@@ -1,36 +1,21 @@
 package site.billingwise.api.serverapi.domain.invoice;
 
-import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-import site.billingwise.api.serverapi.domain.common.BaseEntity;
-import site.billingwise.api.serverapi.domain.contract.Contract;
+import site.billingwise.api.serverapi.domain.common.EnumField;
+import site.billingwise.api.serverapi.domain.contract.ContractStatus;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-@Entity
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE invoice_type SET is_deleted = true WHERE invoice_type_id = ?")
-@Where(clause = "is_deleted = false")
-public class InvoiceType extends BaseEntity {
+@RequiredArgsConstructor
+public enum InvoiceType implements EnumField {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "invoice_type_id")
-    private Long id;
+    AUTO(1L, "자동 청구"),
+    MANUAL(2L, "수동 청구");
 
-    @Column(length = 50, nullable = false)
-    private String name;
+    private final Long id;
+    private final String name;
 
-    @OneToMany(mappedBy = "invoiceType")
-    private List<Invoice> invoiceList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "invoiceType")
-    private List<Contract> contractList = new ArrayList<>();
 
 }
