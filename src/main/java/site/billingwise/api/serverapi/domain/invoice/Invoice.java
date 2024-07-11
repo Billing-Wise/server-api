@@ -53,6 +53,6 @@ public class Invoice extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime dueDate;
 
-    @OneToOne(mappedBy = "invoice", fetch = FetchType.LAZY)
-    private Payment payment;
+    // @OneToOne(mappedBy = "invoice", fetch = FetchType.LAZY)
+    // private Payment payment;
 }

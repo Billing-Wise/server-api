@@ -1,10 +1,13 @@
 package site.billingwise.api.serverapi.domain.member.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
-import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
+import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.DataResponse;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,10 +59,18 @@ public class MemberController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{memberId}")
-    public DataResponse<Member> getMember(@PathVariable("memberId") Long memberId) {
-        Member member = memberService.getMember(memberId);
+    public DataResponse<GetMemberDto> getMember(@PathVariable("memberId") Long memberId) {
+        GetMemberDto getMemberDto = memberService.getMember(memberId);
 
-        return new DataResponse<>(SuccessInfo.MEMBER_LOADED, member);
+        return new DataResponse<>(SuccessInfo.MEMBER_LOADED, getMemberDto);
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping()
+    public DataResponse<List<GetMemberDto>> getMemberList(
+            @RequestParam(name = "name", required = false) String memberName, Pageable pageable) {
+        List<GetMemberDto> getMemberDtoList = memberService.getMemberList(memberName, pageable);
+
+        return new DataResponse<>(SuccessInfo.MEMBER_LOADED, getMemberDtoList);
+    }
 }

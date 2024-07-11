@@ -26,3 +26,17 @@ operation::member/edit[snippets='request-cookies,http-request,path-parameters,re
 회원 정보를 삭제합니다.
 
 operation::member/delete[snippets='request-cookies,http-request,path-parameters,http-response']
+
+
+=== 회원 상세 조회
+
+회원 상세 정보를 조회합니다.
+
+operation::member/get[snippets='request-cookies,http-request,path-parameters,http-response,response-fields']
+
+
+=== 회원 목록 조회
+
+회원 목록의 조회합니다
+
+operation::member/get-list[snippets='request-cookies,http-request,http-response,response-fields']
