@@ -4,12 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -35,12 +39,12 @@ public class Client extends BaseEntity {
     private String phone;
 
     @OneToMany(mappedBy = "client")
-    private List<User> userList = new ArrayList<>();
+    private Set<User> userList;
 
     @OneToMany(mappedBy = "client")
-    private List<Member> memberList = new ArrayList<>();
+    private Set<Member> memberList;
 
     @OneToMany(mappedBy = "client")
-    private List<Item> itemList = new ArrayList<>();
+    private Set<Item> itemList;
 
 }
