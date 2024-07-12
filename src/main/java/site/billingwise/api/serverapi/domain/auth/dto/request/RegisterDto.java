@@ -32,7 +32,7 @@ public class RegisterDto {
     private String name;
 
     @NotBlank(message = "전화번호를 입력해주세요.")
-    @Pattern(regexp = "^010-\\d{4}-\\d{4}$",
+    @Pattern(regexp = "^010\\d{4}\\d{4}$",
             message = "유효한 전화번호 형식이 아닙니다.")
     private String phone;
 

@@ -71,7 +71,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
         CreateMemberDto createMemberDto = CreateMemberDto.builder()
                 .name("kim")
                 .email("example@example.com")
-                .phone("010-1234-5678")
+                .phone("01012345678")
                 .description("Test description")
                 .build();
 
@@ -108,7 +108,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
         CreateMemberDto createMemberDto = CreateMemberDto.builder()
                 .name("kim")
                 .email("example@example.com")
-                .phone("010-1234-5678")
+                .phone("01012345678")
                 .description("Test description")
                 .build();
 

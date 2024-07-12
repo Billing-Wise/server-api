@@ -23,6 +23,7 @@ public class CreateMemberDto {
     private String email;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")
+    @Pattern(regexp = "^010\\d{4}\\d{4}$", message = "유효한 전화번호 형식이 아닙니다.")
     private String phone;
 
     private String description;

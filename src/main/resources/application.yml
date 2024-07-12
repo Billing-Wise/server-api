@@ -26,6 +26,13 @@ aws:
     base-image-url: https://billing-wise-bucket.s3.ap-northeast-2.amazonaws.com/test.png
     item-directory: item
 
+coolsms:
+  api:
+    key: ${COOLSMS_API_KEY}
+    secret: ${COOLSMS_SECRET_KEY}
+    sender: ${COOLSMS_SENDER}
+    url: https://api.coolsms.co.kr
+
 logging:
   level:
     org:

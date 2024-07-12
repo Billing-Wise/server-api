@@ -1,4 +1,4 @@
-== 상품 API
+== 회원 API
 :doctype: book
 :source-highlighter: highlightjs
 :toc: left
