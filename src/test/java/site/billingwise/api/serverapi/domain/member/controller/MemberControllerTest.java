@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -15,14 +16,22 @@ import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.poi.util.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,13 +39,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
+import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 
@@ -292,5 +302,66 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                                 .type(JsonFieldType.STRING),
                         fieldWithPath("data[].updatedAt").description("회원 정보 수정일")
                                 .type(JsonFieldType.STRING))));
+    }
+
+    @Test
+    public void testCreateMemberBulk_Success() throws Exception {
+        // given
+        String url = "/api/v1/members/bulk-register";
+
+        MockMultipartFile file = new MockMultipartFile("file", "member_test_success.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "exel data".getBytes());
+
+        CreateMemberDto createMemberDto = CreateMemberDto.builder()
+                .name("kim")
+                .email("example@example.com")
+                .phone("010-1234-5678")
+                .description("Test description")
+                .build();
+
+        List<CreateMemberDto> memberList = new ArrayList<>();
+        memberList.add(createMemberDto);
+
+        List<String> errorList = new ArrayList<>();
+        errorList.add("1행 : 중복된 이메일입니다.");
+
+        CreateBulkResultDto createBulkResultDto = CreateBulkResultDto.builder()
+                .isSuccess(false)
+                .memberList(memberList)
+                .errorList(errorList)
+                .build();
+        given(memberService.createMemberBulk(file)).willReturn(createBulkResultDto);
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(url)
+                .file(file)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8")
+                .cookie(new Cookie("access", "ACCESS_TOKEN")));
+
+        // given
+        result.andDo(document("member/bulk-register",
+                requestCookies(
+                        cookieWithName("access").description("엑세스 토큰")),
+                requestParts(
+                        partWithName("file").description("업로드할 엑셀 파일")),
+                responseFields(
+                        fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+                        fieldWithPath("message").description("응답 메시지")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.success").description("성공 여부")
+                                .type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.memberList").description("등록된 회원 목록")
+                                .type(JsonFieldType.ARRAY),
+                        fieldWithPath("data.memberList[].name").description("회원 이름")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.memberList[].email").description("회원 이메일")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.memberList[].phone").description("회원 전화번호")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.memberList[].description").description("회원 설명")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.errorList").description("오류 목록")
+                                .type(JsonFieldType.ARRAY).optional())));
     }
 }

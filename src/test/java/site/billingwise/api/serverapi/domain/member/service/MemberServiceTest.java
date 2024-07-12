@@ -4,13 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,19 +33,27 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
 
 import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
+import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 public class MemberServiceTest {
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private Validator validator;
 
     @InjectMocks
     private MemberService memberService;
@@ -212,6 +226,47 @@ public class MemberServiceTest {
         assertFalse(result.isEmpty());
         assertEquals(1, result.size());
         assertEquals(mockMember.getId(), result.get(0).getId());
+    }
+
+    @Test
+    public void createMemberBulk() throws Exception {
+        // given
+        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
+
+        InputStream inputStream = getClass().getResourceAsStream("/exel/member_test_success.xlsx");
+        MockMultipartFile mockFile = new MockMultipartFile("file", "member_test_success.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                inputStream);
+
+        doNothing().when(validator).validate(any(), any(BindingResult.class));
+
+        when(memberRepository.existsByEmail(anyString())).thenReturn(false);
+
+        // when
+        CreateBulkResultDto resultDto = memberService.createMemberBulk(mockFile);
+
+        // then
+        assertTrue(resultDto.isSuccess());
+        assertFalse(resultDto.getMemberList().isEmpty());
+        assertTrue(resultDto.getErrorList().isEmpty());
+        verify(memberRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    public void testCreateMemberBulk_InvalidFileFormat() {
+        // given
+        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
+
+        MockMultipartFile mockFile = new MockMultipartFile("file", "invalid.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                new byte[0]);
+
+        // when, then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            memberService.createMemberBulk(mockFile);
+        });
+
+        assertEquals(FailureInfo.INVALID_FILE, exception.getFailureInfo());
     }
 
 }
