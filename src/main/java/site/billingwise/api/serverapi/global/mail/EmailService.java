@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 
 import java.util.Random;
 
@@ -72,4 +73,7 @@ public class EmailService {
 
         return message;
     }
+
+
+
 }

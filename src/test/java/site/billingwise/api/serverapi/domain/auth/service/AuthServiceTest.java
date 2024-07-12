@@ -16,9 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
-import site.billingwise.api.serverapi.domain.auth.dto.request.EmailCodeDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.LoginDto;
-import site.billingwise.api.serverapi.domain.auth.dto.request.RegisterDto;
+import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
@@ -30,6 +28,8 @@ import site.billingwise.api.serverapi.global.jwt.RefreshTokenRedisRepository;
 import site.billingwise.api.serverapi.global.mail.EmailCode;
 import site.billingwise.api.serverapi.global.mail.EmailCodeRedisRepository;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.PhoneCode;
+import site.billingwise.api.serverapi.global.sms.PhoneCodeRedisRepository;
 import site.billingwise.api.serverapi.global.util.CookieUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
@@ -50,6 +50,9 @@ class AuthServiceTest {
 
     @Mock
     private EmailCodeRedisRepository emailCodeRedisRepository;
+
+    @Mock
+    private PhoneCodeRedisRepository phoneCodeRedisRepository;
 
     @Mock
     private UserRepository userRepository;
@@ -375,8 +378,6 @@ class AuthServiceTest {
         String email = "test@example.com";
         Integer validCode = 123456;
 
-        EmailCodeDto emailCodeDto = new EmailCodeDto(email, validCode);
-
 
         EmailCode storedEmailCode = EmailCode.builder()
                 .email(email)
@@ -385,7 +386,7 @@ class AuthServiceTest {
 
         when(emailCodeRedisRepository.findById(email)).thenReturn(Optional.of(storedEmailCode));
 
-        assertDoesNotThrow(() -> authService.authenticateEmail(emailCodeDto));
+        assertDoesNotThrow(() -> authService.authenticateEmail(email, validCode));
 
         verify(emailCodeRedisRepository, times(1)).findById(email);
     }
@@ -395,8 +396,6 @@ class AuthServiceTest {
         String email = "test@example.com";
         Integer invalidCode = 654321;
 
-        EmailCodeDto emailCodeDto = new EmailCodeDto(email, invalidCode);
-
         EmailCode storedEmailCode = EmailCode.builder()
                 .email(email)
                 .code(123456)
@@ -405,7 +404,7 @@ class AuthServiceTest {
         when(emailCodeRedisRepository.findById(email)).thenReturn(Optional.of(storedEmailCode));
 
         GlobalException exception = assertThrows(GlobalException.class,
-                () -> authService.authenticateEmail(emailCodeDto));
+                () -> authService.authenticateEmail(email, invalidCode));
         verify(emailCodeRedisRepository, times(1)).findById(email);
         verifyNoMoreInteractions(emailCodeRedisRepository);
         assertEquals(FailureInfo.INVALID_MAIL_CODE, exception.getFailureInfo());
@@ -416,14 +415,269 @@ class AuthServiceTest {
         String email = "test@example.com";
         Integer validCode = 123456;
 
-        EmailCodeDto emailCodeDto = new EmailCodeDto(email, validCode);
-
         when(emailCodeRedisRepository.findById(anyString())).thenReturn(Optional.empty());
 
         GlobalException exception = assertThrows(GlobalException.class,
-                () -> authService.authenticateEmail(emailCodeDto));
+                () -> authService.authenticateEmail(email, validCode));
         verify(emailCodeRedisRepository, times(1)).findById(email);
         verifyNoMoreInteractions(emailCodeRedisRepository);
         assertEquals(FailureInfo.INVALID_MAIL_CODE, exception.getFailureInfo());
+    }
+
+    @Test
+    void authenticatePhone_Success() {
+        String validPhone = "01012341234";
+        Integer validCode = 123456;
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(validPhone)
+                .code(validCode)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(validPhone)).thenReturn(Optional.of(phoneCode));
+
+        assertDoesNotThrow(() -> authService.authenticatePhone(validPhone, validCode));
+        verify(phoneCodeRedisRepository, times(1)).findById(validPhone);
+    }
+
+    @Test
+    void authenticatePhone_PhoneNotFound() {
+
+        String inValidPhone = "01012341234";
+        Integer validCode = 123456;
+
+        // Arrange
+        when(phoneCodeRedisRepository.findById(inValidPhone)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticatePhone(inValidPhone, validCode));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+        verify(phoneCodeRedisRepository, times(1)).findById(inValidPhone);
+    }
+
+    @Test
+    void authenticatePhone_CodeMismatch() {
+
+        String validPhone = "01012341234";
+        Integer inValidCode = 123456;
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(validPhone)
+                .code(inValidCode)
+                .build();
+
+        // Arrange
+        when(phoneCodeRedisRepository.findById(validPhone)).thenReturn(Optional.of(phoneCode));
+        Integer invalidCode = 5678;
+
+        // Act & Assert
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.authenticatePhone(validPhone, invalidCode));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+        verify(phoneCodeRedisRepository, times(1)).findById(validPhone);
+    }
+
+    @Test
+    void findEmail_Success() {
+        String name = "홍길동";
+        String phone = "01012345678";
+        Integer code = 123456;
+        String email = "test@gmail.com";
+
+        FindEmailDto findEmailDto = FindEmailDto.builder()
+                .name(name)
+                .phone(phone)
+                .code(code)
+                .build();
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(phone)
+                .code(code)
+                .build();
+
+        User user = User.builder()
+                .name(name)
+                .phone(phone)
+                .email(email)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(phone)).thenReturn(Optional.of(phoneCode));
+        when(userRepository.findByNameAndPhone(name, phone)).thenReturn(Optional.of(user));
+
+        EmailDto emailDto = authService.findEmail(findEmailDto);
+
+        assertNotNull(emailDto);
+        assertEquals(email, emailDto.getEmail());
+
+        verify(phoneCodeRedisRepository, times(1)).findById(phone);
+        verify(userRepository, times(1)).findByNameAndPhone(name, phone);
+    }
+
+    @Test
+    void findEmail_UserNotFound() {
+        String name = "홍길동";
+        String phone = "01012345678";
+        Integer code = 123456;
+
+        FindEmailDto findEmailDto = FindEmailDto.builder()
+                .name(name)
+                .phone(phone)
+                .code(code)
+                .build();
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(phone)
+                .code(code)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(phone)).thenReturn(Optional.of(phoneCode));
+        when(userRepository.findByNameAndPhone(name, phone)).thenReturn(Optional.empty());
+
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.findEmail(findEmailDto));
+        assertEquals(FailureInfo.NOT_EXIST_USER, exception.getFailureInfo());
+
+        verify(phoneCodeRedisRepository, times(1)).findById(phone);
+        verify(userRepository, times(1)).findByNameAndPhone(name, phone);
+    }
+
+    @Test
+    void findEmail_InvalidPhoneCode() {
+        String name = "홍길동";
+        String phone = "010-1234-5678";
+        Integer code = 123456;
+
+        FindEmailDto findEmailDto = FindEmailDto.builder()
+                .name(name)
+                .phone(phone)
+                .code(code)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(phone)).thenReturn(Optional.empty());
+
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.findEmail(findEmailDto));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+
+        verify(phoneCodeRedisRepository, times(1)).findById(phone);
+        verify(userRepository, never()).findByNameAndPhone(anyString(), anyString());
+    }
+
+    @Test
+    void findEmail_PhoneCodeMismatch() {
+        String name = "홍길동";
+        String phone = "010-1234-5678";
+        Integer code = 123456;
+        Integer wrongCode = 654321;
+
+        FindEmailDto findEmailDto = FindEmailDto.builder()
+                .name(name)
+                .phone(phone)
+                .code(wrongCode)
+                .build();
+
+        PhoneCode phoneCode = PhoneCode.builder()
+                .phone(phone)
+                .code(code)
+                .build();
+
+        when(phoneCodeRedisRepository.findById(phone)).thenReturn(Optional.of(phoneCode));
+
+        GlobalException exception = assertThrows(GlobalException.class,
+                () -> authService.findEmail(findEmailDto));
+        assertEquals(FailureInfo.INVALID_PHONE_CODE, exception.getFailureInfo());
+
+        verify(phoneCodeRedisRepository, times(1)).findById(phone);
+        verify(userRepository, never()).findByNameAndPhone(anyString(), anyString());
+    }
+
+    @Test
+    void findPassword_Success() {
+        FindPasswordDto findPasswordDto = FindPasswordDto.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .newPassword("test1234!")
+                .newPasswordCheck("test1234!")
+                .build();
+
+        User user = User.builder()
+                .email("test@gmail.com")
+                .password("oldPassword")
+                .build();
+
+        EmailCode emailCode = EmailCode.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .build();
+
+        Optional<User> optionalUser = Optional.of(user);
+
+        when(userRepository.findByEmail(findPasswordDto.getEmail())).thenReturn(optionalUser);
+        when(emailCodeRedisRepository.findById(findPasswordDto.getEmail()))
+                .thenReturn(Optional.of(emailCode));
+        when(passwordEncoder.encode(findPasswordDto.getNewPassword())).thenReturn("test1234!");
+
+        authService.findPassword(findPasswordDto);
+
+        assertEquals(findPasswordDto.getNewPassword(), user.getPassword());
+
+    }
+
+    @Test
+    void testFindPassword_WrongCode() {
+        FindPasswordDto findPasswordDto = FindPasswordDto.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .newPassword("test1234!")
+                .newPasswordCheck("test1234!")
+                .build();
+
+        EmailCode emailCode = EmailCode.builder()
+                .email("test@gmail.com")
+                .code(321321)
+                .build();
+
+        when(emailCodeRedisRepository.findById(findPasswordDto.getEmail())).thenReturn(Optional.of(emailCode));
+
+        assertThrows(GlobalException.class, () -> authService.findPassword(findPasswordDto),
+                FailureInfo.INVALID_MAIL_CODE.getMessage());
+    }
+
+    @Test
+    void testFindPassword_PasswordMismatch() {
+        FindPasswordDto findPasswordDto = FindPasswordDto.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .newPassword("test1234!")
+                .newPasswordCheck("wrongtest1234!")
+                .build();
+
+        EmailCode emailCode = EmailCode.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .build();
+
+        when(emailCodeRedisRepository.findById(findPasswordDto.getEmail())).thenReturn(Optional.of(emailCode));
+
+        assertThrows(GlobalException.class, () -> authService.findPassword(findPasswordDto),
+                FailureInfo.NEW_PASSWORD_MISMATCH.getMessage());
+    }
+
+    @Test
+    void testFindPassword_UserNotFound() {
+        FindPasswordDto findPasswordDto = FindPasswordDto.builder()
+                .email("test@gmail.com")
+                .code(123123)
+                .newPassword("test1234!")
+                .newPasswordCheck("test1234!")
+                .build();
+
+        // Simulate user not found scenario
+        when(userRepository.findByEmail(findPasswordDto.getEmail())).thenReturn(Optional.empty());
+
+        // Execute and assert the exception
+        assertThrows(GlobalException.class, () -> authService.findPassword(findPasswordDto),
+                FailureInfo.NOT_EXIST_USER.getMessage());
     }
 }
