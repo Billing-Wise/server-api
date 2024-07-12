@@ -22,6 +22,9 @@ public enum SuccessInfo {
     // Jwt
     REISSUE("토큰 재발급이 성공하였습니다."),
 
+    // setting
+    SET_ITEMS_TO_BASIC("간편 동의 상품 설정이 완료되었습니다."),
+
     // Item
     ITEM_CREATED("상품이 성공적으로 생성되었습니다."),
     ITEM_EDITED("상품 정보가 성공적으로 수정되었습니다."),
