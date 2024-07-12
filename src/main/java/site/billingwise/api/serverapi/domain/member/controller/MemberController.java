@@ -2,11 +2,13 @@ package site.billingwise.api.serverapi.domain.member.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
+import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
@@ -21,8 +23,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 
@@ -67,10 +71,19 @@ public class MemberController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping()
-    public DataResponse<List<GetMemberDto>> getMemberList(
+    public DataResponse<Page<GetMemberDto>> getMemberList(
             @RequestParam(name = "name", required = false) String memberName, Pageable pageable) {
-        List<GetMemberDto> getMemberDtoList = memberService.getMemberList(memberName, pageable);
+        Page<GetMemberDto> getMemberDtoList = memberService.getMemberList(memberName, pageable);
 
         return new DataResponse<>(SuccessInfo.MEMBER_LOADED, getMemberDtoList);
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/bulk-register")
+    public DataResponse<CreateBulkResultDto> createMemberBulk(@RequestPart("file") MultipartFile file) {
+        CreateBulkResultDto createBulkResultDto = memberService.createMemberBulk(file);
+
+        return new DataResponse<>(SuccessInfo.FILE_UPLOADED, createBulkResultDto);
+    }
+
 }
