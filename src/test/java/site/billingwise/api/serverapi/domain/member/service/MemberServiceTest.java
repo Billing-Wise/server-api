@@ -194,13 +194,13 @@ public class MemberServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        List<GetMemberDto> result = memberService.getMemberList(null, pageable);
+        Page<GetMemberDto> result = memberService.getMemberList(null, pageable);
 
         // then
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertEquals(mockMember.getId(), result.get(0).getId());
+        assertEquals(10, result.getSize());
+        assertEquals(mockMember.getId(), result.getContent().get(0).getId());
     }
 
     @Test
@@ -219,13 +219,13 @@ public class MemberServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        List<GetMemberDto> result = memberService.getMemberList("Member 1", pageable);
+        Page<GetMemberDto> result = memberService.getMemberList("Member 1", pageable);
 
         // then
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertEquals(mockMember.getId(), result.get(0).getId());
+        assertEquals(10, result.getSize());
+        assertEquals(mockMember.getId(), result.getContent().get(0).getId());
     }
 
     @Test

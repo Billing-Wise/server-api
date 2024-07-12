@@ -93,7 +93,7 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetItemDto> getItemList(String itemName, Pageable pageable) {
+    public Page<GetItemDto> getItemList(String itemName, Pageable pageable) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
@@ -106,7 +106,8 @@ public class ItemService {
                     .findAllByNameContainingIgnoreCaseAndClientId(itemName, pageable, user.getClient().getId());
         }
 
-        List<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto()).getContent();
+        Page<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto());
+        
         return getItemDtoList;
     }
 
