@@ -83,7 +83,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetMemberDto> getMemberList(String memberName, Pageable pageable) {
+    public Page<GetMemberDto> getMemberList(String memberName, Pageable pageable) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
@@ -96,7 +96,7 @@ public class MemberService {
                     memberName, pageable);
         }
 
-        List<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetMemberDto(member)).getContent();
+        Page<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetMemberDto(member));
 
         return getMemberDtoList;
     }

@@ -398,23 +398,23 @@ class ItemServiceTest {
 		given(itemRepository.findAllByClientId(any(Pageable.class), any(Long.class))).willReturn(itemPage);
 
 		// when
-		List<GetItemDto> itemList = itemService.getItemList(null, pageable);
+		Page<GetItemDto> itemList = itemService.getItemList(null, pageable);
 
 		// then
 		assertThat(itemList).hasSize(2);
-		assertThat(itemList.get(0).getId()).isEqualTo(1L);
-		assertThat(itemList.get(0).getName()).isEqualTo("Item 1");
-		assertThat(itemList.get(0).getPrice()).isEqualTo(1000L);
-		assertThat(itemList.get(0).getDescription()).isEqualTo("Item 1 Description");
-		assertThat(itemList.get(0).getImageUrl()).isEqualTo("http://example.com/item1.jpg");
-		assertThat(itemList.get(0).getContractCount()).isEqualTo(5L);
+		assertThat(itemList.getContent().get(0).getId()).isEqualTo(1L);
+		assertThat(itemList.getContent().get(0).getName()).isEqualTo("Item 1");
+		assertThat(itemList.getContent().get(0).getPrice()).isEqualTo(1000L);
+		assertThat(itemList.getContent().get(0).getDescription()).isEqualTo("Item 1 Description");
+		assertThat(itemList.getContent().get(0).getImageUrl()).isEqualTo("http://example.com/item1.jpg");
+		assertThat(itemList.getContent().get(0).getContractCount()).isEqualTo(5L);
 
-		assertThat(itemList.get(1).getId()).isEqualTo(2L);
-		assertThat(itemList.get(1).getName()).isEqualTo("Item 2");
-		assertThat(itemList.get(1).getPrice()).isEqualTo(2000L);
-		assertThat(itemList.get(1).getDescription()).isEqualTo("Item 2 Description");
-		assertThat(itemList.get(1).getImageUrl()).isEqualTo("http://example.com/item2.jpg");
-		assertThat(itemList.get(1).getContractCount()).isEqualTo(10L);
+		assertThat(itemList.getContent().get(1).getId()).isEqualTo(2L);
+		assertThat(itemList.getContent().get(1).getName()).isEqualTo("Item 2");
+		assertThat(itemList.getContent().get(1).getPrice()).isEqualTo(2000L);
+		assertThat(itemList.getContent().get(1).getDescription()).isEqualTo("Item 2 Description");
+		assertThat(itemList.getContent().get(1).getImageUrl()).isEqualTo("http://example.com/item2.jpg");
+		assertThat(itemList.getContent().get(1).getContractCount()).isEqualTo(10L);
 
 		verify(itemRepository).findAllByClientId(any(Pageable.class), any(Long.class));
 	}
@@ -451,23 +451,23 @@ class ItemServiceTest {
 				.willReturn(itemPage);
 
 		// when
-		List<GetItemDto> itemList = itemService.getItemList(itemName, pageable);
+		Page<GetItemDto> itemList = itemService.getItemList(itemName, pageable);
 
 		// then
 		assertThat(itemList).hasSize(2);
-		assertThat(itemList.get(0).getId()).isEqualTo(1L);
-		assertThat(itemList.get(0).getName()).isEqualTo("Item 1");
-		assertThat(itemList.get(0).getPrice()).isEqualTo(1000L);
-		assertThat(itemList.get(0).getDescription()).isEqualTo("Item 1 Description");
-		assertThat(itemList.get(0).getImageUrl()).isEqualTo("http://example.com/item1.jpg");
-		assertThat(itemList.get(0).getContractCount()).isEqualTo(5L);
+		assertThat(itemList.getContent().get(0).getId()).isEqualTo(1L);
+		assertThat(itemList.getContent().get(0).getName()).isEqualTo("Item 1");
+		assertThat(itemList.getContent().get(0).getPrice()).isEqualTo(1000L);
+		assertThat(itemList.getContent().get(0).getDescription()).isEqualTo("Item 1 Description");
+		assertThat(itemList.getContent().get(0).getImageUrl()).isEqualTo("http://example.com/item1.jpg");
+		assertThat(itemList.getContent().get(0).getContractCount()).isEqualTo(5L);
 
-		assertThat(itemList.get(1).getId()).isEqualTo(2L);
-		assertThat(itemList.get(1).getName()).isEqualTo("Item 2");
-		assertThat(itemList.get(1).getPrice()).isEqualTo(2000L);
-		assertThat(itemList.get(1).getDescription()).isEqualTo("Item 2 Description");
-		assertThat(itemList.get(1).getImageUrl()).isEqualTo("http://example.com/item2.jpg");
-		assertThat(itemList.get(1).getContractCount()).isEqualTo(10L);
+		assertThat(itemList.getContent().get(1).getId()).isEqualTo(2L);
+		assertThat(itemList.getContent().get(1).getName()).isEqualTo("Item 2");
+		assertThat(itemList.getContent().get(1).getPrice()).isEqualTo(2000L);
+		assertThat(itemList.getContent().get(1).getDescription()).isEqualTo("Item 2 Description");
+		assertThat(itemList.getContent().get(1).getImageUrl()).isEqualTo("http://example.com/item2.jpg");
+		assertThat(itemList.getContent().get(1).getContractCount()).isEqualTo(10L);
 
 		verify(itemRepository).findAllByNameContainingIgnoreCaseAndClientId(
 				anyString(), any(Pageable.class), anyLong());

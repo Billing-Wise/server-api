@@ -37,6 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -45,6 +47,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
+import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
@@ -259,7 +262,8 @@ public class MemberControllerTest extends AbstractRestDocsTests {
 
         List<GetMemberDto> memberList = Arrays.asList(member1, member2);
 
-        given(memberService.getMemberList(anyString(), any(Pageable.class))).willReturn(memberList);
+        PageImpl<GetMemberDto> page = new PageImpl<>(memberList, PageRequest.of(0, 20), memberList.size());
+        given(memberService.getMemberList(anyString(), any(Pageable.class))).willReturn(page);
 
         // when
         ResultActions result = mockMvc.perform(get(url)
@@ -277,31 +281,46 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                         parameterWithName("size").optional().description("페이지 크기 (기본값: 20)")),
                 responseFields(
                         fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
-                        fieldWithPath("message").description("응답 메시지")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data").description("응답 데이터").type(JsonFieldType.ARRAY),
-                        fieldWithPath("data[].id").description("회원 ID")
+                        fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+                        fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
+                        fieldWithPath("data.content").description("페이지 회원 목록").type(JsonFieldType.ARRAY),
+                        fieldWithPath("data.content[].id").description("회원 ID").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.content[].name").description("회원명").type(JsonFieldType.STRING),
+                        fieldWithPath("data.content[].email").description("회원 이메일").type(JsonFieldType.STRING),
+                        fieldWithPath("data.content[].phone").description("회원 전화번호").type(JsonFieldType.STRING),
+                        fieldWithPath("data.content[].description").description("회원 설명").type(JsonFieldType.STRING),
+                        fieldWithPath("data.content[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.content[].unPaidCount").description("미납된 계약수").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.content[].totalInvoiceAmount").description("총 청구 금액")
                                 .type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].name").description("회원명")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data[].email").description("회원 이메일")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data[].phone").description("회원 전화번호")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data[].description").description("회원 설명")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data[].contractCount").description("관련 계약수")
+                        fieldWithPath("data.content[].totalUnpaidAmount").description("총 미납 금액")
                                 .type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].unPaidCount").description("미납된 계약수")
-                                .type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].totalInvoiceAmount").description("총 청구 금액")
-                                .type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].totalUnpaidAmount").description("총 미납 금액")
-                                .type(JsonFieldType.NUMBER),
-                        fieldWithPath("data[].createdAt").description("회원 생성일")
-                                .type(JsonFieldType.STRING),
-                        fieldWithPath("data[].updatedAt").description("회원 정보 수정일")
-                                .type(JsonFieldType.STRING))));
+                        fieldWithPath("data.content[].createdAt").description("회원 생성일").type(JsonFieldType.STRING),
+                        fieldWithPath("data.content[].updatedAt").description("회원 정보 수정일").type(JsonFieldType.STRING),
+                        fieldWithPath("data.pageable").description("페이징 정보").type(JsonFieldType.OBJECT),
+                        fieldWithPath("data.pageable.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
+                        fieldWithPath("data.pageable.sort.empty").description("정렬 정보 비어 있음 여부")
+                                .type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.pageable.sort.sorted").description("정렬 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.pageable.sort.unsorted").description("정렬되지 않음 여부")
+                                .type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.pageable.offset").description("페이징 오프셋").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.pageable.pageNumber").description("페이지 번호").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.pageable.pageSize").description("페이지 크기").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.pageable.paged").description("페이징 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.pageable.unpaged").description("페이징되지 않음 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.last").description("마지막 페이지 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.totalPages").description("전체 페이지 수").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.totalElements").description("전체 요소 수").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.size").description("페이지 크기").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.number").description("현재 페이지 번호").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
+                        fieldWithPath("data.sort.empty").description("정렬 정보 비어 있음 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.sort.sorted").description("정렬 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.sort.unsorted").description("정렬되지 않음 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.first").description("첫 페이지 여부").type(JsonFieldType.BOOLEAN),
+                        fieldWithPath("data.numberOfElements").description("요소 개수").type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.empty").description("비어 있음 여부").type(JsonFieldType.BOOLEAN))));
     }
 
     @Test

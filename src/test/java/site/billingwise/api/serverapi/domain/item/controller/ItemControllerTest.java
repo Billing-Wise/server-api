@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -275,7 +277,8 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 		List<GetItemDto> itemList = Arrays.asList(item1, item2);
 
-		given(itemService.getItemList(anyString(), any(Pageable.class))).willReturn(itemList);
+		PageImpl<GetItemDto> page = new PageImpl<>(itemList, PageRequest.of(0, 20), itemList.size());
+		given(itemService.getItemList(anyString(), any(Pageable.class))).willReturn(page);
 
 		// when
 		ResultActions result = mockMvc.perform(get(url)
@@ -294,14 +297,39 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				responseFields(
 						fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
 						fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
-						fieldWithPath("data").description("응답 데이터").type(JsonFieldType.ARRAY),
-						fieldWithPath("data[].id").description("상품 ID").type(JsonFieldType.NUMBER),
-						fieldWithPath("data[].name").description("상품명").type(JsonFieldType.STRING),
-						fieldWithPath("data[].description").description("상품 설명").type(JsonFieldType.STRING),
-						fieldWithPath("data[].price").description("상품 가격").type(JsonFieldType.NUMBER),
-						fieldWithPath("data[].imageUrl").description("상품 이미지 URL").type(JsonFieldType.STRING),
-						fieldWithPath("data[].createdAt").description("상품 생성일").type(JsonFieldType.STRING),
-						fieldWithPath("data[].updatedAt").description("상품 정보 수정일").type(JsonFieldType.STRING),
-						fieldWithPath("data[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER))));
+						fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
+						fieldWithPath("data.content").description("페이지 상품 목록").type(JsonFieldType.ARRAY),
+						fieldWithPath("data.content[].id").description("상품 ID").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.content[].name").description("상품명").type(JsonFieldType.STRING),
+						fieldWithPath("data.content[].description").description("상품 설명").type(JsonFieldType.STRING),
+						fieldWithPath("data.content[].price").description("상품 가격").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.content[].imageUrl").description("상품 이미지 URL").type(JsonFieldType.STRING),
+						fieldWithPath("data.content[].createdAt").description("상품 생성일").type(JsonFieldType.STRING),
+						fieldWithPath("data.content[].updatedAt").description("상품 정보 수정일").type(JsonFieldType.STRING),
+						fieldWithPath("data.content[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.pageable").description("페이징 정보").type(JsonFieldType.OBJECT),
+						fieldWithPath("data.pageable.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
+						fieldWithPath("data.pageable.sort.empty").description("정렬 정보 비어 있음 여부")
+								.type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.pageable.sort.sorted").description("정렬 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.pageable.sort.unsorted").description("정렬되지 않음 여부")
+								.type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.pageable.offset").description("페이징 오프셋").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.pageable.pageNumber").description("페이지 번호").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.pageable.pageSize").description("페이지 크기").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.pageable.paged").description("페이징 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.pageable.unpaged").description("페이징되지 않음 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.last").description("마지막 페이지 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.totalPages").description("전체 페이지 수").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.totalElements").description("전체 요소 수").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.size").description("페이지 크기").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.number").description("현재 페이지 번호").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
+						fieldWithPath("data.sort.empty").description("정렬 정보 비어 있음 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.sort.sorted").description("정렬 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.sort.unsorted").description("정렬되지 않음 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.first").description("첫 페이지 여부").type(JsonFieldType.BOOLEAN),
+						fieldWithPath("data.numberOfElements").description("요소 개수").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.empty").description("비어 있음 여부").type(JsonFieldType.BOOLEAN))));
 	}
 }
