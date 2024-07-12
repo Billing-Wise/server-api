@@ -7,8 +7,6 @@ import org.hibernate.annotations.Where;
 
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.contract.Contract;
-import site.billingwise.api.serverapi.domain.invoice.Invoice;
-import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.user.Client;
 
 import java.util.Set;
@@ -55,46 +53,4 @@ public class Member extends BaseEntity {
 
     @OneToMany(mappedBy = "member")
     private Set<Contract> contractList;
-
-    public GetMemberDto toDto() {
-        long contractCount = 0L;
-        long unPaidCount = 0L;
-        long totalInvoiceAmount = 0L;
-        long totalUnpaidAmount = 0L;
-
-        for (Contract contract : this.getContractList()) {
-            boolean isUnpaid = false;
-
-            for (Invoice invoice : contract.getInvoiceList()) {
-                totalInvoiceAmount += invoice.getChargeAmount();
-                // 이 조건문의 조건 수정해야합니다.
-                if (invoice.getPaymentStatus().getId() == 1) {
-                    totalUnpaidAmount += invoice.getChargeAmount();
-                    isUnpaid = true;
-                }
-            }
-
-            contractCount++;
-            if (isUnpaid) {
-                unPaidCount++;
-            }
-        }
-
-        GetMemberDto getMemberDetailDto = GetMemberDto.builder()
-                .id(this.getId())
-                .name(this.getName())
-                .email(this.getEmail())
-                .phone(this.getPhone())
-                .description(this.getDescription())
-                .contractCount(contractCount)
-                .unPaidCount(unPaidCount)
-                .totalInvoiceAmount(totalInvoiceAmount)
-                .totalUnpaidAmount(totalUnpaidAmount)
-                .contractCount(contractCount)
-                .createdAt(this.getCreatedAt())
-                .updatedAt(this.getUpdatedAt())
-                .build();
-
-        return getMemberDetailDto;
-    }
 }

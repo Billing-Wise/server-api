@@ -32,7 +32,10 @@ public enum FailureInfo {
     INVALID_MAIL_CODE(401, "유효하지 않은 메일 인증 코드입니다."),
 
     // image
-    INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),
+    INVALID_IMAGE(419, "사진 파일이 유효하지 않습니다."),
+
+    // file
+    INVALID_FILE(419, "유효한 파일이 아닙니다"),
     
     // item
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
@@ -44,5 +47,9 @@ public enum FailureInfo {
 
     private final Integer code;
     private final String message;
+
+    public String getMessage(Object... args) {
+        return String.format(this.message, args);
+    }
 
 }

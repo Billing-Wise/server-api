@@ -40,3 +40,10 @@ operation::member/get[snippets='request-cookies,http-request,path-parameters,htt
 회원 목록의 조회합니다
 
 operation::member/get-list[snippets='request-cookies,http-request,http-response,response-fields']
+
+
+=== 회원 대량 등록
+
+엑셀 파일을 활용하여 회원 정보를 대량 등록합니다.
+
+operation::member/bulk-register[snippets='request-cookies,http-request,http-response,response-fields']
