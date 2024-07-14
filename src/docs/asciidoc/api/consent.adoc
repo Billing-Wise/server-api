@@ -1,4 +1,4 @@
-== 설정 API
+== 동의 API
 :doctype: book
 :source-highlighter: highlightjs
 :toc: left
