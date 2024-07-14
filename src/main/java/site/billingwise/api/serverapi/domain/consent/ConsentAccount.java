@@ -1,10 +1,11 @@
-package site.billingwise.api.serverapi.domain.member;
+package site.billingwise.api.serverapi.domain.consent;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
+import site.billingwise.api.serverapi.domain.member.Member;
 
 @Entity
 @Getter
@@ -19,7 +20,7 @@ public class ConsentAccount extends BaseEntity {
     @Column(name = "member_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @MapsId
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -34,5 +35,6 @@ public class ConsentAccount extends BaseEntity {
     private String number;
 
     @Column(length = 512, nullable = false)
+    @Setter
     private String signUrl;
 }

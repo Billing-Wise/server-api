@@ -17,5 +17,6 @@ public class GetItemDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long contractCount;
+    private Boolean isBasic;
 
 }

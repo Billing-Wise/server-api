@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Getter
 @Builder
@@ -38,13 +40,13 @@ public class Client extends BaseEntity {
     @Column(length = 20, nullable = false)
     private String phone;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
     private Set<User> userList;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
     private Set<Member> memberList;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
     private Set<Item> itemList;
 
 }

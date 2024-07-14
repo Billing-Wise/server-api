@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Getter
 @Builder
@@ -74,7 +76,7 @@ public class Contract extends BaseEntity {
     @Column(nullable = false)
     private Boolean isEasyConsent;
 
-    @OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "contract", cascade = ALL, orphanRemoval = true)
     private Set<Invoice> invoiceList;
 
 }

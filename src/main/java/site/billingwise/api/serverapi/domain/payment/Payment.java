@@ -25,16 +25,17 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Column(nullable = false)
     private Long payAmount;
 
-    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
-    private PaymentAccount paymentAccount;
-
-    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
-    private PaymentCard paymentCard;
+//    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
+//    private PaymentAccount paymentAccount;
+//
+//    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
+//    private PaymentCard paymentCard;
 
 }
