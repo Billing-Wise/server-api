@@ -23,8 +23,8 @@ public class SettingService {
                 SecurityUtil.getCurrentClient(),
                 setBasicItemsDto.getItemIdList());
 
-        for(Item item : itemList) {
-            item.setIsBasic(true);
+        for (Item item : itemList) {
+            item.setIsBasic(!item.getIsBasic());
         }
     }
 }
