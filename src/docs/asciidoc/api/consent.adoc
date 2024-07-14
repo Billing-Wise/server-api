@@ -1,0 +1,14 @@
+== 설정 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+동의서 관련 API입니다.
+
+=== 동의서 등록
+
+동의서를 등록합니다. 서명 이미지는 필수입니다.
+
+operation::consent/register[snippets='http-request,request-cookies,request-parts,request-part-data-fields,http-response']

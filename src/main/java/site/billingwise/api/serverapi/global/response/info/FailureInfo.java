@@ -46,8 +46,12 @@ public enum FailureInfo {
     ITEM_ACCESS_DENIED(403, "접근 권한이 없는 상품입니다."),
 
     // member
-    NOT_EXIST_MEMBER(400, "존재하지 않는 회원입니다."),
-    MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다.");
+    NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다."),
+    MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다."),
+
+    // consent
+    ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다.");
+
 
     private final Integer code;
     private final String message;

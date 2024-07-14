@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
+import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
@@ -57,6 +59,8 @@ public class SettingControllerTest extends AbstractRestDocsTests {
 
         //then
         result.andExpect(status().isOk()).andDo(document("easy-consent/items",
+                requestCookies(
+                        cookieWithName("access").description("엑세스 토큰 (* required)")),
                 requestFields(
                         fieldWithPath("itemIdList").description("아이템 아이디 목록 (* required)").type(JsonFieldType.ARRAY)
                 )));
