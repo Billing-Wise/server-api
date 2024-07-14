@@ -25,10 +25,4 @@ public class SettingController {
         return new BaseResponse(SuccessInfo.SET_ITEMS_TO_BASIC);
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/easy-consent/payments")
-    public BaseResponse setBasisPayments(@Valid @RequestBody SetBasicItemsDto setBasicItemsDto) {
-        settingService.setBasicItems(setBasicItemsDto);
-        return new BaseResponse(SuccessInfo.SET_ITEMS_TO_BASIC);
-    }
 }

@@ -90,9 +90,9 @@ public class MemberService {
         Page<Member> memberList = null;
 
         if (memberName == null) {
-            memberList = memberRepository.findByClientIdWithContractsWithInvoices(user.getClient().getId(), pageable);
+            memberList = memberRepository.findByClientId(user.getClient().getId(), pageable);
         } else {
-            memberList = memberRepository.findByClientIdAndNameWithContractsWithInvoices(user.getClient().getId(),
+            memberList = memberRepository.findByClientIdAndName(user.getClient().getId(),
                     memberName, pageable);
         }
 

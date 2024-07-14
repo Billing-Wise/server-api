@@ -213,6 +213,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.contractCount(5L)
+				.isBasic(true)
 				.build();
 
 		given(itemService.getItem(anyLong())).willReturn(getItemDto);
@@ -244,7 +245,9 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 								fieldWithPath("data.updatedAt").description("상품 정보 수정일")
 										.type(JsonFieldType.STRING),
 								fieldWithPath("data.contractCount").description("관련 계약수")
-										.type(JsonFieldType.NUMBER))));
+										.type(JsonFieldType.NUMBER),
+								fieldWithPath("data.isBasic").description("간편동의 기본상품 여부")
+										.type(JsonFieldType.BOOLEAN))));
 	}
 
 	@Test
@@ -262,6 +265,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.contractCount(5L)
+				.isBasic(true)
 				.build();
 
 		GetItemDto item2 = GetItemDto.builder()
@@ -273,6 +277,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 				.createdAt(LocalDateTime.now())
 				.updatedAt(LocalDateTime.now())
 				.contractCount(10L)
+				.isBasic(true)
 				.build();
 
 		List<GetItemDto> itemList = Arrays.asList(item1, item2);
@@ -307,6 +312,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 						fieldWithPath("data.content[].createdAt").description("상품 생성일").type(JsonFieldType.STRING),
 						fieldWithPath("data.content[].updatedAt").description("상품 정보 수정일").type(JsonFieldType.STRING),
 						fieldWithPath("data.content[].contractCount").description("관련 계약수").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.content[].isBasic").description("간편동의 기본상품 여부").type(JsonFieldType.BOOLEAN),
 						fieldWithPath("data.pageable").description("페이징 정보").type(JsonFieldType.OBJECT),
 						fieldWithPath("data.pageable.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
 						fieldWithPath("data.pageable.sort.empty").description("정렬 정보 비어 있음 여부")

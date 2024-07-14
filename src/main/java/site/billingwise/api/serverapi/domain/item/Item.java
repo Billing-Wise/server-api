@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.hibernate.annotations.Formula;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Getter
 @Builder
@@ -56,10 +58,10 @@ public class Item extends BaseEntity {
     @Column(nullable = false)
     private Boolean isBasic;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", cascade = ALL, orphanRemoval = true)
     private List<Contract> contractList = new ArrayList<>();
 
-    @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.item_id = item_id)")
+    @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.item_id = item_id and ct.is_deleted = false)")
     private Long contractCount;
 
     public GetItemDto toDto() {
@@ -72,6 +74,7 @@ public class Item extends BaseEntity {
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
                 .contractCount(contractCount)
+                .isBasic(isBasic)
                 .build();
 
         return getItemDto;
