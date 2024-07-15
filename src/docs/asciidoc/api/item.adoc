@@ -44,7 +44,7 @@ operation::item/get[snippets='request-cookies,http-request,path-parameters,http-
 
 === 상품 목록 조회
 
-상품 상세 정보를 조회합니다.
+상품 목록 정보를 조회합니다.
 
 operation::item/get-list[snippets='request-cookies,http-request,http-response,response-fields']
 

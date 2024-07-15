@@ -46,7 +46,8 @@ public class SecurityConfig {
 
     private static final String[] PERMIT_LIST = {
         "/actuator/health",
-        "/api/v1/auth/**"
+        "/api/v1/auth/**",
+        "/api/v1/easy-consent/**"
     };
 
     @Bean
