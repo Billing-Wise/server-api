@@ -38,8 +38,24 @@ public class ConsentController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{memberId}")
-    public BaseResponse editConsent(@PathVariable Long memberId, @Valid @RequestBody RegisterConsentDto editConsentDto) {
+    public BaseResponse editConsent(@PathVariable Long memberId,
+                                    @Valid @RequestBody RegisterConsentDto editConsentDto) {
         consentService.editConsent(memberId, editConsentDto);
         return new BaseResponse(SuccessInfo.CONSENT_EDITED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{memberId}/image")
+    public BaseResponse editItemImage(@PathVariable Long memberId,
+                                      @RequestPart(name = "signImage") MultipartFile multipartFile) {
+        consentService.editConsentSignImage(memberId, multipartFile);
+        return new BaseResponse(SuccessInfo.CONSENT_SIGN_IMAGE_EDITED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{memberId}")
+    public BaseResponse deleteConsent(@PathVariable Long memberId) {
+        consentService.deleteConsent(memberId);
+        return new BaseResponse(SuccessInfo.CONSENT_DELETED);
     }
 }

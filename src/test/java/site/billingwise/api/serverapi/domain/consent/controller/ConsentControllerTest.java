@@ -92,7 +92,7 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
 
     @Test
     @DisplayName("동의서 조회")
-    void getItem() throws Exception {
+    void getConsent() throws Exception {
         // given
         String url = "/api/v1/consents/{memberId}";
 
@@ -167,6 +167,59 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("owner").description("계좌 소유주 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("bank").description("은행 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("number").description("계좌번호 (* required)").type(JsonFieldType.STRING))));
+    }
+
+    @Test
+    @DisplayName("동의 서명 수정")
+    void editConsentImage() throws Exception {
+        // given
+        String url = "/api/v1/consents/{memberId}/image";
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        willDoNothing().given(consentService).editConsentSignImage(anyLong(), eq(signImage));
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(url, 1L)
+                .file(signImage)
+                .cookie(new Cookie("access", "ACCESS_TOKEN"))
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("consent/edit-image",
+                        requestCookies(
+                                cookieWithName("access").description("엑세스 토큰")),
+                        pathParameters(
+                                parameterWithName("memberId").description("회원 아이디")),
+                        requestParts(
+                                partWithName("signImage").description("서명 이미지"))));
+    }
+
+    @Test
+    @DisplayName("동의정보 삭제")
+    void deleteConsent() throws Exception {
+
+        // given
+        String url = "/api/v1/consents/{memberId}";
+
+        willDoNothing().given(consentService).deleteConsent(1L);
+
+        // when
+        ResultActions result = mockMvc.perform(delete(url, 1L)
+                .cookie(new Cookie("access", "ACCESS_TOKEN")));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("consent/delete",
+                        requestCookies(
+                                cookieWithName("access").description("엑세스 토큰")),
+                        pathParameters(
+                                parameterWithName("memberId").description("회원 아이디"))));
     }
 
 }

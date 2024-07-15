@@ -19,7 +19,7 @@ public class ConsentAccount extends BaseEntity {
     @Column(name = "member_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @MapsId
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -34,6 +34,7 @@ public class ConsentAccount extends BaseEntity {
     private String number;
 
     @Column(length = 512, nullable = false)
+    @Setter
     private String signUrl;
 
     public void update(RegisterConsentDto editConsentDto) {

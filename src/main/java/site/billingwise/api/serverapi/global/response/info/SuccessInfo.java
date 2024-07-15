@@ -44,7 +44,9 @@ public enum SuccessInfo {
     // Consent
     CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),
     GET_CONSENT("동의정보 조회가 성공하였습니다."),
-    CONSENT_EDITED("동의정보 수정이 완료되었습니다.");
+    CONSENT_EDITED("동의정보 수정이 완료되었습니다."),
+    CONSENT_SIGN_IMAGE_EDITED("동의 서명 수정이 완료되었습니다."),
+    CONSENT_DELETED("동의정보 삭제가 완료되었습니다.");
 
     private final Integer code = 200;
     private final String message;

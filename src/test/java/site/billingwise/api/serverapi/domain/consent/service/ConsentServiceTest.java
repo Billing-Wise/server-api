@@ -277,4 +277,198 @@ public class ConsentServiceTest {
         verify(memberRepository, times(1)).findById(memberId);
         verify(consentAccountRepository, times(0)).findById(any());
     }
+
+    @Test
+    void editConsentSignImage_Success() {
+        // given
+        Long memberId = 1L;
+        MockMultipartFile newMultipartFile = new MockMultipartFile(
+                "file",
+                "newTest.jpg",
+                "image/jpeg",
+                "new test image content".getBytes());
+        Member member = Member.builder().client(mockClient).build();
+        ConsentAccount consentAccount = ConsentAccount.builder()
+                .id(memberId)
+                .signUrl("s3://bucket/oldTest.jpg")
+                .build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.of(consentAccount));
+        when(s3Service.upload(eq(newMultipartFile), eq(signImageDirectory))).thenReturn("s3://bucket/newTest.jpg");
+
+        // when
+        consentService.editConsentSignImage(memberId, newMultipartFile);
+
+        // then
+        verify(consentAccountRepository, times(1)).findById(memberId);
+        verify(s3Service, times(1)).delete("s3://bucket/oldTest.jpg", signImageDirectory);
+        verify(s3Service, times(1)).upload(eq(newMultipartFile), eq(signImageDirectory));
+        assertEquals("s3://bucket/newTest.jpg", consentAccount.getSignUrl());
+    }
+
+    @Test
+    void editConsentSignImage_MemberNotFound() {
+        // given
+        Long memberId = 1L;
+        MockMultipartFile newMultipartFile = new MockMultipartFile(
+                "file",
+                "newTest.jpg",
+                "image/jpeg",
+                "new test image content".getBytes());
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.editConsentSignImage(memberId, newMultipartFile);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_MEMBER, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+        verify(s3Service, times(0)).upload(any(), any());
+    }
+
+    @Test
+    void editConsentSignImage_ConsentNotFound() {
+        // given
+        Long memberId = 1L;
+        MockMultipartFile newMultipartFile = new MockMultipartFile(
+                "file",
+                "newTest.jpg",
+                "image/jpeg",
+                "new test image content".getBytes());
+        Member member = Member.builder().client(mockClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.editConsentSignImage(memberId, newMultipartFile);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_CONSENT, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(1)).findById(memberId);
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+        verify(s3Service, times(0)).upload(any(), any());
+    }
+
+    @Test
+    void editConsentSignImage_AccessDenied() {
+        // given
+        Long memberId = 1L;
+        MockMultipartFile newMultipartFile = new MockMultipartFile(
+                "file",
+                "newTest.jpg",
+                "image/jpeg",
+                "new test image content".getBytes());
+        Client anotherClient = Client.builder().id(2L).build();
+        Member member = Member.builder().client(anotherClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.editConsentSignImage(memberId, newMultipartFile);
+        });
+
+        assertEquals(FailureInfo.ACCESS_DENIED, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+        verify(s3Service, times(0)).upload(any(), any());
+    }
+
+    @Test
+    void deleteConsent_Success() {
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder().client(mockClient).build();
+        ConsentAccount consentAccount = ConsentAccount.builder()
+                .id(memberId)
+                .signUrl("s3://bucket/test.jpg")
+                .build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.of(consentAccount));
+
+        // when
+        consentService.deleteConsent(memberId);
+
+        // then
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(1)).findById(memberId);
+        verify(s3Service, times(1)).delete("s3://bucket/test.jpg", signImageDirectory);
+        verify(consentAccountRepository, times(1)).delete(consentAccount);
+    }
+
+    @Test
+    void deleteConsent_MemberNotFound() {
+        // given
+        Long memberId = 1L;
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.deleteConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_MEMBER, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+    }
+
+    @Test
+    void deleteConsent_ConsentNotFound() {
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder().client(mockClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.deleteConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_CONSENT, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(1)).findById(memberId);
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+    }
+
+    @Test
+    void deleteConsent_AccessDenied() {
+        // given
+        Long memberId = 1L;
+        Client anotherClient = Client.builder().id(2L).build();
+        Member member = Member.builder().client(anotherClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.deleteConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.ACCESS_DENIED, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+        verify(s3Service, times(0)).delete(anyString(), anyString());
+    }
 }

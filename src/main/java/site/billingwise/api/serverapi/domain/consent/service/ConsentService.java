@@ -82,4 +82,29 @@ public class ConsentService {
 
         return member;
     }
+
+    @Transactional
+    public void editConsentSignImage(Long memberId, MultipartFile multipartFile) {
+        checkMemberPermission(memberId);
+
+        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
+
+        String prevSignUrl = consentAccount.getSignUrl();
+        s3Service.delete(prevSignUrl, signImageDirectory);
+
+        String newSignUrl = uploadImage(multipartFile);
+        consentAccount.setSignUrl(newSignUrl);
+    }
+
+    public void deleteConsent(Long memberId) {
+        checkMemberPermission(memberId);
+
+        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
+
+        s3Service.delete(consentAccount.getSignUrl(), signImageDirectory);
+
+        consentAccountRepository.delete(consentAccount);
+    }
 }
