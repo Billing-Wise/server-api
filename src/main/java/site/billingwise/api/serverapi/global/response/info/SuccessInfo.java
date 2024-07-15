@@ -39,7 +39,13 @@ public enum SuccessInfo {
     MEMBER_CREATED("회원이 성공적으로 등록되었습니다."),
     MEMBER_UPDATED("회원 정보가 성공적으로 수정되었습니다."),
     MEMBER_DELETED("회원 정보가 성공적으로 삭제되었습니다."),
-    MEMBER_LOADED("회원 정보가 성공적으로 조회하였습니다."),
+    MEMBER_LOADED("회원 정보를 성공적으로 조회하였습니다."),
+
+    // Contract
+    CONTRACT_CREATED("계약 정보가 성공적으로 등록되었습니다."),
+    CONTRACT_EDITED("계약 정보가 성공적으로 수정되었습니다."),
+    CONTRACT_DELETED("계약 정보가 성공적으로 삭제되었습니다."),
+    CONTRACT_LOADED("계약 정보를 성공적으로 조회하였습니다."),
 
     // Consent
     CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),
