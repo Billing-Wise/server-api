@@ -34,15 +34,15 @@ public class EasyConsentService {
         Contract contract = contractRepository.findWithItemWithMemberById(contractId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONTRACT));
 
-        if(contract.getPaymentType() != PaymentType.AUTO_TRANSFER) {
+        if (contract.getPaymentType() != PaymentType.AUTO_TRANSFER) {
             throw new GlobalException(FailureInfo.NOT_CMS);
         }
 
-        if(!contract.getIsEasyConsent()) {
+        if (!contract.getIsEasyConsent()) {
             throw new GlobalException(FailureInfo.NOT_EASY_CONSENT_CONTRACT);
         }
 
-        if(contract.getContractStatus() != ContractStatus.PENDING) {
+        if (contract.getContractStatus() != ContractStatus.PENDING) {
             throw new GlobalException(FailureInfo.NOT_PENDING_CONTRACT);
         }
 
