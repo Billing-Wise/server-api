@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.member.Member;
 
 @Entity
@@ -12,8 +13,6 @@ import site.billingwise.api.serverapi.domain.member.Member;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE consent_account SET is_deleted = true WHERE member_id = ?")
-@Where(clause = "is_deleted = false")
 public class ConsentAccount extends BaseEntity {
 
     @Id
@@ -35,6 +34,11 @@ public class ConsentAccount extends BaseEntity {
     private String number;
 
     @Column(length = 512, nullable = false)
-    @Setter
     private String signUrl;
+
+    public void update(RegisterConsentDto editConsentDto) {
+        this.owner = editConsentDto.getOwner();
+        this.bank = editConsentDto.getBank();
+        this.number = editConsentDto.getNumber();
+    }
 }

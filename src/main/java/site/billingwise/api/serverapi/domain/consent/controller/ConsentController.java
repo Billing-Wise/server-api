@@ -1,10 +1,8 @@
 package site.billingwise.api.serverapi.domain.consent.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
@@ -28,7 +26,7 @@ public class ConsentController {
             @Valid @RequestPart(name = "data") RegisterConsentDto registerConsentDto,
             @RequestPart(name = "signImage") MultipartFile multipartFile) {
         consentService.registerConsent(memberId, registerConsentDto, multipartFile);
-        return new BaseResponse(SuccessInfo.CONSENTS_REGISTERED);
+        return new BaseResponse(SuccessInfo.CONSENT_REGISTERED);
     }
 
     @GetMapping("/{memberId}")
@@ -36,5 +34,12 @@ public class ConsentController {
     public DataResponse<GetConsentDto> getConsent(@PathVariable Long memberId) {
         return new DataResponse<>(SuccessInfo.GET_CONSENT,
                 consentService.getConsent(memberId));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{memberId}")
+    public BaseResponse editConsent(@PathVariable Long memberId, @Valid @RequestBody RegisterConsentDto editConsentDto) {
+        consentService.editConsent(memberId, editConsentDto);
+        return new BaseResponse(SuccessInfo.CONSENT_EDITED);
     }
 }

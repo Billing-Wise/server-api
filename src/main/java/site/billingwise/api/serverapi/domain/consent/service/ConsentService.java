@@ -32,13 +32,7 @@ public class ConsentService {
     public void registerConsent(Long memberId,
                                 RegisterConsentDto registerConsentDto,
                                 MultipartFile multipartFile) {
-        Client client = SecurityUtil.getCurrentClient();
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_MEMBER));
-
-        if (!member.getClient().getId().equals(client.getId())) {
-            throw new GlobalException(FailureInfo.ACCESS_DENIED);
-        }
+        Member member = checkMemberPermission(memberId);
 
         if (consentAccountRepository.existsById(memberId)) {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_CONSENT);
@@ -59,6 +53,24 @@ public class ConsentService {
     }
 
     public GetConsentDto getConsent(Long memberId) {
+        checkMemberPermission(memberId);
+
+        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
+        return GetConsentDto.toDto(consentAccount);
+    }
+
+    @Transactional
+    public void editConsent(Long memberId, RegisterConsentDto editConsentDto) {
+        checkMemberPermission(memberId);
+
+        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
+
+        consentAccount.update(editConsentDto);
+    }
+
+    public Member checkMemberPermission(Long memberId) {
         Client client = SecurityUtil.getCurrentClient();
 
         Member member = memberRepository.findById(memberId)
@@ -68,8 +80,6 @@ public class ConsentService {
             throw new GlobalException(FailureInfo.ACCESS_DENIED);
         }
 
-        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
-                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
-        return GetConsentDto.toDto(consentAccount);
+        return member;
     }
 }
