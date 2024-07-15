@@ -1,7 +1,5 @@
 package site.billingwise.api.serverapi.domain.item.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +13,7 @@ import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
+import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
@@ -49,7 +48,10 @@ public class ItemService {
 
     @Transactional
     public void editItem(Long itemId, EditItemDto editItemDto) {
-        Item item = getCurrentItem(itemId);
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+            Item item = toItem(user.getClient(), itemId);
 
         item.setName(editItemDto.getName());
         item.setPrice(editItemDto.getPrice());
@@ -59,7 +61,10 @@ public class ItemService {
 
     @Transactional
     public void editItemImage(Long itemId, MultipartFile multipartFile) {
-        Item item = getCurrentItem(itemId);
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+            Item item = toItem(user.getClient(), itemId);
 
         String prevImageUrl = item.getImageUrl();
 
@@ -74,7 +79,10 @@ public class ItemService {
     }
 
     public void deleteItem(Long itemId) {
-        Item item = getCurrentItem(itemId);
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+            Item item = toItem(user.getClient(), itemId);
 
         if (!item.getImageUrl().equals(defaultImageUrl)) {
             s3Service.delete(item.getImageUrl(), itemImageDirectory);
@@ -85,9 +93,12 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public GetItemDto getItem(Long itemId) {
-        Item item = getCurrentItem(itemId);
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        GetItemDto getItemDto = item.toDto();
+        Item item = toItem(user.getClient(), itemId);
+
+        GetItemDto getItemDto = GetItemDto.toDto(item);
 
         return getItemDto;
     }
@@ -106,7 +117,7 @@ public class ItemService {
                     .findAllByNameContainingIgnoreCaseAndClientId(itemName, pageable, user.getClient().getId());
         }
 
-        Page<GetItemDto> getItemDtoList = itemList.map(item -> item.toDto());
+        Page<GetItemDto> getItemDtoList = itemList.map(item -> GetItemDto.toDto(item));
         
         return getItemDtoList;
     }
@@ -122,15 +133,12 @@ public class ItemService {
 
     }
 
-    private Item getCurrentItem(Long itemId) {
-        User user = SecurityUtil.getCurrentUser().orElseThrow(
-                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-
+    public Item toItem(Client client, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
 
-        if (item.getClient().getId() != user.getClient().getId()) {
-            throw new GlobalException(FailureInfo.ITEM_ACCESS_DENIED);
+        if (item.getClient().getId() != client.getId()) {
+            throw new GlobalException(FailureInfo.ACCESS_DENIED);
         }
 
         return item;

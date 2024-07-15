@@ -62,18 +62,5 @@ public class Item extends BaseEntity {
     @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.item_id = item_id)")
     private Long contractCount;
 
-    public GetItemDto toDto() {
-        GetItemDto getItemDto = GetItemDto.builder()
-                .id(id)
-                .name(name)
-                .price(price)
-                .description(description)
-                .imageUrl(imageUrl)
-                .createdAt(this.getCreatedAt())
-                .updatedAt(this.getUpdatedAt())
-                .contractCount(contractCount)
-                .build();
 
-        return getItemDto;
-    }
 }

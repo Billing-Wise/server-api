@@ -20,4 +20,30 @@ public class PoiUtil {
         return null;
     }
 
+    public static Integer getCellIntValue(Cell cell) {
+
+        if (cell == null) {
+            return null;
+        }
+
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return (int) cell.getNumericCellValue();
+        }
+
+        return null;
+    }
+
+    public static Long getCellLongValue(Cell cell) {
+
+        if (cell == null) {
+            return null;
+        }
+
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return (long) cell.getNumericCellValue();
+        }
+
+        return null;
+    }
+
 }

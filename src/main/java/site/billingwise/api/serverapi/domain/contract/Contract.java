@@ -44,14 +44,17 @@ public class Contract extends BaseEntity {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
+    @Setter
     @Convert(converter = InvoiceTypeConverter.class)
     @Column(name = "invoice_type_id", nullable = false)
     private InvoiceType invoiceType;
 
+    @Setter
     @Convert(converter = PaymentTypeConverter.class)
     @Column(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
+    @Setter
     @Convert(converter = ContractStatusConverter.class)
     @Column(name = "contract_status_id", nullable = false)
     private ContractStatus contractStatus;
@@ -59,18 +62,23 @@ public class Contract extends BaseEntity {
     @Column(nullable = false)
     private Boolean isSubscription;
 
+    @Setter
     @Column(nullable = false)
     private Long itemPrice;
 
+    @Setter
     @Column(nullable = false)
     private Integer itemAmount;
 
+    @Setter
     @Column(nullable = false)
     private Integer contractCycle;
 
+    @Setter
     @Column(nullable = false)
     private Integer paymentDueCycle;
 
+    @Setter
     @Column(nullable = false)
     private Boolean isEasyConsent;
 
