@@ -22,16 +22,11 @@ import static org.springframework.restdocs.request.RequestDocumentation.partWith
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.poi.util.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,7 +42,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
@@ -283,7 +277,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
                         fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
                         fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
-                        fieldWithPath("data.content").description("페이지 회원 목록").type(JsonFieldType.ARRAY),
+                        fieldWithPath("data.content").description("회원 목록").type(JsonFieldType.ARRAY),
                         fieldWithPath("data.content[].id").description("회원 ID").type(JsonFieldType.NUMBER),
                         fieldWithPath("data.content[].name").description("회원명").type(JsonFieldType.STRING),
                         fieldWithPath("data.content[].email").description("회원 이메일").type(JsonFieldType.STRING),
@@ -324,7 +318,8 @@ public class MemberControllerTest extends AbstractRestDocsTests {
     }
 
     @Test
-    public void testCreateMemberBulk_Success() throws Exception {
+    @DisplayName("회원 대량 등록")
+    public void createMemberBulk() throws Exception {
         // given
         String url = "/api/v1/members/bulk-register";
 

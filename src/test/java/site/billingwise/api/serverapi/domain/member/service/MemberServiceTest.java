@@ -203,7 +203,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    public void testGetMemberListWithName() {
+    public void getetMemberListWithName() {
         // given
         when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
         List<Member> memberList = new ArrayList<>();
@@ -252,7 +252,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    public void testCreateMemberBulk_InvalidFileFormat() {
+    public void createMemberBulkInvalidFile() {
         // given
         when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
 
