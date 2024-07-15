@@ -40,6 +40,7 @@ public enum FailureInfo {
 
     // file
     INVALID_FILE(419, "유효한 파일이 아닙니다"),
+    INVALID_CELL_INPUT(400, "유효하지 않은 셀 형식입니다."),
     
     // item
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),

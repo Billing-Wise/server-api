@@ -49,9 +49,9 @@ public class ItemService {
     @Transactional
     public void editItem(Long itemId, EditItemDto editItemDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
-            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-            Item item = toItem(user.getClient(), itemId);
+        Item item = getEntity(user.getClient(), itemId);
 
         item.setName(editItemDto.getName());
         item.setPrice(editItemDto.getPrice());
@@ -62,9 +62,9 @@ public class ItemService {
     @Transactional
     public void editItemImage(Long itemId, MultipartFile multipartFile) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
-            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-            Item item = toItem(user.getClient(), itemId);
+        Item item = getEntity(user.getClient(), itemId);
 
         String prevImageUrl = item.getImageUrl();
 
@@ -75,14 +75,14 @@ public class ItemService {
         uploadImage(item, multipartFile);
         s3Service.delete(prevImageUrl, itemImageDirectory);
         return;
-        
+
     }
 
     public void deleteItem(Long itemId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
-            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-            Item item = toItem(user.getClient(), itemId);
+        Item item = getEntity(user.getClient(), itemId);
 
         if (!item.getImageUrl().equals(defaultImageUrl)) {
             s3Service.delete(item.getImageUrl(), itemImageDirectory);
@@ -94,9 +94,9 @@ public class ItemService {
     @Transactional(readOnly = true)
     public GetItemDto getItem(Long itemId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
-            () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        Item item = toItem(user.getClient(), itemId);
+        Item item = getEntity(user.getClient(), itemId);
 
         GetItemDto getItemDto = GetItemDto.toDto(item);
 
@@ -118,7 +118,7 @@ public class ItemService {
         }
 
         Page<GetItemDto> getItemDtoList = itemList.map(item -> GetItemDto.toDto(item));
-        
+
         return getItemDtoList;
     }
 
@@ -133,7 +133,7 @@ public class ItemService {
 
     }
 
-    public Item toItem(Client client, Long itemId) {
+    public Item getEntity(Client client, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
 

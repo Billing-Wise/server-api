@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.contract.ContractStatus;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
@@ -40,10 +40,6 @@ import site.billingwise.api.serverapi.domain.invoice.InvoiceType;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
 import site.billingwise.api.serverapi.domain.member.Member;
-import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
-import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
-import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
-import site.billingwise.api.serverapi.domain.member.repository.ConsentAccountRepository;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
@@ -150,81 +146,91 @@ public class ContractService {
 
     @Transactional
     public CreateBulkContractResultDto createContractBulk(MultipartFile file) {
-        // // user
-        // User user = SecurityUtil.getCurrentUser()
-        //         .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+        // user
+        User user = SecurityUtil.getCurrentUser()
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        // // dto field
-        // boolean isSuccess = true;
-        // List<CreateContractDto> createContractDtoList = new ArrayList<>();
-        // List<String> errorList = new ArrayList<>();
+        // dto field
+        boolean isSuccess = true;
+        List<CreateContractDto> createContractDtoList = new ArrayList<>();
+        List<String> errorList = new ArrayList<>();
 
-        // // row validation test
-        // try (InputStream inputStream = file.getInputStream();
-        //         Workbook workbook = new XSSFWorkbook(inputStream)) {
-        //     Sheet sheet = workbook.getSheetAt(0);
+        // row validation test
+        try (InputStream inputStream = file.getInputStream();
+                Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
 
-        //     for (Row row : sheet) {
+            for (Row row : sheet) {
 
-        //         // 제목행 skip
-        //         if (row.getRowNum() == 0) {
-        //             continue;
-        //         }
+                // 제목행 skip
+                if (row.getRowNum() == 0) {
+                    continue;
+                }
 
-        //         // dto 생성
-        //         boolean isValidRow = true;
-        //         CreateContractDto createContractDto = CreateContractDto.builder()
-        //                 .memberId(PoiUtil.getCellLongValue(row.getCell(0)))
-        //                 .itemId(PoiUtil.getCellLongValue(row.getCell(1)))
-        //                 .itemPrice(PoiUtil.getCellLongValue(row.getCell(2)))
-        //                 .itemAmount(PoiUtil.getCellIntValue(row.getCell(3)))
-        //                 .isSubscription(Boolean
-        //                         .parseBoolean(PoiUtil.getCellValue(row.getCell(4))))
-        //                 .invoiceTypeId(PoiUtil.getCellLongValue(row.getCell(5)))
-        //                 .paymentTypeId(PoiUtil.getCellLongValue(row.getCell(6)))
-        //                 .isEasyConsent(true)
-        //                 .contractCycle(Integer.parseInt(PoiUtil.getCellValue(row.getCell(7))))
-        //                 .paymentDueCycle(Integer.parseInt(PoiUtil.getCellValue(row.getCell(8))))
-        //                 .build();
+                boolean rowValidation = true;
+                CreateContractDto createContractDto = null;
 
-        //         // dto @valid 검증
-        //         BindingResult bindingResult = new BeanPropertyBindingResult(createContractDto,
-        //                 "createContractDto");
-        //         validator.validate(createContractDto, bindingResult);
+                // 셀 서식 검증
+                try {
+                    createContractDto = CreateContractDto.builder()
+                            .memberId(PoiUtil.getCellLongValue(row.getCell(0)))
+                            .itemId(PoiUtil.getCellLongValue(row.getCell(1)))
+                            .itemPrice(PoiUtil.getCellLongValue(row.getCell(2)))
+                            .itemAmount(PoiUtil.getCellIntValue(row.getCell(3)))
+                            .isSubscription(PoiUtil.getCellBooleanValue(row.getCell(4)))
+                            .invoiceTypeId(PoiUtil.getCellLongValue(row.getCell(5)))
+                            .paymentTypeId(PoiUtil.getCellLongValue(row.getCell(6)))
+                            .isEasyConsent(true)
+                            .contractCycle(PoiUtil.getCellIntValue(row.getCell(7)))
+                            .paymentDueCycle(PoiUtil.getCellIntValue(row.getCell(8)))
+                            .build();
+                } catch (Exception e) {
+                    isSuccess = false;
+                    rowValidation = false;
+                    errorList.add(row.getRowNum() + "행: " + e.getMessage());
+                }
 
-        //         if (bindingResult.hasErrors()) {
-        //             isSuccess = false;
-        //             isValidRow = false;
-        //             bindingResult.getAllErrors()
-        //                     .forEach(error -> errorList.add(row.getRowNum() + "행 : "
-        //                             + error.getDefaultMessage()));
-        //         }
+                // dto @valid 검증
+                if (rowValidation) {
+                    BindingResult bindingResult = new BeanPropertyBindingResult(createContractDto,
+                            "createContractDto");
+                    validator.validate(createContractDto, bindingResult);
 
-        //         // db 검증
-        //         // if (isValidRow) {
-        //         try {
-        //             Contract contract = toEntityFromCreateDto(user.getClient(), createContractDto);
-        //             // contractRepository.save(contract);
-        //         } catch (Exception e) {
-        //             isSuccess = false;
-        //             errorList.add(row.getRowNum() + "행 : " + e.getMessage());
-        //         }
-        //         // }
+                    if (bindingResult.hasErrors()) {
+                        isSuccess = false;
+                        rowValidation = false;
+                        bindingResult.getAllErrors()
+                                .forEach(error -> errorList.add(row.getRowNum() + "행 : " + error.getDefaultMessage()));
+                    }
+                }
 
-        //         createContractDtoList.add(createContractDto);
-        //     }
-        // } catch (Exception e) {
-        //     throw new GlobalException(FailureInfo.INVALID_FILE);
-        // }
+                // db 연관성 검증
+                if (rowValidation) {
+                    try {
+                        Contract contract = toEntityFromCreateDto(user.getClient(), createContractDto);
+                        contractRepository.save(contract);
+                    } catch (Exception e) {
+                        isSuccess = false;
+                        rowValidation = false;
+                        errorList.add(row.getRowNum() + "행 : " + e.getMessage());
+                    }
+                }
 
-        // CreateBulkContractResultDto createBulkResultDto = CreateBulkContractResultDto.builder()
-        //         .isSuccess(isSuccess)
-        //         .contractList(createContractDtoList)
-        //         .errorList(errorList)
-        //         .build();
+                if (rowValidation) {
+                    createContractDtoList.add(createContractDto);
+                }
+            }
+        } catch (Exception e) {
+            throw new GlobalException(FailureInfo.INVALID_FILE);
+        }
 
-        // return createBulkResultDto;
-        return null;
+        CreateBulkContractResultDto createBulkResultDto = CreateBulkContractResultDto.builder()
+                .isSuccess(isSuccess)
+                .contractList(createContractDtoList)
+                .errorList(errorList)
+                .build();
+
+        return createBulkResultDto;
     }
 
     public Contract getEntity(Client client, Long contractId) {
@@ -239,8 +245,8 @@ public class ContractService {
     }
 
     private Contract toEntityFromCreateDto(Client client, CreateContractDto createContractDto) {
-        Item item = itemService.toItem(client, createContractDto.getItemId());
-        Member member = memberService.toMember(client, createContractDto.getMemberId());
+        Item item = itemService.getEntity(client, createContractDto.getItemId());
+        Member member = memberService.getEntity(client, createContractDto.getMemberId());
 
         PaymentType paymentType = EnumUtil.toEnum(PaymentType.class, createContractDto.getPaymentTypeId());
         InvoiceType invoiceType = EnumUtil.toEnum(InvoiceType.class, createContractDto.getInvoiceTypeId());

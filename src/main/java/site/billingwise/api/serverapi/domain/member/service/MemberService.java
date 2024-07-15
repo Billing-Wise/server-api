@@ -56,7 +56,7 @@ public class MemberService {
     @Transactional
     public void editMember(Long memberId, CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-        Member member = toMember(user.getClient(), memberId);
+        Member member = getEntity(user.getClient(), memberId);
 
         if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
@@ -70,7 +70,7 @@ public class MemberService {
 
     public void deleteMember(Long memberId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-        Member member = toMember(user.getClient(), memberId);
+        Member member = getEntity(user.getClient(), memberId);
 
         memberRepository.delete(member);
     }
@@ -86,7 +86,7 @@ public class MemberService {
             throw new GlobalException(FailureInfo.ACCESS_DENIED);
         }
 
-        return toGetMemberDto(member);
+        return toGetDtoFromEntity(member);
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +103,7 @@ public class MemberService {
                     memberName, pageable);
         }
 
-        Page<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetMemberDto(member));
+        Page<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetDtoFromEntity(member));
 
         return getMemberDtoList;
     }
@@ -126,7 +126,7 @@ public class MemberService {
         return createBulkResultDto;
     }
 
-    public Member toMember(Client client, Long memberId) {
+    public Member getEntity(Client client, Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_MEMBER));
@@ -138,7 +138,7 @@ public class MemberService {
         return member;
     }
 
-    private GetMemberDto toGetMemberDto(Member member) {
+    private GetMemberDto toGetDtoFromEntity(Member member) {
         long contractCount = 0L;
         long unPaidCount = 0L;
         long totalInvoiceAmount = 0L;
