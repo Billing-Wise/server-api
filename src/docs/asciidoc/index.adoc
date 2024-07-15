@@ -8,5 +8,6 @@
 include::api/auth.adoc[]
 include::api/item.adoc[]
 include::api/member.adoc[]
+include::api/contract.adoc[]
 include::api/consent.adoc[]
 include::api/setting.adoc[]
