@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
+import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.service.EasyConsentService;
 import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
@@ -22,5 +23,12 @@ public class EasyConsentController {
     public DataResponse<List<GetBasicItemDto>> getBasicItemList(Long clientId) {
         return new DataResponse<>(SuccessInfo.GET_BASIC_ITEM_LIST,
                 easyConsentService.getBasicItemList(clientId));
+    }
+
+    @GetMapping("/member/contracts/{contractId}")
+    @ResponseStatus(HttpStatus.OK)
+    public DataResponse<GetContractInfoDto> getContractInfo(@PathVariable Long contractId) {
+        return new DataResponse<>(SuccessInfo.GET_EASY_CONSENT_CONTRACT_INFO,
+                easyConsentService.getContractInfo(contractId));
     }
 }

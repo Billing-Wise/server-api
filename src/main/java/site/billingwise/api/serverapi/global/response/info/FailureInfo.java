@@ -53,9 +53,14 @@ public enum FailureInfo {
     ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),
     NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다."),
 
+    // easy consent
+    NOT_CMS(400, "실시간 CMS 계약이 아닙니다."),
+    NOT_EASY_CONSENT_CONTRACT(400, "간편동의 계약이 아닙니다."),
+    NOT_PENDING_CONTRACT(400, "간편동의 대기 중인 계약이 아닙니다."),
+
     // contract
     INVALID_DUE_CYCLE(400, "납부 기한은 약정일 이후여야합니다."),
-    NOT_EXIST_CONTRACT(400, "존재하지 않는 계약입니다."),
+    NOT_EXIST_CONTRACT(404, "존재하지 않는 계약입니다."),
 
     // payment type
     INVALID_PAYMENTTYPE(400, "유효하지 않은 결제 수단입니다."),

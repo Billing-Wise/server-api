@@ -7,22 +7,35 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
+import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
+import site.billingwise.api.serverapi.domain.contract.Contract;
+import site.billingwise.api.serverapi.domain.contract.ContractStatus;
+import site.billingwise.api.serverapi.domain.contract.PaymentType;
+import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
+import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.user.Client;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 public class EasyConsentServiceTest {
 
     @Mock
     private ItemRepository itemRepository;
+
+    @Mock
+    private ContractRepository contractRepository;
 
     @InjectMocks
     private EasyConsentService easyConsentService;
@@ -67,5 +80,105 @@ public class EasyConsentServiceTest {
         assertThat(result.get(1).getName()).isEqualTo("test2");
         assertThat(result.get(1).getPrice()).isEqualTo(2000);
         assertThat(result.get(1).getImageUrl()).isEqualTo("test2.png");
+    }
+
+    @Test
+    void testGetContractInfoSuccess() {
+        Long contractId = 1L;
+
+        // Given
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.AUTO_TRANSFER)
+                .isEasyConsent(true)
+                .contractStatus(ContractStatus.PENDING)
+                .member(Member.builder().id(1L).name("홍길동").build())
+                .item(Item.builder().id(1L).name("Item1").price(1000L).build())
+                .itemPrice(1000L)
+                .itemAmount(3)
+                .build();
+
+        when(contractRepository.findWithItemWithMemberById(contractId)).thenReturn(Optional.of(contract));
+
+        // When
+        GetContractInfoDto result = easyConsentService.getContractInfo(contractId);
+
+        // Then
+        assertThat(result.getContractId()).isEqualTo(contractId);
+        assertThat(result.getMemberName()).isEqualTo("홍길동");
+        assertThat(result.getItemName()).isEqualTo("Item1");
+    }
+
+    @Test
+    void testGetContractInfoNotExist() {
+        Long contractId = 1L;
+
+        // Given
+        when(contractRepository.findWithItemWithMemberById(contractId)).thenReturn(Optional.empty());
+
+        // Then
+        assertThatThrownBy(() -> easyConsentService.getContractInfo(contractId))
+                .isInstanceOf(GlobalException.class)
+                .hasMessageContaining(FailureInfo.NOT_EXIST_CONTRACT.getMessage());
+    }
+
+    @Test
+    void testGetContractInfoNotAutoTransfer() {
+        Long contractId = 1L;
+
+        // Given
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.PAYER_PAYMENT)
+                .isEasyConsent(true)
+                .contractStatus(ContractStatus.PENDING)
+                .build();
+
+        when(contractRepository.findWithItemWithMemberById(contractId)).thenReturn(Optional.of(contract));
+
+        // Then
+        assertThatThrownBy(() -> easyConsentService.getContractInfo(contractId))
+                .isInstanceOf(GlobalException.class)
+                .hasMessageContaining(FailureInfo.NOT_CMS.getMessage());
+    }
+
+    @Test
+    void testGetContractInfoNotEasyConsent() {
+        Long contractId = 1L;
+
+        // Given
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.AUTO_TRANSFER)
+                .isEasyConsent(false)
+                .contractStatus(ContractStatus.PENDING)
+                .build();
+
+        when(contractRepository.findWithItemWithMemberById(contractId)).thenReturn(Optional.of(contract));
+
+        // Then
+        assertThatThrownBy(() -> easyConsentService.getContractInfo(contractId))
+                .isInstanceOf(GlobalException.class)
+                .hasMessageContaining(FailureInfo.NOT_EASY_CONSENT_CONTRACT.getMessage());
+    }
+
+    @Test
+    void testGetContractInfoNotPending() {
+        Long contractId = 1L;
+
+        // Given
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.AUTO_TRANSFER)
+                .isEasyConsent(true)
+                .contractStatus(ContractStatus.PROGRESS)
+                .build();
+
+        when(contractRepository.findWithItemWithMemberById(contractId)).thenReturn(Optional.of(contract));
+
+        // Then
+        assertThatThrownBy(() -> easyConsentService.getContractInfo(contractId))
+                .isInstanceOf(GlobalException.class)
+                .hasMessageContaining(FailureInfo.NOT_PENDING_CONTRACT.getMessage());
     }
 }

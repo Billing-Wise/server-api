@@ -55,7 +55,8 @@ public enum SuccessInfo {
     CONSENT_DELETED("동의정보 삭제가 완료되었습니다."),
 
     // Easy Consent
-    GET_BASIC_ITEM_LIST("비회원 간편동의 상품목록조회가 성공하였습니다.");
+    GET_BASIC_ITEM_LIST("비회원 간편동의 상품목록조회가 성공하였습니다."),
+    GET_EASY_CONSENT_CONTRACT_INFO("회원 간편동의 계약정보 조회가 성공하였습니다.");
 
     private final Integer code = 200;
     private final String message;
