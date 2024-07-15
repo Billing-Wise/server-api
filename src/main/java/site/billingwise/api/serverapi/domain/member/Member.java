@@ -11,6 +11,8 @@ import site.billingwise.api.serverapi.domain.user.Client;
 
 import java.util.Set;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 @Entity
 @Getter
 @Builder
@@ -48,9 +50,9 @@ public class Member extends BaseEntity {
     @Column(length = 20, nullable = false)
     private String phone;
 
-    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-    private ConsentAccount consentAccount;
+//    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+//    private ConsentAccount consentAccount;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "member", cascade = ALL, orphanRemoval = true)
     private Set<Contract> contractList;
 }

@@ -3,7 +3,10 @@ package site.billingwise.api.serverapi.global.util;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
+import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 
 import java.util.Optional;
 
@@ -18,4 +21,12 @@ public class SecurityUtil {
 
         return Optional.empty();
     }
+
+    public static Client getCurrentClient() {
+        return getCurrentUser()
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER))
+                .getClient();
+    }
+
+
 }

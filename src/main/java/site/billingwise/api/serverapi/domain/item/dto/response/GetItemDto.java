@@ -18,6 +18,7 @@ public class GetItemDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long contractCount;
+    private Boolean isBasic;
 
     public static GetItemDto toDto(Item item) {
         GetItemDto getItemDto = GetItemDto.builder()

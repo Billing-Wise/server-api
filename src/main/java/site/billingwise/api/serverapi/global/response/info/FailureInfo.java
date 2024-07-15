@@ -45,7 +45,12 @@ public enum FailureInfo {
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
 
     // member
-    NOT_EXIST_MEMBER(400, "존재하지 않는 회원입니다."),
+    NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다."),
+    MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다."),
+
+    // consent
+    ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),
+    NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다."),
 
     // contract
     INVALID_DUE_CYCLE(400, "납부 기한은 약정일 이후여야합니다."),

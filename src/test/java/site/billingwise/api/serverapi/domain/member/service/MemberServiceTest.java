@@ -187,7 +187,7 @@ public class MemberServiceTest {
 
         Page<Member> memberPage = new PageImpl<>(memberList, PageRequest.of(0, 10), memberList.size());
 
-        when(memberRepository.findByClientIdWithContractsWithInvoices(anyLong(), any(Pageable.class)))
+        when(memberRepository.findByClientId(anyLong(), any(Pageable.class)))
                 .thenReturn(memberPage);
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -211,7 +211,7 @@ public class MemberServiceTest {
 
         Page<Member> memberPage = new PageImpl<>(memberList, PageRequest.of(0, 10), memberList.size());
 
-        when(memberRepository.findByClientIdAndNameWithContractsWithInvoices(anyLong(), anyString(),
+        when(memberRepository.findByClientIdAndName(anyLong(), anyString(),
                 any(Pageable.class)))
                 .thenReturn(memberPage);
 

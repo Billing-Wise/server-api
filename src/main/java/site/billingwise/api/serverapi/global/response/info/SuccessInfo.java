@@ -21,6 +21,9 @@ public enum SuccessInfo {
 
     // Jwt
     REISSUE("토큰 재발급이 성공하였습니다."),
+    
+    // setting
+    SET_ITEMS_TO_BASIC("간편 동의 상품 설정이 완료되었습니다."),
 
     // file
     FILE_UPLOADED("파일이 업로드되었습니다."),
@@ -42,7 +45,14 @@ public enum SuccessInfo {
     CONTRACT_CREATED("계약 정보가 성공적으로 등록되었습니다."),
     CONTRACT_EDITED("계약 정보가 성공적으로 수정되었습니다."),
     CONTRACT_DELETED("계약 정보가 성공적으로 삭제되었습니다."),
-    CONTRACT_LOADED("계약 정보를 성공적으로 조회하였습니다.");
+    CONTRACT_LOADED("계약 정보를 성공적으로 조회하였습니다."),
+
+    // Consent
+    CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),
+    GET_CONSENT("동의정보 조회가 성공하였습니다."),
+    CONSENT_EDITED("동의정보 수정이 완료되었습니다."),
+    CONSENT_SIGN_IMAGE_EDITED("동의 서명 수정이 완료되었습니다."),
+    CONSENT_DELETED("동의정보 삭제가 완료되었습니다.");
 
     private final Integer code = 200;
     private final String message;
