@@ -42,7 +42,8 @@ public enum SuccessInfo {
     MEMBER_LOADED("회원 정보가 성공적으로 조회하였습니다."),
 
     // Consent
-    CONSENTS_REGISTERED("동의서 등록이 완료되었습니다.");
+    CONSENTS_REGISTERED("동의서 등록이 완료되었습니다."),
+    GET_CONSENT("동의서 조회가 성공하였습니다.");
 
     private final Integer code = 200;
     private final String message;

@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
+import site.billingwise.api.serverapi.domain.consent.dto.response.GetConsentDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
@@ -19,11 +20,14 @@ import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.service.S3Service;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -97,4 +101,81 @@ public class ConsentServiceTest {
         verify(s3Service, times(1)).upload(any(), any());
     }
 
+    @Test
+    void getConsent_Success() {
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder().client(mockClient).build();
+        ConsentAccount consentAccount = ConsentAccount.builder().id(memberId).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.of(consentAccount));
+
+        // when
+        GetConsentDto getConsentDto = consentService.getConsent(memberId);
+
+        // then
+        assertNotNull(getConsentDto);
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(1)).findById(memberId);
+    }
+
+    @Test
+    void getConsent_MemberNotFound() {
+        // given
+        Long memberId = 1L;
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.getConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_MEMBER, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+    }
+
+    @Test
+    void getConsent_ConsentNotFound() {
+        // given
+        Long memberId = 1L;
+        Member member = Member.builder().client(mockClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+        when(consentAccountRepository.findById(memberId)).thenReturn(Optional.empty());
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.getConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.NOT_EXIST_CONSENT, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(1)).findById(memberId);
+    }
+
+    @Test
+    void getConsent_AccessDenied() {
+        // given
+        Long memberId = 1L;
+        Client anotherClient = Client.builder().id(2L).build();
+        Member member = Member.builder().client(anotherClient).build();
+
+        when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
+        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
+
+        // when / then
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            consentService.getConsent(memberId);
+        });
+
+        assertEquals(FailureInfo.ACCESS_DENIED, exception.getFailureInfo());
+        verify(memberRepository, times(1)).findById(memberId);
+        verify(consentAccountRepository, times(0)).findById(any());
+    }
 }

@@ -50,7 +50,8 @@ public enum FailureInfo {
     MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다."),
 
     // consent
-    ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다.");
+    ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),
+    NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다.");
 
 
     private final Integer code;

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
+import site.billingwise.api.serverapi.domain.consent.dto.response.GetConsentDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
@@ -55,5 +56,20 @@ public class ConsentService {
         }
 
         return s3Service.upload(multipartFile, signImageDirectory);
+    }
+
+    public GetConsentDto getConsent(Long memberId) {
+        Client client = SecurityUtil.getCurrentClient();
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_MEMBER));
+
+        if (!member.getClient().getId().equals(client.getId())) {
+            throw new GlobalException(FailureInfo.ACCESS_DENIED);
+        }
+
+        ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
+        return GetConsentDto.toDto(consentAccount);
     }
 }
