@@ -16,6 +16,4 @@ public enum InvoiceType implements EnumField {
     private final Long id;
     private final String name;
 
-
-
 }

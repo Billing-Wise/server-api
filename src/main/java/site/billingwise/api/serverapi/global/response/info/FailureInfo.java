@@ -40,10 +40,10 @@ public enum FailureInfo {
 
     // file
     INVALID_FILE(419, "유효한 파일이 아닙니다"),
+    INVALID_CELL_INPUT(400, "유효하지 않은 셀 형식입니다."),
     
     // item
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
-    ITEM_ACCESS_DENIED(403, "접근 권한이 없는 상품입니다."),
 
     // member
     NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다."),
@@ -51,8 +51,17 @@ public enum FailureInfo {
 
     // consent
     ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),
-    NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다.");
+    NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다."),
 
+    // contract
+    INVALID_DUE_CYCLE(400, "납부 기한은 약정일 이후여야합니다."),
+    NOT_EXIST_CONTRACT(400, "존재하지 않는 계약입니다."),
+
+    // payment type
+    INVALID_PAYMENTTYPE(400, "유효하지 않은 결제 수단입니다."),
+
+    // invoice type
+    INVALID_INVOICETYPE(400, "유효하지 않은 청구 수단입니다.");
 
     private final Integer code;
     private final String message;

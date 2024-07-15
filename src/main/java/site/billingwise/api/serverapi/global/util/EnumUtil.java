@@ -1,6 +1,8 @@
 package site.billingwise.api.serverapi.global.util;
 
 import site.billingwise.api.serverapi.domain.common.EnumField;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
@@ -21,6 +23,6 @@ public class EnumUtil {
         return EnumSet.allOf(enumClass).stream()
                 .filter(e -> e.getId().equals(id))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException());
+                .orElseThrow(() -> new GlobalException(FailureInfo.INVALID_INPUT));
     }
 }
