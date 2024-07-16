@@ -39,20 +39,25 @@ public class Invoice extends BaseEntity {
     @Column(name = "invoice_type_id", nullable = false)
     private InvoiceType invoiceType;
 
+    @Setter
     @Convert(converter = PaymentTypeConverter.class)
     @Column(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
+    @Setter
     @Convert(converter = PaymentStatusConverter.class)
     @Column(name = "payment_status_id", nullable = false)
     private PaymentStatus paymentStatus;
 
+    @Setter
     @Column(nullable = false)
     private Long chargeAmount;
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime contractDate;
 
+    @Setter
     @Column(nullable = false)
     private LocalDateTime dueDate;
 

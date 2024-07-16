@@ -47,6 +47,12 @@ public enum SuccessInfo {
     CONTRACT_DELETED("계약 정보가 성공적으로 삭제되었습니다."),
     CONTRACT_LOADED("계약 정보를 성공적으로 조회하였습니다."),
 
+    // Invoice
+    INVOICE_CREATED("청구 정보가 성공적으로 등록되었습니다."),
+    INVOICE_UPDATED("청구 정보가 성공적으로 수정되었습니다."),
+    INVOICE_DELETED("청구 정보가 성공적으로 삭제되었습니다."),
+    INVOICE_LOADED("청구 정보를 성공적으로 조회하였습니다."),
+
     // Consent
     CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),
     GET_CONSENT("동의정보 조회가 성공하였습니다."),

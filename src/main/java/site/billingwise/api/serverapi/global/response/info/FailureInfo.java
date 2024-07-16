@@ -63,8 +63,18 @@ public enum FailureInfo {
     NOT_PENDING_CONTRACT(400, "간편동의 대기 중인 계약이 아닙니다."),
 
     // contract
+    NOT_PROGRESS_CONTRACT(400, "진행 중인 계약이 아닙니다."),
     INVALID_DUE_CYCLE(400, "납부 기한은 약정일 이후여야합니다."),
     NOT_EXIST_CONTRACT(404, "존재하지 않는 계약입니다."),
+
+    // invoice
+    INVALID_CONTRACT_DATE(400, "약정일은 현재로부터 다음 날 이후여야합니다."),
+    INVALID_DUE_DATE(400, "납부 기한은 약정일과 같거나 이후여야합니다."),
+    INVALID_INVOICE_PAYMENTTYPE(400, "납부자 결제인 계약은 실시간 CMS를 결제 수단으로 선택할 수 없습니다."),
+    DUPLICATE_INVOICE(400, "해당 월에 이미 청구 건이 존재합니다."),
+    NOT_EXIST_INVOICE(400, "존재하지 않는 청구 정보입니다."),
+    PAID_INVOICE(400, "이미 결제된 청구입니다."),
+    DIFFERENT_MONTH(400, "약정일 수정 범위는 해당 연월입니다."),
 
     // payment type
     INVALID_PAYMENTTYPE(400, "유효하지 않은 결제 수단입니다."),
