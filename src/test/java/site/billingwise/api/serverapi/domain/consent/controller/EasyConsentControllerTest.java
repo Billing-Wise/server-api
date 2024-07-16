@@ -9,23 +9,20 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.service.EasyConsentService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
@@ -116,7 +113,7 @@ public class EasyConsentControllerTest extends AbstractRestDocsTests {
         MockMultipartFile signImage = new MockMultipartFile(
                 "signImage", "sign.png", "image/png", "consent data".getBytes());
 
-        willDoNothing().given(easyConsentService).consentWithNonMember(clientId, consentWithNonMemberDto, signImage);
+        willDoNothing().given(easyConsentService).consentForNonMember(clientId, consentWithNonMemberDto, signImage);
 
         // when
         ResultActions result = mockMvc.perform(multipart(url + "?clientId=" + clientId)
@@ -162,6 +159,7 @@ public class EasyConsentControllerTest extends AbstractRestDocsTests {
                 .itemName("item1")
                 .itemAmount(3)
                 .totalPrice(30000L)
+                .isSubscription(true)
                 .contractCycle(3)
                 .build();
 
@@ -189,6 +187,55 @@ public class EasyConsentControllerTest extends AbstractRestDocsTests {
                                 fieldWithPath("data.itemName").description("상품명").type(JsonFieldType.STRING),
                                 fieldWithPath("data.itemAmount").description("상품 개수").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.totalPrice").description("총 금액").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.isSubscription").description("정기 여부").type(JsonFieldType.BOOLEAN),
                                 fieldWithPath("data.contractCycle").description("약정일 주기").type(JsonFieldType.NUMBER))));
+    }
+
+    @Test
+    @DisplayName("회원 간편동의 처리")
+    void consentForMember() throws Exception {
+        String url = "/api/v1/easy-consent/member";
+
+        // given
+        Long contractId = 1L;
+
+        RegisterConsentDto registerConsentDto = RegisterConsentDto.builder()
+                .owner("홍길동")
+                .bank("신한")
+                .number("111222333444")
+                .build();
+
+        String registerConsentJsonDto = objectMapper.writeValueAsString(registerConsentDto);
+
+        MockMultipartFile data = new MockMultipartFile("data", "consent", "application/json",
+                registerConsentJsonDto.getBytes(StandardCharsets.UTF_8));
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        willDoNothing().given(easyConsentService).consentForMember(contractId, registerConsentDto, signImage);
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(url + "?contractId=" + contractId)
+                .file(data)
+                .file(signImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("easy-consent/member",
+                        queryParameters(
+                                parameterWithName("contractId").description("계약 아이디")),
+                        requestParts(
+                                partWithName("data").description("동의 계좌 정보 (* required)"),
+                                partWithName("signImage").description("동의 서명 이미지 (* required)")),
+                        requestPartFields("data",
+                                fieldWithPath("owner").description("계좌 소유주 (* required)")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("bank").description("은행 (* required)")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("number").description("계좌 번호 (* required)")
+                                        .type(JsonFieldType.STRING))));
+
     }
 }
