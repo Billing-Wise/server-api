@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.mock.web.MockMultipartFile;
+import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
+import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
@@ -16,10 +19,11 @@ import site.billingwise.api.serverapi.domain.contract.repository.ContractReposit
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.repository.ItemRepository;
 import site.billingwise.api.serverapi.domain.member.Member;
+import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
+import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
-import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +31,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 public class EasyConsentServiceTest {
 
@@ -36,6 +43,18 @@ public class EasyConsentServiceTest {
 
     @Mock
     private ContractRepository contractRepository;
+
+    @Mock
+    private ClientRepository clientRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
+
+    @Mock
+    private ConsentAccountRepository consentAccountRepository;
+
+    @Mock
+    private ConsentService consentService;
 
     @InjectMocks
     private EasyConsentService easyConsentService;
@@ -180,5 +199,83 @@ public class EasyConsentServiceTest {
         assertThatThrownBy(() -> easyConsentService.getContractInfo(contractId))
                 .isInstanceOf(GlobalException.class)
                 .hasMessageContaining(FailureInfo.NOT_PENDING_CONTRACT.getMessage());
+    }
+
+    @Test
+    void testConsentWithNonMemberSuccess() throws Exception {
+        // given
+        Long clientId = 1L;
+        ConsentWithNonMemberDto consentWithNonMemberDto = ConsentWithNonMemberDto.builder()
+                .memberName("홍길동")
+                .memberEmail("test@gmail.com")
+                .memberPhone("01012341234")
+                .itemId(1L)
+                .itemAmount(3)
+                .isSubscription(true)
+                .contractCycle(15)
+                .accountBank("은행")
+                .accountOwner("홍길동")
+                .accountNumber("1234567890")
+                .build();
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        Client client = Client.builder().id(clientId).build();
+        Item item = Item.builder()
+                .id(consentWithNonMemberDto.getItemId())
+                .client(client)
+                .price(1000L)
+                .isBasic(true)
+                .build();
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(itemRepository.findByIdAndClientIdAndIsBasic(consentWithNonMemberDto.getItemId(), clientId, true))
+                .thenReturn(Optional.of(item));
+        when(memberRepository.existsByClientIdAndEmail(clientId, consentWithNonMemberDto.getMemberEmail()))
+                .thenReturn(false);
+        when(consentService.uploadImage(signImage)).thenReturn("sign-url");
+
+        // when
+        easyConsentService.consentForNonMember(clientId, consentWithNonMemberDto, signImage);
+
+        // then
+        verify(memberRepository).save(any(Member.class));
+        verify(consentAccountRepository).save(any(ConsentAccount.class));
+        verify(contractRepository).save(any(Contract.class));
+        assertEquals("회원 이메일이 일치해야 합니다.", consentWithNonMemberDto.getMemberEmail(), "test@gmail.com");
+        assertEquals("상품 아이디가 일치해야 합니다.", consentWithNonMemberDto.getItemId(), 1L);
+    }
+
+    @Test
+    void testConsentForMemberSuccess() throws Exception {
+        // given
+        Long contractId = 1L;
+        RegisterConsentDto registerConsentDto = RegisterConsentDto.builder()
+                .owner("홍길동")
+                .bank("은행")
+                .number("1234567890")
+                .build();
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        Member member = Member.builder().id(1L).name("홍길동").build();
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.AUTO_TRANSFER)
+                .isEasyConsent(true)
+                .contractStatus(ContractStatus.PENDING)
+                .member(member)
+                .build();
+
+        when(contractRepository.findWithMemberById(contractId)).thenReturn(Optional.of(contract));
+        when(consentService.uploadImage(signImage)).thenReturn("sign-url");
+        when(consentAccountRepository.existsById(member.getId())).thenReturn(false);
+
+        // when
+        easyConsentService.consentForMember(contractId, registerConsentDto, signImage);
+
+        // then
+        verify(consentAccountRepository).save(any(ConsentAccount.class));
     }
 }

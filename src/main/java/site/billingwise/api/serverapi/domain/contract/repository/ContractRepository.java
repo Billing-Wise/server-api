@@ -16,4 +16,9 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSp
             + "JOIN FETCH c.member "
             + "WHERE c.id = :contractId")
     Optional<Contract> findWithItemWithMemberById(@Param("contractId") Long contractId);
+
+    @Query("SELECT c FROM Contract c "
+            + "JOIN FETCH c.member "
+            + "WHERE c.id = :contractId")
+    Optional<Contract> findWithMemberById(@Param("contractId") Long contractId);
 }

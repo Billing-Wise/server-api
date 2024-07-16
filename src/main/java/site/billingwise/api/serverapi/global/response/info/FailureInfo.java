@@ -41,6 +41,9 @@ public enum FailureInfo {
     // file
     INVALID_FILE(419, "유효한 파일이 아닙니다"),
     INVALID_CELL_INPUT(400, "유효하지 않은 셀 형식입니다."),
+
+    // client
+    NOT_EXIST_CLIENT(404, "존재하지 않는 고객입니다."),
     
     // item
     ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
@@ -48,6 +51,7 @@ public enum FailureInfo {
     // member
     NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다."),
     MEMBER_ACCESS_DENIED(403, "접근 권한이 없는 회원입니다."),
+    ALREADY_EXIST_MEMBER(409, "이미 존재하는 회원입니다."),
 
     // consent
     ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),

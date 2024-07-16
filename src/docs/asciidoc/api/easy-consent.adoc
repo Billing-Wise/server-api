@@ -11,8 +11,20 @@
 
 operation::easy-consent/non-member/items/get-list[snippets='http-request,query-parameters,http-response,response-fields']
 
+=== 비회원 간편동의
+
+비회원 간편동의를 합니다. 서명 이미지는 필수입니다.
+
+operation::easy-consent/non-member[snippets='http-request,query-parameters,request-parts,request-part-data-fields,http-response']
+
 === 회원 간편동의 계약정보 조회
 
 회원 간편동의 계약정보를 조회합니다.
 
 operation::easy-consent/member/contract/get[snippets='http-request,path-parameters,http-response,response-fields']
+
+=== 회원 간편동의
+
+회원 간편동의를 합니다. 서명 이미지는 필수입니다.
+
+operation::easy-consent/member[snippets='http-request,query-parameters,request-parts,request-part-data-fields,http-response']
