@@ -21,5 +21,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
 	List<Item> findAllByClientIdAndIsBasic(Long clientId, Boolean isBasic);
 
-	Optional<Item> findByIdAndClientIdAndIsBasic(Long itemId, Long clientId, boolean b);
+	Optional<Item> findByIdAndClientIdAndIsBasic(Long itemId, Long clientId, boolean isBasic);
 }

@@ -130,7 +130,7 @@ public class EasyConsentControllerTest extends AbstractRestDocsTests {
                         queryParameters(
                                 parameterWithName("clientId").description("고객 아이디")),
                         requestParts(
-                                partWithName("data").description("동의 계좌 정보 (* required)"),
+                                partWithName("data").description("동의 정보 (* required)"),
                                 partWithName("signImage").description("동의 서명 이미지 (* required)")),
                         requestPartFields("data",
                                 fieldWithPath("memberName").description("회원 이름").type(JsonFieldType.STRING),

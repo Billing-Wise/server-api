@@ -223,10 +223,17 @@ public class EasyConsentServiceTest {
                 "signImage", "sign.png", "image/png", "consent data".getBytes());
 
         Client client = Client.builder().id(clientId).build();
-        Item item = Item.builder().id(consentWithNonMemberDto.getItemId()).client(client).price(1000L).isBasic(true).build();
+        Item item = Item.builder()
+                .id(consentWithNonMemberDto.getItemId())
+                .client(client)
+                .price(1000L)
+                .isBasic(true)
+                .build();
         when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
-        when(itemRepository.findByIdAndClientIdAndIsBasic(consentWithNonMemberDto.getItemId(), clientId, true)).thenReturn(Optional.of(item));
-        when(memberRepository.existsByClientIdAndEmail(clientId, consentWithNonMemberDto.getMemberEmail())).thenReturn(false);
+        when(itemRepository.findByIdAndClientIdAndIsBasic(consentWithNonMemberDto.getItemId(), clientId, true))
+                .thenReturn(Optional.of(item));
+        when(memberRepository.existsByClientIdAndEmail(clientId, consentWithNonMemberDto.getMemberEmail()))
+                .thenReturn(false);
         when(consentService.uploadImage(signImage)).thenReturn("sign-url");
 
         // when
