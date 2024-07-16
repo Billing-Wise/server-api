@@ -16,6 +16,7 @@ public class GetContractInfoDto {
     private String itemName;
     private Integer itemAmount;
     private Long totalPrice;
+    private Boolean isSubscription;
     private Integer contractCycle;
 
     public static GetContractInfoDto toDto(Contract contract) {
@@ -29,6 +30,7 @@ public class GetContractInfoDto {
                 .itemName(contract.getItem().getName())
                 .itemAmount(contract.getItemAmount())
                 .totalPrice(contract.getItemPrice() * contract.getItemAmount())
+                .isSubscription(contract.getIsSubscription())
                 .contractCycle(contract.getContractCycle())
                 .build();
     }

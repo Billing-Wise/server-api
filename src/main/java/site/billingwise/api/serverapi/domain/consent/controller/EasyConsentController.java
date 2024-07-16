@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.service.EasyConsentService;
@@ -31,11 +32,11 @@ public class EasyConsentController {
 
     @PostMapping("/non-member")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse consentWithNonMember(
+    public BaseResponse consentForNonMember(
             Long clientId,
             @Valid @RequestPart(name = "data") ConsentWithNonMemberDto consentWithNonMemberDto,
             @RequestPart(name = "signImage") MultipartFile multipartFile) {
-        easyConsentService.consentWithNonMember(clientId, consentWithNonMemberDto, multipartFile);
+        easyConsentService.consentForNonMember(clientId, consentWithNonMemberDto, multipartFile);
         return new BaseResponse(SuccessInfo.CONSENT_WITH_NON_MEMBER);
     }
 
@@ -44,5 +45,15 @@ public class EasyConsentController {
     public DataResponse<GetContractInfoDto> getContractInfo(@PathVariable Long contractId) {
         return new DataResponse<>(SuccessInfo.GET_EASY_CONSENT_CONTRACT_INFO,
                 easyConsentService.getContractInfo(contractId));
+    }
+
+    @PostMapping("/member")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse consentForMember(
+            Long contractId,
+            @Valid @RequestPart(name = "data") RegisterConsentDto registerConsentDto,
+            @RequestPart(name = "signImage") MultipartFile multipartFile) {
+        easyConsentService.consentForMember(contractId, registerConsentDto, multipartFile);
+        return new BaseResponse(SuccessInfo.CONSENT_WITH_MEMBER);
     }
 }

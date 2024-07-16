@@ -1,12 +1,12 @@
 package site.billingwise.api.serverapi.domain.consent.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
@@ -23,7 +23,6 @@ import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
-import site.billingwise.api.serverapi.global.service.S3Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,24 +48,14 @@ public class EasyConsentService {
         Contract contract = contractRepository.findWithItemWithMemberById(contractId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONTRACT));
 
-        if (contract.getPaymentType() != PaymentType.AUTO_TRANSFER) {
-            throw new GlobalException(FailureInfo.NOT_CMS);
-        }
-
-        if (!contract.getIsEasyConsent()) {
-            throw new GlobalException(FailureInfo.NOT_EASY_CONSENT_CONTRACT);
-        }
-
-        if (contract.getContractStatus() != ContractStatus.PENDING) {
-            throw new GlobalException(FailureInfo.NOT_PENDING_CONTRACT);
-        }
+        validateEasyConsentContract(contract);
 
         return GetContractInfoDto.toDto(contract);
 
     }
 
     @Transactional
-    public void consentWithNonMember(
+    public void consentForNonMember(
             Long clientId,
             ConsentWithNonMemberDto dto,
             MultipartFile multipartFile) {
@@ -119,5 +108,40 @@ public class EasyConsentService {
         contractRepository.save(contract);
 
 
+    }
+
+    @Transactional
+    public void consentForMember(Long contractId, RegisterConsentDto registerConsentDto, MultipartFile multipartFile) {
+
+        Contract contract = contractRepository.findWithMemberById(contractId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONTRACT));
+
+        validateEasyConsentContract(contract);
+
+        contract.setContractStatus(ContractStatus.PROGRESS);
+
+        if (consentAccountRepository.existsById(contract.getMember().getId())) {
+            throw new GlobalException(FailureInfo.ALREADY_EXIST_CONSENT);
+        }
+
+        consentAccountRepository.save(registerConsentDto.toEntity(
+                contract.getMember(),
+                consentService.uploadImage(multipartFile))
+        );
+
+    }
+
+    private void validateEasyConsentContract(Contract contract) {
+        if (contract.getPaymentType() != PaymentType.AUTO_TRANSFER) {
+            throw new GlobalException(FailureInfo.NOT_CMS);
+        }
+
+        if (!contract.getIsEasyConsent()) {
+            throw new GlobalException(FailureInfo.NOT_EASY_CONSENT_CONTRACT);
+        }
+
+        if (contract.getContractStatus() != ContractStatus.PENDING) {
+            throw new GlobalException(FailureInfo.NOT_PENDING_CONTRACT);
+        }
     }
 }

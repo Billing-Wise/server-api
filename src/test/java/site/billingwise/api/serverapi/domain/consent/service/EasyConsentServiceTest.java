@@ -6,9 +6,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
+import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
@@ -24,7 +24,6 @@ import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
-import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -237,7 +236,7 @@ public class EasyConsentServiceTest {
         when(consentService.uploadImage(signImage)).thenReturn("sign-url");
 
         // when
-        easyConsentService.consentWithNonMember(clientId, consentWithNonMemberDto, signImage);
+        easyConsentService.consentForNonMember(clientId, consentWithNonMemberDto, signImage);
 
         // then
         verify(memberRepository).save(any(Member.class));
@@ -245,5 +244,38 @@ public class EasyConsentServiceTest {
         verify(contractRepository).save(any(Contract.class));
         assertEquals("회원 이메일이 일치해야 합니다.", consentWithNonMemberDto.getMemberEmail(), "test@gmail.com");
         assertEquals("상품 아이디가 일치해야 합니다.", consentWithNonMemberDto.getItemId(), 1L);
+    }
+
+    @Test
+    void testConsentForMemberSuccess() throws Exception {
+        // given
+        Long contractId = 1L;
+        RegisterConsentDto registerConsentDto = RegisterConsentDto.builder()
+                .owner("홍길동")
+                .bank("은행")
+                .number("1234567890")
+                .build();
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        Member member = Member.builder().id(1L).name("홍길동").build();
+        Contract contract = Contract.builder()
+                .id(contractId)
+                .paymentType(PaymentType.AUTO_TRANSFER)
+                .isEasyConsent(true)
+                .contractStatus(ContractStatus.PENDING)
+                .member(member)
+                .build();
+
+        when(contractRepository.findWithMemberById(contractId)).thenReturn(Optional.of(contract));
+        when(consentService.uploadImage(signImage)).thenReturn("sign-url");
+        when(consentAccountRepository.existsById(member.getId())).thenReturn(false);
+
+        // when
+        easyConsentService.consentForMember(contractId, registerConsentDto, signImage);
+
+        // then
+        verify(consentAccountRepository).save(any(ConsentAccount.class));
     }
 }

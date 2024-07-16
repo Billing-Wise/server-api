@@ -22,3 +22,9 @@ operation::easy-consent/non-member[snippets='http-request,query-parameters,reque
 회원 간편동의 계약정보를 조회합니다.
 
 operation::easy-consent/member/contract/get[snippets='http-request,path-parameters,http-response,response-fields']
+
+=== 회원 간편동의
+
+회원 간편동의를 합니다. 서명 이미지는 필수입니다.
+
+operation::easy-consent/member[snippets='http-request,query-parameters,request-parts,request-part-data-fields,http-response']
