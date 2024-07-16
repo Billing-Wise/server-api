@@ -13,11 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateInvoiceDto {
-
-    @NotNull(message = "계약 정보는 필수 입력값입니다.")
-    private Long contractId;
-
+public class EditInvoiceDto {
     @NotNull(message = "결제 수단은 필수 입력값입니다.")
     private Long paymentTypeId;
 
