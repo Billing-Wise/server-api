@@ -22,7 +22,7 @@ public class CreateInvoiceDto {
     private Long paymentTypeId;
 
     @NotNull(message = "금액 정보는 필수 입력값입니다.")
-    @Min(value = 1, message="금액은 1원 이상이어야합니다.")
+    @Min(value = 1, message = "금액은 1원 이상이어야합니다.")
     private Long chargeAmount;
 
     @NotNull(message = "약정일은 필수 입력값입니다.")

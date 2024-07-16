@@ -246,17 +246,17 @@ public class InvoiceService {
         Contract contract = invoice.getContract();
 
         GetInvoiceListDto getInvoiceListDto = GetInvoiceListDto.builder()
-                                                    .invoiceId(invoice.getId())
-                                                    .contractId(contract.getId())
-                                                    .memberName(contract.getMember().getName())
-                                                    .itemName(contract.getItem().getName())
-                                                    .chargeAmount(invoice.getChargeAmount())
-                                                    .paymentType(PaymentTypeDto.fromEnum(invoice.getPaymentType()))
-                                                    .paymentStatus(PaymentStatusDto.fromEnum(invoice.getPaymentStatus()))
-                                                    .contractDate(invoice.getContractDate())
-                                                    .dueDate(invoice.getDueDate())
-                                                    .createdAt(invoice.getCreatedAt())
-                                                    .build();
+                .invoiceId(invoice.getId())
+                .contractId(contract.getId())
+                .memberName(contract.getMember().getName())
+                .itemName(contract.getItem().getName())
+                .chargeAmount(invoice.getChargeAmount())
+                .paymentType(PaymentTypeDto.fromEnum(invoice.getPaymentType()))
+                .paymentStatus(PaymentStatusDto.fromEnum(invoice.getPaymentStatus()))
+                .contractDate(invoice.getContractDate())
+                .dueDate(invoice.getDueDate())
+                .createdAt(invoice.getCreatedAt())
+                .build();
 
         return getInvoiceListDto;
     }
