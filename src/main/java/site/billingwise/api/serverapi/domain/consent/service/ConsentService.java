@@ -43,7 +43,7 @@ public class ConsentService {
 
     }
 
-    private String uploadImage(MultipartFile multipartFile) {
+    public String uploadImage(MultipartFile multipartFile) {
 
         if (!multipartFile.getContentType().startsWith("image/")) {
             throw new GlobalException(FailureInfo.INVALID_IMAGE);

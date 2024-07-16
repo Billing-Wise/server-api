@@ -30,4 +30,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             + "WHERE m.client.id = :clientId AND m.name LIKE %:memberName%")
     Page<Member> findByClientIdAndName(@Param("clientId") Long clientId,
                                        @Param("memberName") String memberName, Pageable pageable);
+
+    boolean existsByClientIdAndEmail(Long clientId, String memberEmail);
 }

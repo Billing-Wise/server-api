@@ -5,25 +5,34 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
+import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetBasicItemDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetContractInfoDto;
 import site.billingwise.api.serverapi.domain.consent.service.EasyConsentService;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
 import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,6 +85,65 @@ public class EasyConsentControllerTest extends AbstractRestDocsTests {
                                 fieldWithPath("data[].price").description("상품 가격").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].imageUrl").description("상품 이미지 URL")
                                         .type(JsonFieldType.STRING))));
+    }
+
+    @Test
+    @DisplayName("비회원 간편동의 처리")
+    void consentWithNonMember() throws Exception {
+        // given
+        String url = "/api/v1/easy-consent/non-member";
+
+        Long clientId = 1L;
+
+        ConsentWithNonMemberDto consentWithNonMemberDto = ConsentWithNonMemberDto.builder()
+                .memberName("홍길동")
+                .memberEmail("test@gmail.com")
+                .memberPhone("01012341234")
+                .itemId(1L)
+                .itemAmount(3)
+                .isSubscription(true)
+                .contractCycle(15)
+                .accountBank("은행")
+                .accountOwner("홍길동")
+                .accountNumber("1234567890")
+                .build();
+
+        String consentWithNonMemberJsonDto = objectMapper.writeValueAsString(consentWithNonMemberDto);
+
+        MockMultipartFile data = new MockMultipartFile("data", "consent", "application/json",
+                consentWithNonMemberJsonDto.getBytes(StandardCharsets.UTF_8));
+
+        MockMultipartFile signImage = new MockMultipartFile(
+                "signImage", "sign.png", "image/png", "consent data".getBytes());
+
+        willDoNothing().given(easyConsentService).consentWithNonMember(clientId, consentWithNonMemberDto, signImage);
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(url + "?clientId=" + clientId)
+                .file(data)
+                .file(signImage)
+                .contentType(MediaType.MULTIPART_FORM_DATA));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("easy-consent/non-member",
+                        queryParameters(
+                                parameterWithName("clientId").description("고객 아이디")),
+                        requestParts(
+                                partWithName("data").description("동의 정보 (* required)"),
+                                partWithName("signImage").description("동의 서명 이미지 (* required)")),
+                        requestPartFields("data",
+                                fieldWithPath("memberName").description("회원 이름").type(JsonFieldType.STRING),
+                                fieldWithPath("memberEmail").description("회원 이메일").type(JsonFieldType.STRING),
+                                fieldWithPath("memberPhone").description("회원 전화번호").type(JsonFieldType.STRING),
+                                fieldWithPath("itemId").description("상품 아이디").type(JsonFieldType.NUMBER),
+                                fieldWithPath("itemAmount").description("상품 수량").type(JsonFieldType.NUMBER),
+                                fieldWithPath("isSubscription").description("정기 여부").type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("contractCycle").description("약정일 주기").type(JsonFieldType.NUMBER),
+                                fieldWithPath("accountBank").description("은행명").type(JsonFieldType.STRING),
+                                fieldWithPath("accountOwner").description("계좌주").type(JsonFieldType.STRING),
+                                fieldWithPath("accountNumber").description("계좌번호").type(JsonFieldType.STRING)
+                        )));
     }
 
     @Test
