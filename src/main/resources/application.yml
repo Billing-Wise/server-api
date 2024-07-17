@@ -34,6 +34,10 @@ coolsms:
     sender: ${COOLSMS_SENDER}
     url: https://api.coolsms.co.kr
 
+pay:
+  api:
+    url: ${PAY_API_URL}
+
 logging:
   level:
     org:
