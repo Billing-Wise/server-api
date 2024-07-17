@@ -12,6 +12,7 @@ import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.consent.controller.EasyConsentController;
 import site.billingwise.api.serverapi.domain.consent.dto.request.ConsentWithNonMemberDto;
 import site.billingwise.api.serverapi.domain.consent.service.EasyConsentService;
+import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
 import site.billingwise.api.serverapi.domain.payment.service.PaymentService;
 
@@ -63,6 +64,40 @@ public class PaymentControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("owner").description("카드 소유주 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("company").description("카드사 (* required)").type(JsonFieldType.STRING),
                         fieldWithPath("number").description("카드번호 (* required)").type(JsonFieldType.STRING)
+                )));
+    }
+
+    @Test
+    @DisplayName("계좌 납부자 결제")
+    void payerPayAccount() throws Exception {
+        // given
+        String url = "/api/v1/payments/payer-pay/account";
+
+        Long invoiceId = 1L;
+
+        PayerPayAccountDto payerPayAccountDto = PayerPayAccountDto.builder()
+                .number("1234123412341234")
+                .bank("신한")
+                .owner("홍길동")
+                .build();
+
+        // given
+        willDoNothing().given(paymentService).payerPayAccount(invoiceId, payerPayAccountDto);
+
+        // when
+        ResultActions result = mockMvc.perform(post(url)
+                .queryParam("invoiceId", String.valueOf(invoiceId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payerPayAccountDto)));
+
+        //then
+        result.andExpect(status().isOk()).andDo(document("payer-payment/account",
+                queryParameters(
+                        parameterWithName("invoiceId").description("청구 아이디")),
+                requestFields(
+                        fieldWithPath("owner").description("계좌 소유주 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("bank").description("은행 (* required)").type(JsonFieldType.STRING),
+                        fieldWithPath("number").description("계좌번호 (* required)").type(JsonFieldType.STRING)
                 )));
     }
 
