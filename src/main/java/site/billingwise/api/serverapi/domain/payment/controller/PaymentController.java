@@ -58,4 +58,5 @@ public class PaymentController {
         GetPaymentDto getPaymentDto = paymentService.getPayment(invoiceId);
         return new DataResponse<>(SuccessInfo.PAYMENT_LOADED, getPaymentDto);
 
+    }
 }
