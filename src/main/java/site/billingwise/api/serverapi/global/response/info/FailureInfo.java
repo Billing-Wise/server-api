@@ -76,6 +76,11 @@ public enum FailureInfo {
     PAID_INVOICE(400, "이미 결제된 청구입니다."),
     DIFFERENT_MONTH(400, "약정일 수정 범위는 해당 연월입니다."),
 
+    // payment
+    NOT_EXIST_PAYMENT(400, "해당 납부 내역은 존재하지 않습니다."),
+    NOT_EXIST_PAYMENT_CARD(400, "해당 카드 납부 내역은 존재하지 않습니다."),
+    NOT_EXIST_PAYMENT_ACCOUNT(400, "해당 계좌 납부 내역은 존재하지 않습니다."),
+
     // payment type
     INVALID_PAYMENTTYPE(400, "유효하지 않은 결제 수단입니다."),
 

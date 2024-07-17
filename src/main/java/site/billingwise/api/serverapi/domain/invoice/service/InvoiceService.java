@@ -145,6 +145,7 @@ public class InvoiceService {
     }
 
     // 청구 삭제
+    @Transactional
     public void deleteInvoice(Long invoiceId) {
         User user = SecurityUtil.getCurrentUser()
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
@@ -203,6 +204,7 @@ public class InvoiceService {
     }
 
     // 청구 목록 조회
+    @Transactional(readOnly = true)
     public Page<GetInvoiceListDto> getInvoiceList(
             Long contractId,
             Long paymentStatusId,

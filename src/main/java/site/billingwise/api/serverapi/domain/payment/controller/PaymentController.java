@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPaymentDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
@@ -19,6 +21,13 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/payer-pay/invoices/{invoiceId}")
+    public DataResponse<GetPayerPayInvoiceDto> getPayerPayInvoice(@PathVariable Long invoiceId) {
+        return new DataResponse(SuccessInfo.GET_PAYER_PAY_INVOICE,
+                paymentService.getPayerPayInvoice(invoiceId));
+    }
+  
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/payer-pay/card")
     public BaseResponse payerPayCard(Long invoiceId,
@@ -37,9 +46,17 @@ public class PaymentController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/payer-pay/invoices/{invoiceId}")
-    public DataResponse<GetPayerPayInvoiceDto> getPayerPayInvoice(@PathVariable Long invoiceId) {
-        return new DataResponse(SuccessInfo.GET_PAYER_PAY_INVOICE,
-                paymentService.getPayerPayInvoice(invoiceId));
+    @DeleteMapping("/{invoiceId}")
+    public BaseResponse deletePayment(@PathVariable("invoiceId") Long invoiceId) {
+        paymentService.deletePayment(invoiceId);
+        return new BaseResponse(SuccessInfo.PAYMENT_DELETED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{invoiceId}")
+    public DataResponse<GetPaymentDto> getPayment(@PathVariable("invoiceId") Long invoiceId) {
+        GetPaymentDto getPaymentDto = paymentService.getPayment(invoiceId);
+        return new DataResponse<>(SuccessInfo.PAYMENT_LOADED, getPaymentDto);
+
     }
 }

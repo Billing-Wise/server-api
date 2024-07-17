@@ -1,14 +1,11 @@
 package site.billingwise.api.serverapi.domain.payment.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.payment.Payment;
 import site.billingwise.api.serverapi.domain.payment.PaymentCard;
 

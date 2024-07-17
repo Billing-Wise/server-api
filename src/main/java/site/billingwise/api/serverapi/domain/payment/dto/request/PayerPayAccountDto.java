@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.billingwise.api.serverapi.domain.payment.Payment;
 import site.billingwise.api.serverapi.domain.payment.PaymentAccount;
-import site.billingwise.api.serverapi.domain.payment.PaymentCard;
 
 @Getter
 @Builder
