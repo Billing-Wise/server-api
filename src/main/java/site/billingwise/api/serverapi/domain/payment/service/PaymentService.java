@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
+import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
@@ -12,6 +13,7 @@ import site.billingwise.api.serverapi.domain.payment.Payment;
 import site.billingwise.api.serverapi.domain.payment.PaymentMethod;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
@@ -29,6 +31,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentCardRepository paymentCardRepository;
     private final PaymentAccountRepository paymentAccountRepository;
+    private final ContractRepository contractRepository;
 
     @Transactional
     public void payerPayCard(Long invoiceId, PayerPayCardDto payerPayCardDto) {
@@ -80,6 +83,10 @@ public class PaymentService {
         paymentAccountRepository.save(payerPayAccountDto.toEntity(payment));
 
         invoice.setPaymentStatus(PaymentStatus.PAID);
+    }
+
+    public GetPayerPayInvoiceDto getPayerPayInvoice(Long invoiceId) {
+        return GetPayerPayInvoiceDto.toDto(checkInvoiceValidation(invoiceId));
     }
 
     private Invoice checkInvoiceValidation(Long invoiceId) {

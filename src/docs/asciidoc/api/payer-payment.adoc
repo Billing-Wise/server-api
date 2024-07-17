@@ -18,3 +18,9 @@ operation::payer-payment/card[snippets='http-request,query-parameters,request-fi
 계좌로 납부자 결제를 합니다.
 
 operation::payer-payment/account[snippets='http-request,query-parameters,request-fields,http-response']
+
+=== 납부자 결제 청구정보 조회
+
+납부자 결제의 청구 정보를 조회합니다.
+
+operation::payer-payment/invoice/get[snippets='http-request,path-parameters,http-response,response-fields']
