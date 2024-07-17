@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
 import site.billingwise.api.serverapi.domain.payment.service.PaymentService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
+import site.billingwise.api.serverapi.global.response.DataResponse;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 @RestController
@@ -32,5 +34,12 @@ public class PaymentController {
                                         @Valid @RequestBody PayerPayAccountDto payerPayAccountDto) {
         paymentService.payerPayAccount(invoiceId, payerPayAccountDto);
         return new BaseResponse(SuccessInfo.PAYER_PAY_ACCOUNT);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/payer-pay/invoices/{invoiceId}")
+    public DataResponse<GetPayerPayInvoiceDto> getPayerPayInvoice(@PathVariable Long invoiceId) {
+        return new DataResponse(SuccessInfo.GET_PAYER_PAY_INVOICE,
+                paymentService.getPayerPayInvoice(invoiceId));
     }
 }
