@@ -30,10 +30,4 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Long payAmount;
 
-//    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
-//    private PaymentAccount paymentAccount;
-//
-//    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
-//    private PaymentCard paymentCard;
-
 }

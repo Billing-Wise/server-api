@@ -15,27 +15,18 @@ import site.billingwise.api.serverapi.domain.payment.PaymentAccount;
 import site.billingwise.api.serverapi.domain.payment.PaymentCard;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
-import site.billingwise.api.serverapi.domain.payment.Payment;
 import site.billingwise.api.serverapi.domain.payment.PaymentMethod;
 import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentDto;
 import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
-import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.feign.PayClient;
-import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 
 @Service
 @RequiredArgsConstructor
