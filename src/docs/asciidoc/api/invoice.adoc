@@ -9,6 +9,34 @@
 
 === 청구 생성
 
-청구건을 생성합니다.
+청구 정보를 생성합니다.
 
-operation::contract/create[snippets='request-cookies,http-request,request-fields,http-response']
+operation::invoice/create[snippets='request-cookies,http-request,request-fields,http-response']
+
+
+=== 청구 수정
+
+청구 정보를 수정합니다.
+
+operation::invoice/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response']
+
+
+=== 청구 삭제
+
+청구 정보를 삭제합니다.
+
+operation::invoice/delete[snippets='request-cookies,http-request,path-parameters,http-response']
+
+
+=== 청구 상세 조회
+
+청구 정보를 조회합니다.
+
+operation::invoice/get[snippets='request-cookies,http-request,path-parameters,http-response,response-fields']
+
+
+=== 청구 목록 조회
+
+청구 정보 목록을 조회합니다.
+
+operation::invoice/get-list[snippets='request-cookies,http-request,path-parameters,http-response,response-fields']
