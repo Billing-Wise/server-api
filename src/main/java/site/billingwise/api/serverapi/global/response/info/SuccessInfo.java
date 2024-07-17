@@ -28,6 +28,9 @@ public enum SuccessInfo {
     // file
     FILE_UPLOADED("파일이 업로드되었습니다."),
 
+    // user
+    GET_CURRENT_USER("현재 사용자 정보 조회가 성공하였습니다."),
+
     // Item
     ITEM_CREATED("상품이 성공적으로 생성되었습니다."),
     ITEM_EDITED("상품 정보가 성공적으로 수정되었습니다."),

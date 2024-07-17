@@ -25,6 +25,7 @@ public class User extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
+    @Setter
     private Client client;
 
     @Column(unique = true, nullable = false)

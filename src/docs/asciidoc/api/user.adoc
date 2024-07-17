@@ -1,0 +1,12 @@
+== 사용자 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+=== 현재 사용자 정보 조회
+
+현재 사용자 정보를 조회합니다.
+
+operation::user/current/get[snippets='http-request,request-cookies,http-response,response-fields']
