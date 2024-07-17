@@ -1,0 +1,20 @@
+== 납부자 결제 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+납부자 결제 API입니다.
+
+=== 카드 납부자 결제
+
+카드로 납부자 결제를 합니다.
+
+operation::payer-payment/card[snippets='http-request,query-parameters,request-fields,http-response']
+
+=== 계좌 납부자 결제
+
+계좌로 납부자 결제를 합니다.
+
+operation::payer-payment/account[snippets='http-request,query-parameters,request-fields,http-response']

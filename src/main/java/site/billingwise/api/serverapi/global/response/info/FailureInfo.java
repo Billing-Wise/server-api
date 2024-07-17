@@ -85,7 +85,16 @@ public enum FailureInfo {
     INVALID_PAYMENTTYPE(400, "유효하지 않은 결제 수단입니다."),
 
     // invoice type
-    INVALID_INVOICETYPE(400, "유효하지 않은 청구 수단입니다.");
+    INVALID_INVOICETYPE(400, "유효하지 않은 청구 수단입니다."),
+
+    // payment
+    PAY_FAIL(502, "결제가 실패하였습니다."),
+    NOT_EXIST_ACCOUNT(404, "존재하지 않는 계좌입니다."),
+    INSUFFICIENT_BALANCE(402, "잔액이 부족합니다."),
+    ACCOUNT_NOT_USABLE(403, "사용할 수 없는 계좌입니다."),
+    NOT_PAYER_PAYMENT(409, "납부자 결제가 불가능한 청구입니다."),
+    NOT_EXIST_CARD(404, "존재하지 않는 카드입니다."),
+    CARD_NOT_USABLE(403, "사용할 수 없는 카드입니다.");
 
     private final Integer code;
     private final String message;

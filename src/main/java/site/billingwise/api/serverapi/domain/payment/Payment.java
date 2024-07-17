@@ -18,7 +18,7 @@ public class Payment extends BaseEntity {
     @Column(name = "invoice_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @MapsId
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;

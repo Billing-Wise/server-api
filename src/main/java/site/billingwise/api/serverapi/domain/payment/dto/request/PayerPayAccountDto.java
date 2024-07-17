@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.billingwise.api.serverapi.domain.payment.Payment;
+import site.billingwise.api.serverapi.domain.payment.PaymentAccount;
+import site.billingwise.api.serverapi.domain.payment.PaymentCard;
 
 @Getter
 @Builder
@@ -22,4 +25,13 @@ public class PayerPayAccountDto {
     @Pattern(regexp = "^\\d{10,20}$", message = "유효한 계좌번호 형식이 아닙니다.")
     private String number;
 
+    public PaymentAccount toEntity(Payment payment) {
+        return PaymentAccount.builder()
+                .id(payment.getId())
+                .payment(payment)
+                .number(this.number)
+                .bank(this.bank)
+                .owner(this.owner)
+                .build();
+    }
 }
