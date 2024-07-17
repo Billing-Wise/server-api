@@ -23,6 +23,9 @@ import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
 import site.billingwise.api.serverapi.domain.payment.PaymentMethod;
+import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentDto;
+import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentAccountDto;
+import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
@@ -71,7 +74,47 @@ public class PaymentService {
         paymentRepository.delete(payment);
     }
 
-    // 유효성 검증 후 엔티티 반환
+    // 납부 조회
+    @Transactional(readOnly = true)
+    public GetPaymentDto getPayment(Long invoiceId) {
+        User user = SecurityUtil.getCurrentUser()
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+        Payment payment = getEntity(user.getClient(), invoiceId);
+
+        GetPaymentDto getPaymentDto = null;
+
+        if (payment.getPaymentMethod().equals(PaymentMethod.ACCOUNT)) {
+            PaymentAccount paymentAccount = paymentAccountRepository.findById(invoiceId)
+                    .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_ACCOUNT));
+            
+            getPaymentDto = GetPaymentAccountDto.builder()
+                                .invoiceId(invoiceId)
+                                .payAmoount(payment.getPayAmount())
+                                .createAt(payment.getCreatedAt())
+                                .number(paymentAccount.getNumber())
+                                .bank(paymentAccount.getBank())
+                                .owner(paymentAccount.getOwner())
+                                .build();
+        } else if (payment.getPaymentMethod().equals(PaymentMethod.CARD)) {
+            PaymentCard paymentCard = paymentCardRepository.findById(invoiceId)
+                    .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_CARD));
+
+            getPaymentDto = GetPaymentCardDto.builder()
+                    .invoiceId(invoiceId)
+                    .payAmoount(payment.getPayAmount())
+                    .createAt(payment.getCreatedAt())
+                    .number(paymentCard.getNumber())
+                    .company(paymentCard.getCompany())
+                    .owner(paymentCard.getOwner())
+                    .build();
+                    
+        }
+        
+        return getPaymentDto;
+    }
+
+    // 유효성 검증 후 납부 엔티티 반환
     public Payment getEntity(Client client, Long invoiceId) {
         Payment payment = paymentRepository.findById(invoiceId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT));
