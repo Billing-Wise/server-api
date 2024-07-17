@@ -23,7 +23,7 @@ public class RegisterConsentDto {
     private String bank;
 
     @NotBlank(message = "계좌번호를 입력하세요.")
-    @Pattern(regexp = "^\\d{10,}$", message = "유효한 계좌번호 형식이 아닙니다.")
+    @Pattern(regexp = "^\\d{10,20}$", message = "유효한 계좌번호 형식이 아닙니다.")
     private String number;
 
     public ConsentAccount toEntity(Member member, String signUrl) {

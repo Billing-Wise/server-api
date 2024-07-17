@@ -64,7 +64,11 @@ public enum SuccessInfo {
     GET_BASIC_ITEM_LIST("비회원 간편동의 상품목록조회가 성공하였습니다."),
     GET_EASY_CONSENT_CONTRACT_INFO("회원 간편동의 계약정보 조회가 성공하였습니다."),
     CONSENT_WITH_NON_MEMBER("비회원 간편동의가 성공하였습니다."),
-    CONSENT_WITH_MEMBER("회원 간편동의가 성공하였습니다.");
+    CONSENT_WITH_MEMBER("회원 간편동의가 성공하였습니다."),
+
+    // Payment
+    PAYER_PAY_CARD("납부자 결제(카드)가 성공하였습니다."),
+    PAYER_PAY_ACCOUNT("납부자 결제(계좌)가 성공하였습니다.");
 
     private final Integer code = 200;
     private final String message;
