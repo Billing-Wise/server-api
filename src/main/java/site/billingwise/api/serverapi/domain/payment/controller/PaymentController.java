@@ -18,6 +18,13 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/{invoiceId}")
+    public BaseResponse deletePayment(@PathVariable("invoiceId") Long invoiceId) {
+        paymentService.deletePayment(invoiceId);
+        return new BaseResponse(SuccessInfo.PAYMENT_DELETED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/payer-pay/card")
     public BaseResponse payerPayCard(Long invoiceId,
                                      @Valid @RequestBody PayerPayCardDto payerPayCardDto) {

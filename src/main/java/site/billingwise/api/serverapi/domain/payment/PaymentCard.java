@@ -11,8 +11,6 @@ import site.billingwise.api.serverapi.domain.common.BaseEntity;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE payment_card SET is_deleted = true WHERE invoice_id = ?")
-@Where(clause = "is_deleted = false")
 public class PaymentCard extends BaseEntity {
 
     @Id

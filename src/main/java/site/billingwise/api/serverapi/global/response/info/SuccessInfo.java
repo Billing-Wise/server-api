@@ -67,6 +67,7 @@ public enum SuccessInfo {
     CONSENT_WITH_MEMBER("회원 간편동의가 성공하였습니다."),
 
     // Payment
+    PAYMENT_DELETED("납부 내역이 성공적으로 취소되었습니다."),
     PAYER_PAY_CARD("납부자 결제(카드)가 성공하였습니다."),
     PAYER_PAY_ACCOUNT("납부자 결제(계좌)가 성공하였습니다.");
 

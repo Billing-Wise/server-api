@@ -11,6 +11,8 @@ import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 import site.billingwise.api.serverapi.domain.payment.Payment;
+import site.billingwise.api.serverapi.domain.payment.PaymentAccount;
+import site.billingwise.api.serverapi.domain.payment.PaymentCard;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,29 +40,6 @@ public class PaymentService {
 
     private final PayClient payClient;
 
-    // 납부 취소
-    @Transactional
-    public void deletePayment(Long invoiceId) {
-        User user = SecurityUtil.getCurrentUser()
-                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-
-        Payment payment = getEntity(user.getClient(), invoiceId);
-
-        paymentRepository.delete(payment);
-    }
-
-    // 유효성 검증 후 엔티티 반환
-    public Payment getEntity(Client client, Long invoiceId) {
-        Payment payment = paymentRepository.findById(invoiceId)
-                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_INVOICE));
-
-        if (payment.getInvoice().getContract().getItem().getClient().getId() != client.getId()) {
-            throw new GlobalException(FailureInfo.ACCESS_DENIED);
-        }
-
-        return payment;
-    }
-
     public void payerPayCard(Long invoiceId, PayerPayCardDto payerPayCardDto) {
         int statusCode = payClient
                 .pay(PaymentMethod.ACCOUNT.name(), payerPayCardDto.getNumber()).getStatusCode();
@@ -69,6 +48,39 @@ public class PaymentService {
 
     public void payerPayAccount(Long invoiceId, PayerPayAccountDto payerPayAccountDto) {
 
+    }
+
+    // 납부 취소
+    @Transactional
+    public void deletePayment(Long invoiceId) {
+        User user = SecurityUtil.getCurrentUser()
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+        Payment payment = getEntity(user.getClient(), invoiceId);
+
+        if (payment.getPaymentMethod().equals(PaymentMethod.CARD)) {
+            PaymentCard paymentCard = paymentCardRepository.findById(invoiceId)
+                    .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_CARD));
+            paymentCardRepository.delete(paymentCard);
+        } else if (payment.getPaymentMethod().equals(PaymentMethod.ACCOUNT)) {
+            PaymentAccount paymentAccount = paymentAccountRepository.findById(invoiceId)
+                    .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_ACCOUNT));
+            paymentAccountRepository.delete(paymentAccount);
+        }
+
+        paymentRepository.delete(payment);
+    }
+
+    // 유효성 검증 후 엔티티 반환
+    public Payment getEntity(Client client, Long invoiceId) {
+        Payment payment = paymentRepository.findById(invoiceId)
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT));
+
+        if (payment.getInvoice().getContract().getItem().getClient().getId() != client.getId()) {
+            throw new GlobalException(FailureInfo.ACCESS_DENIED);
+        }
+
+        return payment;
     }
 
 }
