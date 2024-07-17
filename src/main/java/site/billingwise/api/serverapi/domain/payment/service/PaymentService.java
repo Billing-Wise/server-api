@@ -17,7 +17,6 @@ import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRe
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
 import lombok.extern.slf4j.Slf4j;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
-import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
@@ -40,8 +39,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentCardRepository paymentCardRepository;
-    private final ContractRepository contractRepository;
-
 
     @Transactional
     public void payerPayCard(Long invoiceId, PayerPayCardDto payerPayCardDto) {
@@ -171,7 +168,8 @@ public class PaymentService {
             
             getPaymentDto = GetPaymentAccountDto.builder()
                                 .invoiceId(invoiceId)
-                                .payAmoount(payment.getPayAmount())
+                                .payAmount(payment.getPayAmount())
+                                .paymentMethod(payment.getPaymentMethod())
                                 .createAt(payment.getCreatedAt())
                                 .number(paymentAccount.getNumber())
                                 .bank(paymentAccount.getBank())
@@ -183,7 +181,8 @@ public class PaymentService {
 
             getPaymentDto = GetPaymentCardDto.builder()
                     .invoiceId(invoiceId)
-                    .payAmoount(payment.getPayAmount())
+                    .payAmount(payment.getPayAmount())
+                    .paymentMethod(payment.getPaymentMethod())
                     .createAt(payment.getCreatedAt())
                     .number(paymentCard.getNumber())
                     .company(paymentCard.getCompany())

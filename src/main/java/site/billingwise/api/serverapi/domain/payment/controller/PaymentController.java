@@ -57,6 +57,5 @@ public class PaymentController {
     public DataResponse<GetPaymentDto> getPayment(@PathVariable("invoiceId") Long invoiceId) {
         GetPaymentDto getPaymentDto = paymentService.getPayment(invoiceId);
         return new DataResponse<>(SuccessInfo.PAYMENT_LOADED, getPaymentDto);
-
     }
 }
