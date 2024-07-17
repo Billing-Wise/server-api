@@ -17,6 +17,7 @@ import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRe
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
 import lombok.extern.slf4j.Slf4j;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
+import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
@@ -26,18 +27,25 @@ import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentAccou
 import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
+import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
+import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
+import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
+import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.feign.PayClient;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentService {
+    private final PayClient payClient;
+
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentAccountRepository paymentAccountRepository;
     private final PaymentCardRepository paymentCardRepository;
+    private final ContractRepository contractRepository;
 
-    private final PayClient payClient;
 
     @Transactional
     public void payerPayCard(Long invoiceId, PayerPayCardDto payerPayCardDto) {
@@ -89,6 +97,10 @@ public class PaymentService {
         paymentAccountRepository.save(payerPayAccountDto.toEntity(payment));
 
         invoice.setPaymentStatus(PaymentStatus.PAID);
+    }
+
+    public GetPayerPayInvoiceDto getPayerPayInvoice(Long invoiceId) {
+        return GetPayerPayInvoiceDto.toDto(checkInvoiceValidation(invoiceId));
     }
 
     private Invoice checkInvoiceValidation(Long invoiceId) {

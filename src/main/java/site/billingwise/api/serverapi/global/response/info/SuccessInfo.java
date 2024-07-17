@@ -70,7 +70,8 @@ public enum SuccessInfo {
     PAYMENT_DELETED("납부 내역이 성공적으로 취소되었습니다."),
     PAYMENT_LOADED("납부 내역을 성공적으로 조회하였습니다."),
     PAYER_PAY_CARD("납부자 결제(카드)가 성공하였습니다."),
-    PAYER_PAY_ACCOUNT("납부자 결제(계좌)가 성공하였습니다.");
+    PAYER_PAY_ACCOUNT("납부자 결제(계좌)가 성공하였습니다."),
+    GET_PAYER_PAY_INVOICE("납부자 결제 청구정보 조회가 성공하였습니다.");
 
     private final Integer code = 200;
     private final String message;

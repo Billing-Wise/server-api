@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
 import site.billingwise.api.serverapi.domain.payment.service.PaymentService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.DataResponse;
@@ -20,6 +21,13 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/payer-pay/invoices/{invoiceId}")
+    public DataResponse<GetPayerPayInvoiceDto> getPayerPayInvoice(@PathVariable Long invoiceId) {
+        return new DataResponse(SuccessInfo.GET_PAYER_PAY_INVOICE,
+                paymentService.getPayerPayInvoice(invoiceId));
+    }
+  
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/payer-pay/card")
     public BaseResponse payerPayCard(Long invoiceId,
@@ -49,5 +57,5 @@ public class PaymentController {
     public DataResponse<GetPaymentDto> getPayment(@PathVariable("invoiceId") Long invoiceId) {
         GetPaymentDto getPaymentDto = paymentService.getPayment(invoiceId);
         return new DataResponse<>(SuccessInfo.PAYMENT_LOADED, getPaymentDto);
-    }
+
 }
