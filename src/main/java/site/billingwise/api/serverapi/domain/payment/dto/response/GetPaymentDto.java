@@ -1,4 +1,4 @@
-package site.billingwise.api.serverapi.domain.payment.dto.reponse;
+package site.billingwise.api.serverapi.domain.payment.dto.response;
 
 import java.time.LocalDateTime;
 

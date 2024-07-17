@@ -22,16 +22,12 @@ import site.billingwise.api.serverapi.domain.invoice.Invoice;
 import site.billingwise.api.serverapi.domain.invoice.PaymentStatus;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
 import site.billingwise.api.serverapi.domain.payment.PaymentMethod;
-import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentDto;
-import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentAccountDto;
-import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentCardDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPaymentDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPaymentAccountDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPaymentCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentAccountRepository;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentCardRepository;
-import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
-import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.feign.PayClient;
 
 @Service

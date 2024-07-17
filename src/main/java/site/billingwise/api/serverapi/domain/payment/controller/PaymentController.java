@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import site.billingwise.api.serverapi.domain.payment.dto.reponse.GetPaymentDto;
+import site.billingwise.api.serverapi.domain.payment.dto.response.GetPaymentDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayAccountDto;
 import site.billingwise.api.serverapi.domain.payment.dto.request.PayerPayCardDto;
 import site.billingwise.api.serverapi.domain.payment.dto.response.GetPayerPayInvoiceDto;
