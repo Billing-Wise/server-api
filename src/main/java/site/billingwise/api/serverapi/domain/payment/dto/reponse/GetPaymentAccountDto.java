@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetPaymentAccountDto extends GetPaymentDto{
+public class GetPaymentAccountDto extends GetPaymentDto {
     private String number;
     private String bank;
     private String owner;
