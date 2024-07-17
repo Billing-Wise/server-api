@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import site.billingwise.api.serverapi.domain.payment.PaymentMethod;
 
 @Getter
 @SuperBuilder
@@ -13,6 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class GetPaymentDto {
     private Long invoiceId;
-    private Long payAmoount;
+    private Long payAmount;
+    private PaymentMethod paymentMethod;
     private LocalDateTime createAt;
 }
