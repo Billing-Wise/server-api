@@ -4,3 +4,15 @@
 :toc: left
 :toclevels: 2
 :seclinks:
+
+include::api/auth.adoc[]
+include::api/user.adoc[]
+include::api/item.adoc[]
+include::api/member.adoc[]
+include::api/contract.adoc[]
+include::api/invoice.adoc[]
+include::api/payment.adoc[]
+include::api/consent.adoc[]
+include::api/setting.adoc[]
+include::api/easy-consent.adoc[]
+include::api/payer-payment.adoc[]

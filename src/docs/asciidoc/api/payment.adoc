@@ -1,0 +1,22 @@
+== 납부 API
+:doctype: book
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:seclinks:
+
+납부 관련 API입니다.
+
+=== 납부 내역 취소
+
+납부 내역을 취소합니다.
+
+operation::payment/delete[snippets='request-cookies,http-request,path-parameters,http-response']
+
+
+=== 납부 내역 조회
+
+납부 내역을 조회합니다.
+
+operation::payment/get-account[snippets='request-cookies,http-request,path-parameters,http-response,response-fields']
+operation::payment/get-card[snippets='request-cookies,http-request,path-parameters,http-response,response-fields']
