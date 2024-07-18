@@ -1,12 +1,12 @@
 {
   "containerDefinitions": [
     {
-      "name": "billingwise-container",
-      "image": "901929896752.dkr.ecr.ap-northeast-2.amazonaws.com/billingwise-api-ecr",
+      "name": "t5-api-container",
+      "image": "891376922202.dkr.ecr.ap-northeast-2.amazonaws.com/t5-api-ecr",
       "cpu": 0,
       "portMappings": [
         {
-          "name": "billingwise-api-port",
+          "name": "t5-api-port",
           "containerPort": 8081,
           "hostPort": 8081,
           "protocol": "tcp",
@@ -22,7 +22,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "billingwise-api-log",
+          "awslogs-group": "/ecs/t5-api-task-definition",
           "awslogs-create-group": "true",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
@@ -32,9 +32,9 @@
       "systemControls": []
     }
   ],
-  "family": "billingwise-task",
-  "taskRoleArn": "arn:aws:iam::901929896752:role/ecsTaskExecutionRole",
-  "executionRoleArn": "arn:aws:iam::901929896752:role/ecsTaskExecutionRole",
+  "family": "t5-api-task-definition",
+  "taskRoleArn": "arn:aws:iam::891376922202:role/ecs-task-execution-role",
+  "executionRoleArn": "arn:aws:iam::891376922202:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "volumes": [],
   "placementConstraints": [],

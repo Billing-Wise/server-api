@@ -79,7 +79,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // AWS S3
-	  implementation 'io.awspring.cloud:spring-cloud-aws-core:2.4.4'
+    implementation 'io.awspring.cloud:spring-cloud-aws-core:2.4.4'
   
      // poi
     implementation 'org.apache.poi:poi:5.2.2'
@@ -115,7 +115,7 @@ jib {
         image = "eclipse-temurin:17-jdk"
     }
     to {
-        image = "901929896752.dkr.ecr.ap-northeast-2.amazonaws.com/billingwise-api-ecr"
+        image = "891376922202.dkr.ecr.ap-northeast-2.amazonaws.com/t5-api-ecr"
         tags = ["${project.version}".toString()]
         credHelper = 'ecr-login'
     }
