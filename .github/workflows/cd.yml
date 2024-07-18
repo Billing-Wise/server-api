@@ -43,6 +43,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: task-definition.json
-          cluster: billingwise-api-cluster
-          service: billingwise-api-service
+          cluster: t5-ecs-fargate-cluster
+          service: t5-api-service
           wait-for-service-stability: true
