@@ -127,8 +127,7 @@ public class PaymentService {
                         .invoice(invoice)
                         .paymentMethod(PaymentMethod.CARD)
                         .payAmount(invoice.getChargeAmount())
-                        .build()
-        );
+                        .build());
     }
 
     // 납부 취소
@@ -160,26 +159,27 @@ public class PaymentService {
 
         Payment payment = getEntity(user.getClient(), invoiceId);
 
-        GetPaymentDto getPaymentDto = null;
-
         if (payment.getPaymentMethod().equals(PaymentMethod.ACCOUNT)) {
             PaymentAccount paymentAccount = paymentAccountRepository.findById(invoiceId)
                     .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_ACCOUNT));
             
-            getPaymentDto = GetPaymentAccountDto.builder()
-                                .invoiceId(invoiceId)
-                                .payAmount(payment.getPayAmount())
-                                .paymentMethod(payment.getPaymentMethod())
-                                .createAt(payment.getCreatedAt())
-                                .number(paymentAccount.getNumber())
-                                .bank(paymentAccount.getBank())
-                                .owner(paymentAccount.getOwner())
-                                .build();
+            GetPaymentDto getPaymentDto = GetPaymentAccountDto.builder()
+                        .invoiceId(invoiceId)
+                        .payAmount(payment.getPayAmount())
+                        .paymentMethod(payment.getPaymentMethod())
+                        .createAt(payment.getCreatedAt())
+                        .number(paymentAccount.getNumber())
+                        .bank(paymentAccount.getBank())
+                        .owner(paymentAccount.getOwner())
+                        .build();
+
+            return getPaymentDto;
+
         } else if (payment.getPaymentMethod().equals(PaymentMethod.CARD)) {
             PaymentCard paymentCard = paymentCardRepository.findById(invoiceId)
                     .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_CARD));
 
-            getPaymentDto = GetPaymentCardDto.builder()
+            GetPaymentDto getPaymentDto = GetPaymentCardDto.builder()
                     .invoiceId(invoiceId)
                     .payAmount(payment.getPayAmount())
                     .paymentMethod(payment.getPaymentMethod())
@@ -188,10 +188,11 @@ public class PaymentService {
                     .company(paymentCard.getCompany())
                     .owner(paymentCard.getOwner())
                     .build();
-                    
+
+            return getPaymentDto;      
         }
         
-        return getPaymentDto;
+        throw new GlobalException(FailureInfo.INVALID_INPUT);
     }
 
     // 유효성 검증 후 납부 엔티티 반환
