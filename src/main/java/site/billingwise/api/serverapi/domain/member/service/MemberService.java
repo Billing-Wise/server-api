@@ -216,6 +216,8 @@ public class MemberService {
 
                 createMemberDtoList.add(createMemberDto);
             }
+        } catch (GlobalException e) {
+            throw e;
         } catch (Exception e) {
             throw new GlobalException(FailureInfo.INVALID_FILE);
         }
