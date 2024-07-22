@@ -19,7 +19,7 @@ public class PoiUtil {
             return String.valueOf((long) cell.getNumericCellValue());
         }
 
-        throw null;
+        throw new GlobalException(FailureInfo.INVALID_CELL_INPUT);
     }
 
     public static Integer getCellIntValue(Cell cell) {
