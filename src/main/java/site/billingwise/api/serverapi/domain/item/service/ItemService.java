@@ -34,7 +34,7 @@ public class ItemService {
     private String defaultImageUrl;
 
     @Transactional
-    public void createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
+    public GetItemDto createItem(CreateItemDto createItemDto, MultipartFile multipartFile) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Item item = createItemDto.toEntity(user.getClient(), defaultImageUrl);
@@ -43,6 +43,8 @@ public class ItemService {
         if (multipartFile != null) {
             uploadImage(item, multipartFile);
         }
+
+        return GetItemDto.toDto(item);
 
     }
 

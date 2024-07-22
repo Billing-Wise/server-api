@@ -36,10 +36,10 @@ public enum FailureInfo {
     INVALID_PHONE_CODE(401, "유효하지 않은 전화번호 인증 코드입니다."),
 
     // image
-    INVALID_IMAGE(419, "사진 파일이 유효하지 않습니다."),
+    INVALID_IMAGE(400, "사진 파일이 유효하지 않습니다."),
 
     // file
-    INVALID_FILE(419, "유효한 파일이 아닙니다"),
+    INVALID_FILE(400, "유효한 파일이 아닙니다"),
     INVALID_CELL_INPUT(400, "유효하지 않은 셀 형식입니다."),
 
     // client

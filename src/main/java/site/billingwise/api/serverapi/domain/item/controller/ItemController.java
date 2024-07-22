@@ -36,11 +36,11 @@ public class ItemController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
-    public BaseResponse createItem(@Valid @RequestPart(name = "data") CreateItemDto createItemDto,
+    public DataResponse<GetItemDto> createItem(@Valid @RequestPart(name = "data") CreateItemDto createItemDto,
             @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
-        itemService.createItem(createItemDto, multipartFile);
+                GetItemDto getItemDto = itemService.createItem(createItemDto, multipartFile);
 
-        return new BaseResponse(SuccessInfo.ITEM_CREATED);
+        return new DataResponse<>(SuccessInfo.ITEM_CREATED, getItemDto);
     }
 
     @ResponseStatus(HttpStatus.OK)

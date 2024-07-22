@@ -72,7 +72,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		// given
 		CreateItemDto createItemDto = CreateItemDto.builder()
 				.name("NAME")
-				.price((long) 10000)
+				.price("10000")
 				.description("Description")
 				.build();
 
