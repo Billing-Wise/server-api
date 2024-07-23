@@ -101,7 +101,7 @@ class ItemServiceTest {
 		CreateItemDto createItemDto = CreateItemDto.builder()
 				.name("Test Item")
 				.description("Test Description")
-				.price((long) 1000)
+				.price("10000")
 				.build();
 
 		MockMultipartFile multipartFile = new MockMultipartFile(
@@ -133,7 +133,7 @@ class ItemServiceTest {
 		CreateItemDto createItemDto = CreateItemDto.builder()
 				.name("Test Item")
 				.description("Test Description")
-				.price((long) 1000)
+				.price("10000")
 				.build();
 
 		when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
@@ -157,7 +157,7 @@ class ItemServiceTest {
 
 		EditItemDto editItemDto = EditItemDto.builder()
 				.name("New Name")
-				.price(1000L)
+				.price("1000")
 				.description("New Description")
 				.build();
 
@@ -181,7 +181,7 @@ class ItemServiceTest {
 		Long itemId = 1L;
 		EditItemDto editItemDto = EditItemDto.builder()
 				.name("New Name")
-				.price(1000L)
+				.price("1000")
 				.description("New Description")
 				.build();
 
