@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -32,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
@@ -187,38 +189,13 @@ public class MemberServiceTest {
 
         Page<Member> memberPage = new PageImpl<>(memberList, PageRequest.of(0, 10), memberList.size());
 
-        when(memberRepository.findByClientId(anyLong(), any(Pageable.class)))
+        when(memberRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(memberPage);
 
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<GetMemberDto> result = memberService.getMemberList(null, pageable);
-
-        // then
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(10, result.getSize());
-        assertEquals(mockMember.getId(), result.getContent().get(0).getId());
-    }
-
-    @Test
-    public void getetMemberListWithName() {
-        // given
-        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
-        List<Member> memberList = new ArrayList<>();
-        memberList.add(mockMember);
-
-        Page<Member> memberPage = new PageImpl<>(memberList, PageRequest.of(0, 10), memberList.size());
-
-        when(memberRepository.findByClientIdAndName(anyLong(), anyString(),
-                any(Pageable.class)))
-                .thenReturn(memberPage);
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        // when
-        Page<GetMemberDto> result = memberService.getMemberList("Member 1", pageable);
+        Page<GetMemberDto> result = memberService.getMemberList("name", "email@naver.com", "01011111111", pageable);
 
         // then
         assertNotNull(result);

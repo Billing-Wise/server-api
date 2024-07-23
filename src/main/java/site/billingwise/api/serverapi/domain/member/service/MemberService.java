@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -26,6 +27,7 @@ import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
+import site.billingwise.api.serverapi.domain.member.repository.MemberSpecification;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
@@ -90,18 +92,14 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GetMemberDto> getMemberList(String memberName, Pageable pageable) {
+    public Page<GetMemberDto> getMemberList(String name, String email, String phone, Pageable pageable) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        Page<Member> memberList = null;
+        Specification<Member> spec = MemberSpecification.findMember(
+                name, email, phone, user.getClient().getId());
 
-        if (memberName == null) {
-            memberList = memberRepository.findByClientId(user.getClient().getId(), pageable);
-        } else {
-            memberList = memberRepository.findByClientIdAndName(user.getClient().getId(),
-                    memberName, pageable);
-        }
+        Page<Member> memberList = memberRepository.findAll(spec, pageable);
 
         Page<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetDtoFromEntity(member));
 

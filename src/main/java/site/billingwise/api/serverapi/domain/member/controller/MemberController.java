@@ -1,7 +1,5 @@
 package site.billingwise.api.serverapi.domain.member.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -72,8 +70,11 @@ public class MemberController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping()
     public DataResponse<Page<GetMemberDto>> getMemberList(
-            @RequestParam(name = "name", required = false) String memberName, Pageable pageable) {
-        Page<GetMemberDto> getMemberDtoList = memberService.getMemberList(memberName, pageable);
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "phone", required = false) String phone,
+            Pageable pageable) {
+        Page<GetMemberDto> getMemberDtoList = memberService.getMemberList(name, email, phone, pageable);
 
         return new DataResponse<>(SuccessInfo.MEMBER_LOADED, getMemberDtoList);
     }
