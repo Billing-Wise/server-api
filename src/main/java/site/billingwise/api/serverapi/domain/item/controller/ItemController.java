@@ -38,26 +38,27 @@ public class ItemController {
     @PostMapping()
     public DataResponse<GetItemDto> createItem(@Valid @RequestPart(name = "data") CreateItemDto createItemDto,
             @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
-                GetItemDto getItemDto = itemService.createItem(createItemDto, multipartFile);
+        GetItemDto getItemDto = itemService.createItem(createItemDto, multipartFile);
 
         return new DataResponse<>(SuccessInfo.ITEM_CREATED, getItemDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{itemId}")
-    public BaseResponse editItem(@PathVariable("itemId") Long itemId, @Valid @RequestBody EditItemDto editItemDto) {
-        itemService.editItem(itemId, editItemDto);
+    public DataResponse<GetItemDto> editItem(@PathVariable("itemId") Long itemId,
+            @Valid @RequestBody EditItemDto editItemDto) {
+        GetItemDto getItemDto = itemService.editItem(itemId, editItemDto);
 
-        return new BaseResponse(SuccessInfo.ITEM_EDITED);
+        return new DataResponse<>(SuccessInfo.ITEM_EDITED, getItemDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{itemId}/image")
-    public BaseResponse editItemImage(@PathVariable("itemId") Long itemId,
+    public DataResponse<GetItemDto> editItemImage(@PathVariable("itemId") Long itemId,
             @RequestPart(name = "image", required = false) MultipartFile multipartFile) {
-        itemService.editItemImage(itemId, multipartFile);
+        GetItemDto getItemDto = itemService.editItemImage(itemId, multipartFile);
 
-        return new BaseResponse(SuccessInfo.ITEM_IMAGE_EDITED);
+        return new DataResponse<>(SuccessInfo.ITEM_IMAGE_EDITED, getItemDto);
     }
 
     @ResponseStatus(HttpStatus.OK)

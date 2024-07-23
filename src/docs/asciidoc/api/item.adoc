@@ -11,21 +11,21 @@
 
 상품을 생성합니다.
 
-operation::item/create[snippets='request-cookies,http-request,request-parts,request-part-data-fields,http-response']
+operation::item/create[snippets='request-cookies,http-request,request-parts,request-part-data-fields,http-response,response-fields']
 
 
 === 상품 정보 수정
 
 상품 정보를 수정합니다.
 
-operation::item/edit-info[snippets='request-cookies,http-request,path-parameters,request-fields,http-response']
+operation::item/edit-info[snippets='request-cookies,http-request,path-parameters,request-fields,http-response,response-fields']
 
 
 === 상품 이미지 수정
 
 상품 이미지를 수정합니다.
 
-operation::item/edit-image[snippets='request-cookies,http-request,path-parameters,request-parts,http-response']
+operation::item/edit-image[snippets='request-cookies,http-request,path-parameters,request-parts,http-response,response-fields']
 
 
 === 상품 삭제

@@ -49,20 +49,21 @@ public class ItemService {
     }
 
     @Transactional
-    public void editItem(Long itemId, EditItemDto editItemDto) {
+    public GetItemDto editItem(Long itemId, EditItemDto editItemDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Item item = getEntity(user.getClient(), itemId);
 
         item.setName(editItemDto.getName());
-        item.setPrice(editItemDto.getPrice());
+        item.setPrice(Long.parseLong(editItemDto.getPrice()));
         item.setDescription(editItemDto.getDescription());
 
+        return GetItemDto.toDto(item);
     }
 
     @Transactional
-    public void editItemImage(Long itemId, MultipartFile multipartFile) {
+    public GetItemDto editItemImage(Long itemId, MultipartFile multipartFile) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
@@ -76,8 +77,8 @@ public class ItemService {
 
         uploadImage(item, multipartFile);
         s3Service.delete(prevImageUrl, itemImageDirectory);
-        return;
 
+        return GetItemDto.toDto(item);
     }
 
     public void deleteItem(Long itemId) {

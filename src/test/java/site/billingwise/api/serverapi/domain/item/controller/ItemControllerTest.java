@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.mockStatic;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
@@ -27,8 +28,10 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,16 +41,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
+import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
+import site.billingwise.api.serverapi.domain.user.Client;
+import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.service.S3Service;
+import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 @WebMvcTest(ItemController.class)
 @AutoConfigureMockMvc
@@ -63,6 +71,23 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 	@MockBean
 	ClientRepository clientRepository;
+
+	GetItemDto getItemDto;
+
+	@BeforeEach
+	void setUp() {
+		getItemDto = GetItemDto.builder()
+				.id(1L)
+				.name("Name")
+				.description("Item Description")
+				.price(1000L)
+				.imageUrl("http://example.com/image.jpg")
+				.createdAt(LocalDateTime.now())
+				.updatedAt(LocalDateTime.now())
+				.contractCount(5L)
+				.isBasic(true)
+				.build();
+	}
 
 	@Test
 	@DisplayName("상품 생성")
@@ -85,7 +110,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		MockMultipartFile itemImage = new MockMultipartFile(
 				"image", "item.png", "image/png", "item data".getBytes());
 
-		willDoNothing().given(itemService).createItem(createItemDto, itemImage);
+		given(itemService.createItem(any(CreateItemDto.class), any(MockMultipartFile.class))).willReturn(getItemDto);
 
 		// when
 		ResultActions result = mockMvc.perform(multipart(url)
@@ -106,10 +131,28 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 								fieldWithPath("name").description("상품명 (* required)")
 										.type(JsonFieldType.STRING),
 								fieldWithPath("price").description("상품 가격 (* required)")
-										.type(JsonFieldType.NUMBER),
+										.type(JsonFieldType.STRING),
 								fieldWithPath("description").description("상품 상세 설명")
-										.type(JsonFieldType.STRING))));
-
+										.type(JsonFieldType.STRING)),
+						responseFields(
+								fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+								fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+								fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
+								fieldWithPath("data.id").description("상품 ID").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.name").description("상품명").type(JsonFieldType.STRING),
+								fieldWithPath("data.description").description("상품 설명")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.price").description("상품 가격").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.imageUrl").description("상품 이미지 URL")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.createdAt").description("상품 생성일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.updatedAt").description("상품 정보 수정일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.contractCount").description("관련 계약수")
+										.type(JsonFieldType.NUMBER),
+								fieldWithPath("data.isBasic").description("간편동의 기본상품 여부")
+										.type(JsonFieldType.BOOLEAN))));
 	}
 
 	@Test
@@ -121,11 +164,11 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 
 		EditItemDto editItemDto = EditItemDto.builder()
 				.name("UPDATED")
-				.price(100000L)
+				.price("100000")
 				.description("UPDATED")
 				.build();
 
-		willDoNothing().given(itemService).editItem(anyLong(), eq(editItemDto));
+		given(itemService.editItem(anyLong(), any(EditItemDto.class))).willReturn(getItemDto);
 
 		// when
 		ResultActions result = mockMvc.perform(put(url, ITEM_ID)
@@ -141,8 +184,27 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 						parameterWithName("itemId").description("상품 ID")),
 				requestFields(
 						fieldWithPath("name").description("상품명 (* required)").type(JsonFieldType.STRING),
-						fieldWithPath("price").description("상품 가격 (* required)").type(JsonFieldType.NUMBER),
-						fieldWithPath("description").description("상세 설명").type(JsonFieldType.STRING))));
+						fieldWithPath("price").description("상품 가격 (* required)").type(JsonFieldType.STRING),
+						fieldWithPath("description").description("상세 설명").type(JsonFieldType.STRING)),
+				responseFields(
+						fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+						fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+						fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
+						fieldWithPath("data.id").description("상품 ID").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.name").description("상품명").type(JsonFieldType.STRING),
+						fieldWithPath("data.description").description("상품 설명")
+								.type(JsonFieldType.STRING),
+						fieldWithPath("data.price").description("상품 가격").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.imageUrl").description("상품 이미지 URL")
+								.type(JsonFieldType.STRING),
+						fieldWithPath("data.createdAt").description("상품 생성일")
+								.type(JsonFieldType.STRING),
+						fieldWithPath("data.updatedAt").description("상품 정보 수정일")
+								.type(JsonFieldType.STRING),
+						fieldWithPath("data.contractCount").description("관련 계약수")
+								.type(JsonFieldType.NUMBER),
+						fieldWithPath("data.isBasic").description("간편동의 기본상품 여부")
+								.type(JsonFieldType.BOOLEAN))));
 	}
 
 	@Test
@@ -154,7 +216,7 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 		MockMultipartFile itemImage = new MockMultipartFile(
 				"image", "item.png", "image/png", "item data".getBytes());
 
-		willDoNothing().given(itemService).editItemImage(anyLong(), eq(itemImage));
+		given(itemService.editItemImage(anyLong(), any(MockMultipartFile.class))).willReturn(getItemDto);
 
 		// when
 		ResultActions result = mockMvc.perform(multipart(url, ITEM_ID)
@@ -173,7 +235,26 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 						pathParameters(
 								parameterWithName("itemId").description("상품 ID")),
 						requestParts(
-								partWithName("image").description("상품 이미지"))));
+								partWithName("image").description("상품 이미지")),
+						responseFields(
+								fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+								fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
+								fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
+								fieldWithPath("data.id").description("상품 ID").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.name").description("상품명").type(JsonFieldType.STRING),
+								fieldWithPath("data.description").description("상품 설명")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.price").description("상품 가격").type(JsonFieldType.NUMBER),
+								fieldWithPath("data.imageUrl").description("상품 이미지 URL")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.createdAt").description("상품 생성일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.updatedAt").description("상품 정보 수정일")
+										.type(JsonFieldType.STRING),
+								fieldWithPath("data.contractCount").description("관련 계약수")
+										.type(JsonFieldType.NUMBER),
+								fieldWithPath("data.isBasic").description("간편동의 기본상품 여부")
+										.type(JsonFieldType.BOOLEAN))));
 	}
 
 	@Test
@@ -203,18 +284,6 @@ public class ItemControllerTest extends AbstractRestDocsTests {
 	void getItem() throws Exception {
 		// given
 		String url = "/api/v1/items/{itemId}";
-
-		GetItemDto getItemDto = GetItemDto.builder()
-				.id(1L)
-				.name("Name")
-				.description("Item Description")
-				.price(1000L)
-				.imageUrl("http://example.com/image.jpg")
-				.createdAt(LocalDateTime.now())
-				.updatedAt(LocalDateTime.now())
-				.contractCount(5L)
-				.isBasic(true)
-				.build();
 
 		given(itemService.getItem(anyLong())).willReturn(getItemDto);
 
