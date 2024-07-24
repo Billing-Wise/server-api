@@ -1,16 +1,20 @@
 package site.billingwise.api.serverapi.domain.member.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
 import lombok.RequiredArgsConstructor;
+import site.billingwise.api.serverapi.domain.contract.dto.request.CreateContractDto;
 import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.global.response.BaseResponse;
 import site.billingwise.api.serverapi.global.response.DataResponse;
+import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.response.info.SuccessInfo;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,19 +40,19 @@ public class MemberController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
-    public BaseResponse createMember(@Valid @RequestBody CreateMemberDto createMemberDto) {
-        memberService.createMember(createMemberDto);
+    public DataResponse<Long> createMember(@Valid @RequestBody CreateMemberDto createMemberDto) {
+        Long memberId = memberService.createMember(createMemberDto);
 
-        return new BaseResponse(SuccessInfo.MEMBER_CREATED);
+        return new DataResponse<>(SuccessInfo.MEMBER_CREATED, memberId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{memberId}")
-    public BaseResponse editMember(@PathVariable("memberId") Long memberId,
+    public DataResponse<GetMemberDto> editMember(@PathVariable("memberId") Long memberId,
             @Valid @RequestBody CreateMemberDto createMemberDto) {
-        memberService.editMember(memberId, createMemberDto);
+        GetMemberDto getMemberDto = memberService.editMember(memberId, createMemberDto);
 
-        return new BaseResponse(SuccessInfo.MEMBER_UPDATED);
+        return new DataResponse<>(SuccessInfo.MEMBER_UPDATED, getMemberDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -81,10 +85,16 @@ public class MemberController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/bulk-register")
-    public DataResponse<CreateBulkResultDto> createMemberBulk(@RequestPart("file") MultipartFile file) {
+    public DataResponse<?> createMemberBulk(@RequestPart("file") MultipartFile file) {
         CreateBulkResultDto createBulkResultDto = memberService.createMemberBulk(file);
 
-        return new DataResponse<>(SuccessInfo.FILE_UPLOADED, createBulkResultDto);
+        if (createBulkResultDto.isSuccess()) {
+            List<CreateMemberDto> createMemberDtoList = createBulkResultDto.getMemberList();
+            return new DataResponse<>(SuccessInfo.CONTRACT_CREATED, createMemberDtoList);
+        } else {
+            List<String> errorList = createBulkResultDto.getErrorList();
+            return new DataResponse<>(FailureInfo.INVALID_FILE, errorList);
+        }
     }
 
 }

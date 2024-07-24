@@ -43,31 +43,27 @@ public class MemberService {
     private final Validator validator;
 
     @Transactional
-    public void createMember(CreateMemberDto createMemberDto) {
+    public Long createMember(CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-
-        if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-            throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
-        }
 
         Member member = createMemberDto.toEntity(user.getClient());
 
         memberRepository.save(member);
+
+        return member.getId();
     }
 
     @Transactional
-    public void editMember(Long memberId, CreateMemberDto createMemberDto) {
+    public GetMemberDto editMember(Long memberId, CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
         Member member = getEntity(user.getClient(), memberId);
-
-        if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-            throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
-        }
 
         member.setName(createMemberDto.getName());
         member.setEmail(createMemberDto.getEmail());
         member.setPhone(createMemberDto.getPhone());
         member.setDescription(createMemberDto.getDescription());
+
+        return toGetDtoFromEntity(member);
     }
 
     public void deleteMember(Long memberId) {
@@ -137,7 +133,6 @@ public class MemberService {
     }
 
     private GetMemberDto toGetDtoFromEntity(Member member) {
-        long contractCount = 0L;
         long unPaidCount = 0L;
         long totalInvoiceAmount = 0L;
         long totalUnpaidAmount = 0L;
@@ -153,7 +148,6 @@ public class MemberService {
                 }
             }
 
-            contractCount++;
             if (isUnpaid) {
                 unPaidCount++;
             }
@@ -165,11 +159,11 @@ public class MemberService {
                 .email(member.getEmail())
                 .phone(member.getPhone())
                 .description(member.getDescription())
-                .contractCount(contractCount)
+                .contractCount(member.getContractCount())
                 .unPaidCount(unPaidCount)
                 .totalInvoiceAmount(totalInvoiceAmount)
                 .totalUnpaidAmount(totalUnpaidAmount)
-                .contractCount(contractCount)
+                .contractCount(member.getContractCount())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
                 .build();
