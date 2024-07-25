@@ -42,7 +42,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 
-
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.contract.ContractStatus;
@@ -392,7 +391,8 @@ public class ContractControllerTest extends AbstractRestDocsTests {
 
         PageImpl<GetContractAllDto> page = new PageImpl<>(contractList, PageRequest.of(0, 20),
                 contractList.size());
-        given(contractService.getContractList(anyString(), anyString(), anyBoolean(), anyLong(), anyLong(),
+        given(contractService.getContractList(anyLong(), anyLong(), anyString(), anyString(), anyBoolean(),
+                anyLong(), anyLong(),
                 anyLong(),
                 any(Pageable.class))).willReturn(page);
 
@@ -639,7 +639,7 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .characterEncoding("UTF-8")
                 .cookie(new Cookie("access", "ACCESS_TOKEN")));
-            
+
         // given
         result.andDo(document("contract/bulk-register/fail",
                 requestCookies(

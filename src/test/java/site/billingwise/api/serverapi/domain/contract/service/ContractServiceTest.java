@@ -326,7 +326,7 @@ public class ContractServiceTest {
 
         // when
         Page<GetContractAllDto> result = contractService.getContractList(
-                itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentStatusId, pageable);
+                null, null, itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentStatusId, pageable);
 
         // then
         assertEquals(1, result.getContent().size());

@@ -14,6 +14,8 @@ import site.billingwise.api.serverapi.global.util.EnumUtil;
 
 public class ContractSpecification {
     public static Specification<Contract> findContract(
+            Long itemId,
+            Long MemberId,
             String itemName,
             String memberName,
             Boolean isSubscription,
@@ -23,6 +25,14 @@ public class ContractSpecification {
             Long clientId) {
         return ((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (itemId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("item").get("id"), itemId));
+            }
+
+            if (MemberId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("member").get("id"), MemberId));
+            }
 
             if (itemName != null && !itemName.isEmpty()) {
                 predicates.add(criteriaBuilder.like(root.get("item").get("name"), "%" + itemName + "%"));

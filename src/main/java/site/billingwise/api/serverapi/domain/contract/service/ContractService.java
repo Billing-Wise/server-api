@@ -121,6 +121,8 @@ public class ContractService {
 
     @Transactional(readOnly = true)
     public Page<GetContractAllDto> getContractList(
+            Long itemId,
+            Long memberId,
             String itemName,
             String memberName,
             Boolean isSubscription,
@@ -133,7 +135,8 @@ public class ContractService {
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Specification<Contract> spec = ContractSpecification.findContract(
-                itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentStatusId,
+                itemId, memberId, itemName, memberName, isSubscription, invoiceTypeId, contractStatusId,
+                paymentStatusId,
                 user.getClient().getId());
 
         Page<Contract> contractList = contractRepository.findAll(spec, pageable);
@@ -333,14 +336,6 @@ public class ContractService {
     }
 
     private GetContractAllDto toGetAllDtoFromEntity(Contract contract) {
-        Long totalUnpaidCount = 0L;
-
-        for (Invoice invoice : contract.getInvoiceList()) {
-            if (invoice.getPaymentStatus().getId() == 1) {
-                totalUnpaidCount++;
-            }
-        }
-
         ContractInvoiceTypeDto invoiceType = ContractInvoiceTypeDto.builder()
                 .id(contract.getInvoiceType().getId())
                 .name(contract.getInvoiceType().getName())
@@ -360,11 +355,11 @@ public class ContractService {
                 .id(contract.getId())
                 .memberName(contract.getMember().getName())
                 .itemName(contract.getItem().getName())
-                .chargeAmount(contract.getItemPrice() * contract.getItemAmount())
+                .chargeAmount(contract.getChargeAmount())
                 .contractCycle(contract.getContractCycle())
                 .paymentDueCycle(contract.getPaymentDueCycle())
                 .isSubscription(contract.getIsSubscription())
-                .totalUnpaidCount(totalUnpaidCount)
+                .totalUnpaidCount(contract.getTotalUnpaidCount())
                 .invoiceType(invoiceType)
                 .paymentType(paymentType)
                 .contractStatus(contractStatus)
