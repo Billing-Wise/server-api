@@ -2,6 +2,8 @@ package site.billingwise.api.serverapi.domain.member;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -50,8 +52,8 @@ public class Member extends BaseEntity {
     @Column(length = 20, nullable = false)
     private String phone;
 
-//    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-//    private ConsentAccount consentAccount;
+    @Formula("(SELECT COUNT(*) FROM contract ct WHERE ct.member_id = member_id and ct.is_deleted = false)")
+    private Long contractCount;
 
     @OneToMany(mappedBy = "member", cascade = ALL, orphanRemoval = true)
     private Set<Contract> contractList;

@@ -2,6 +2,7 @@ package site.billingwise.api.serverapi.global.util;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
@@ -9,7 +10,7 @@ import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 public class PoiUtil {
 
     public static String getCellValue(Cell cell) {
-        if (cell == null) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return null;
         }
 
@@ -23,7 +24,7 @@ public class PoiUtil {
     }
 
     public static Integer getCellIntValue(Cell cell) {
-        if (cell == null) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return null;
         }
 
@@ -35,7 +36,7 @@ public class PoiUtil {
     }
 
     public static Long getCellLongValue(Cell cell) {
-        if (cell == null) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return null;
         }
 
@@ -47,7 +48,7 @@ public class PoiUtil {
     }
 
     public static Boolean getCellBooleanValue(Cell cell) {
-        if (cell == null) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
             return null;
         }
 
@@ -56,6 +57,18 @@ public class PoiUtil {
         }
 
         throw new GlobalException(FailureInfo.INVALID_CELL_INPUT);
+    }
+
+    public static Boolean getNotBlank(Row row, int columnCount) {
+
+        for (int i = 0; i < columnCount; i++) {
+            Cell cell = row.getCell(i);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

@@ -11,14 +11,14 @@
 
 회원을 생성합니다.
 
-operation::member/create[snippets='request-cookies,http-request,request-fields,http-response']
+operation::member/create[snippets='request-cookies,http-request,request-fields,http-response,response-fields']
 
 
 === 회원 수정
 
 회원 정보를 수정합니다.
 
-operation::member/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response']
+operation::member/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response,response-fields']
 
 
 === 회원 삭제
@@ -46,6 +46,7 @@ operation::member/get-list[snippets='request-cookies,http-request,http-response,
 
 엑셀 파일을 활용하여 회원 정보를 대량 등록합니다.
 
-operation::member/bulk-register[snippets='request-cookies,http-request,http-response,response-fields']
+operation::member/bulk-register/success[snippets='request-cookies,http-request,http-response,response-fields']
+operation::member/bulk-register/fail[snippets='request-cookies,http-request,http-response,response-fields']
 
 
