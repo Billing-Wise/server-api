@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -108,7 +109,6 @@ public class MemberService {
         Client client = user.getClient();
 
         CreateBulkResultDto createBulkResultDto = toCreateBulkResultDto(file);
-
         if (createBulkResultDto.isSuccess()) {
             List<Member> memberList = new ArrayList<>();
             for (CreateMemberDto createMemberDto : createBulkResultDto.getMemberList()) {
@@ -181,7 +181,12 @@ public class MemberService {
 
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
+                // 첫 행인지 확인
                 if (row.getRowNum() == 0) {
+                    continue;
+                }
+                // 빈 행인지 확인
+                if (!PoiUtil.getNotBlank(row, 4)) {
                     continue;
                 }
 
@@ -199,11 +204,6 @@ public class MemberService {
                     isSuccess = false;
                     bindingResult.getAllErrors()
                             .forEach(error -> errorList.add(row.getRowNum() + "행 : " + error.getDefaultMessage()));
-                }
-
-                if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-                    isSuccess = false;
-                    errorList.add(row.getRowNum() + "행 : " + "중복된 이메일입니다.");
                 }
 
                 createMemberDtoList.add(createMemberDto);

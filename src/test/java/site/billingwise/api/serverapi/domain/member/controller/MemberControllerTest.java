@@ -40,6 +40,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
@@ -70,7 +71,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                 .description("Test description")
                 .build();
 
-        willDoNothing().given(memberService).createMember(createMemberDto);
+        given(memberService.createMember(any(CreateMemberDto.class))).willReturn(3L);
 
         // when
         ResultActions result = mockMvc.perform(post(url)
@@ -91,7 +92,14 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                                 fieldWithPath("phone").description("전화번호(* required)")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("description").description("상세설명")
-                                        .type(JsonFieldType.STRING))));
+                                        .type(JsonFieldType.STRING)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("회원 번호")
+                                        .type(JsonFieldType.NUMBER))));
     }
 
     @Test
@@ -107,7 +115,21 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                 .description("Test description")
                 .build();
 
-        willDoNothing().given(memberService).editMember(anyLong(), eq(createMemberDto));
+        GetMemberDto getMemberDto = GetMemberDto.builder()
+                .id(1L)
+                .name("kim")
+                .email("example@example.com")
+                .phone("01012345678")
+                .description("Member Description")
+                .contractCount(5L)
+                .unPaidCount(2L)
+                .totalInvoiceAmount(10000L)
+                .totalUnpaidAmount(2000L)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        given(memberService.editMember(anyLong(), any(CreateMemberDto.class))).willReturn(getMemberDto);
 
         // when
         ResultActions result = mockMvc.perform(put(url, MEMBER_ID)
@@ -130,6 +152,38 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                                 fieldWithPath("phone").description("전화번호(* required)")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("description").description("상세설명")
+                                        .type(JsonFieldType.STRING)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("응답 데이터")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.id").description("회원 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.name").description("회원명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.email").description("회원 이메일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.phone").description("회원 전화번호")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.description").description("회원 설명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.contractCount")
+                                        .description("관련 계약수")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.unPaidCount").description("미납 계약수")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.totalInvoiceAmount")
+                                        .description("총 청구 금액")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.totalUnpaidAmount")
+                                        .description("총 미납 금액")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.createdAt").description("회원 생성일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.updatedAt").description("회원 정보 수정일")
                                         .type(JsonFieldType.STRING))));
     }
 
@@ -164,7 +218,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                 .id(1L)
                 .name("Name")
                 .email("test@example.com")
-                .phone("123-456-7890")
+                .phone("1234567890")
                 .description("Member Description")
                 .contractCount(5L)
                 .unPaidCount(2L)
@@ -354,8 +408,8 @@ public class MemberControllerTest extends AbstractRestDocsTests {
     }
 
     @Test
-    @DisplayName("회원 대량 등록")
-    public void createMemberBulk() throws Exception {
+    @DisplayName("회원 대량 등록 - 성공")
+    public void createMemberBulkSuccess() throws Exception {
         // given
         String url = "/api/v1/members/bulk-register";
 
@@ -373,15 +427,13 @@ public class MemberControllerTest extends AbstractRestDocsTests {
         List<CreateMemberDto> memberList = new ArrayList<>();
         memberList.add(createMemberDto);
 
-        List<String> errorList = new ArrayList<>();
-        errorList.add("1행 : 중복된 이메일입니다.");
-
         CreateBulkResultDto createBulkResultDto = CreateBulkResultDto.builder()
-                .isSuccess(false)
+                .isSuccess(true)
                 .memberList(memberList)
-                .errorList(errorList)
+                .errorList(new ArrayList<>())
                 .build();
-        given(memberService.createMemberBulk(file)).willReturn(createBulkResultDto);
+
+        given(memberService.createMemberBulk(any(MultipartFile.class))).willReturn(createBulkResultDto);
 
         // when
         ResultActions result = mockMvc.perform(multipart(url)
@@ -391,7 +443,7 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                 .cookie(new Cookie("access", "ACCESS_TOKEN")));
 
         // given
-        result.andDo(document("member/bulk-register",
+        result.andDo(document("member/bulk-register/success",
                 requestCookies(
                         cookieWithName("access").description("엑세스 토큰")),
                 requestParts(
@@ -400,19 +452,57 @@ public class MemberControllerTest extends AbstractRestDocsTests {
                         fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
                         fieldWithPath("message").description("응답 메시지")
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath("data.success").description("성공 여부")
-                                .type(JsonFieldType.BOOLEAN),
-                        fieldWithPath("data.memberList").description("등록된 회원 목록")
+                        fieldWithPath("data").description("등록된 회원 목록")
                                 .type(JsonFieldType.ARRAY),
-                        fieldWithPath("data.memberList[].name").description("회원 이름")
+                        fieldWithPath("data[].name").description("회원 이름")
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath("data.memberList[].email").description("회원 이메일")
+                        fieldWithPath("data[].email").description("회원 이메일")
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath("data.memberList[].phone").description("회원 전화번호")
+                        fieldWithPath("data[].phone").description("회원 전화번호")
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath("data.memberList[].description").description("회원 설명")
+                        fieldWithPath("data[].description").description("회원 설명")
+                                .type(JsonFieldType.STRING))));
+    }
+
+    @Test
+    @DisplayName("회원 대량 등록 - 실패")
+    public void createMemberBulkFail() throws Exception {
+        // given
+        String url = "/api/v1/members/bulk-register";
+
+        MockMultipartFile file = new MockMultipartFile("file", "member_test_success.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "exel data".getBytes());
+
+        List<String> errorList = new ArrayList<>();
+        errorList.add("1행 : 중복된 이메일입니다.");
+
+        CreateBulkResultDto createBulkResultDto = CreateBulkResultDto.builder()
+                .isSuccess(false)
+                .memberList(new ArrayList<>())
+                .errorList(errorList)
+                .build();
+
+        given(memberService.createMemberBulk(any(MultipartFile.class))).willReturn(createBulkResultDto);
+
+        // when
+        ResultActions result = mockMvc.perform(multipart(url)
+                .file(file)
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .characterEncoding("UTF-8")
+                .cookie(new Cookie("access", "ACCESS_TOKEN")));
+
+        // given
+        result.andDo(document("member/bulk-register/fail",
+                requestCookies(
+                        cookieWithName("access").description("엑세스 토큰")),
+                requestParts(
+                        partWithName("file").description("업로드할 엑셀 파일")),
+                responseFields(
+                        fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
+                        fieldWithPath("message").description("응답 메시지")
                                 .type(JsonFieldType.STRING),
-                        fieldWithPath("data.errorList").description("오류 목록")
+                        fieldWithPath("data").description("오류 목록")
                                 .type(JsonFieldType.ARRAY).optional())));
     }
 }

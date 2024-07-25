@@ -113,16 +113,6 @@ public class MemberServiceTest {
     }
 
     @Test
-    void createMemberEmailExist() {
-        // given
-        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
-        when(memberRepository.existsByEmail(createMemberDto.getEmail())).thenReturn(true);
-
-        // when, then
-        assertThrows(GlobalException.class, () -> memberService.createMember(createMemberDto));
-    }
-
-    @Test
     void editMember() {
         // given
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(mockMember));
@@ -137,17 +127,6 @@ public class MemberServiceTest {
         assertEquals(createMemberDto.getEmail(), mockMember.getEmail());
         assertEquals(createMemberDto.getPhone(), mockMember.getPhone());
         assertEquals(createMemberDto.getDescription(), mockMember.getDescription());
-    }
-
-    @Test
-    void editMemberEmailExist() {
-        // given
-        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(mockMember));
-        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
-        when(memberRepository.existsByEmail(createMemberDto.getEmail())).thenReturn(true);
-
-        // when, then
-        assertThrows(GlobalException.class, () -> memberService.editMember(1L, createMemberDto));
     }
 
     @Test
