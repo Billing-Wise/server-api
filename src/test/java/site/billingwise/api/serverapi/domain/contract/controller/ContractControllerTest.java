@@ -398,6 +398,8 @@ public class ContractControllerTest extends AbstractRestDocsTests {
 
         // when
         ResultActions result = mockMvc.perform(get(url)
+                .param("itemId", "1")
+                .param("memberId", "2")
                 .param("itemName", "item")
                 .param("memberName", "member")
                 .param("isSubscription", "true")
@@ -412,6 +414,8 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                 requestCookies(
                         cookieWithName("access").description("엑세스 토큰")),
                 pathParameters(
+                        parameterWithName("itemId").optional().description("상품Id"),
+                        parameterWithName("memberId").optional().description("회원Id"),
                         parameterWithName("itemName").optional().description("상품명"),
                         parameterWithName("memberName").optional().description("회원명"),
                         parameterWithName("isSubscription").optional().description("구독 여부"),
