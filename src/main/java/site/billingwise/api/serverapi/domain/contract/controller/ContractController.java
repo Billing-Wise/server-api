@@ -75,6 +75,8 @@ public class ContractController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping()
     public DataResponse<Page<GetContractAllDto>> getContractList(
+            @RequestParam(name = "itemId", required = false) Long itemId,
+            @RequestParam(name = "memberId", required = false) Long memberId,
             @RequestParam(name = "itemName", required = false) String itemName,
             @RequestParam(name = "memberName", required = false) String memberName,
             @RequestParam(name = "isSubscription", required = false) Boolean isSubscription,
@@ -83,7 +85,7 @@ public class ContractController {
             @RequestParam(name = "paymentTypeId", required = false) Long paymentTypeId,
             Pageable pageable) {
         Page<GetContractAllDto> getContractList = contractService.getContractList(
-                itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentTypeId,
+                itemId, memberId, itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentTypeId,
                 pageable);
 
         return new DataResponse<>(SuccessInfo.CONTRACT_LOADED, getContractList);

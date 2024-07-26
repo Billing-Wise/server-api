@@ -1,8 +1,9 @@
 package site.billingwise.api.serverapi.domain.contract;
 
-
 import jakarta.persistence.*;
 import lombok.*;
+
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -83,6 +84,14 @@ public class Contract extends BaseEntity {
     @Setter
     @Column(nullable = false)
     private Boolean isEasyConsent;
+
+    @Formula("item_amount * item_price")
+    private Long chargeAmount;
+
+    @Formula("(SELECT COUNT(*) FROM invoice i "
+            + "WHERE i.contract_id = contract_id "
+            + "AND i.is_deleted = 0 AND i.payment_status_id = 1 AND i.is_deleted = false)")
+    private Long totalUnpaidCount;
 
     @OneToMany(mappedBy = "contract", cascade = ALL, orphanRemoval = true)
     private Set<Invoice> invoiceList;

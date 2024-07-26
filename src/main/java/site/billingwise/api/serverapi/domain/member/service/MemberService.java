@@ -4,12 +4,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -26,6 +28,7 @@ import site.billingwise.api.serverapi.domain.member.dto.request.CreateMemberDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.CreateBulkResultDto;
 import site.billingwise.api.serverapi.domain.member.dto.response.GetMemberDto;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
+import site.billingwise.api.serverapi.domain.member.repository.MemberSpecification;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
@@ -41,31 +44,27 @@ public class MemberService {
     private final Validator validator;
 
     @Transactional
-    public void createMember(CreateMemberDto createMemberDto) {
+    public Long createMember(CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
-
-        if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-            throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
-        }
 
         Member member = createMemberDto.toEntity(user.getClient());
 
         memberRepository.save(member);
+
+        return member.getId();
     }
 
     @Transactional
-    public void editMember(Long memberId, CreateMemberDto createMemberDto) {
+    public GetMemberDto editMember(Long memberId, CreateMemberDto createMemberDto) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
         Member member = getEntity(user.getClient(), memberId);
-
-        if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-            throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
-        }
 
         member.setName(createMemberDto.getName());
         member.setEmail(createMemberDto.getEmail());
         member.setPhone(createMemberDto.getPhone());
         member.setDescription(createMemberDto.getDescription());
+
+        return toGetDtoFromEntity(member);
     }
 
     public void deleteMember(Long memberId) {
@@ -90,18 +89,14 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GetMemberDto> getMemberList(String memberName, Pageable pageable) {
+    public Page<GetMemberDto> getMemberList(String name, String email, String phone, Pageable pageable) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
-        Page<Member> memberList = null;
+        Specification<Member> spec = MemberSpecification.findMember(
+                name, email, phone, user.getClient().getId());
 
-        if (memberName == null) {
-            memberList = memberRepository.findByClientId(user.getClient().getId(), pageable);
-        } else {
-            memberList = memberRepository.findByClientIdAndName(user.getClient().getId(),
-                    memberName, pageable);
-        }
+        Page<Member> memberList = memberRepository.findAll(spec, pageable);
 
         Page<GetMemberDto> getMemberDtoList = memberList.map((member) -> toGetDtoFromEntity(member));
 
@@ -114,7 +109,6 @@ public class MemberService {
         Client client = user.getClient();
 
         CreateBulkResultDto createBulkResultDto = toCreateBulkResultDto(file);
-
         if (createBulkResultDto.isSuccess()) {
             List<Member> memberList = new ArrayList<>();
             for (CreateMemberDto createMemberDto : createBulkResultDto.getMemberList()) {
@@ -139,7 +133,6 @@ public class MemberService {
     }
 
     private GetMemberDto toGetDtoFromEntity(Member member) {
-        long contractCount = 0L;
         long unPaidCount = 0L;
         long totalInvoiceAmount = 0L;
         long totalUnpaidAmount = 0L;
@@ -155,7 +148,6 @@ public class MemberService {
                 }
             }
 
-            contractCount++;
             if (isUnpaid) {
                 unPaidCount++;
             }
@@ -167,11 +159,11 @@ public class MemberService {
                 .email(member.getEmail())
                 .phone(member.getPhone())
                 .description(member.getDescription())
-                .contractCount(contractCount)
+                .contractCount(member.getContractCount())
                 .unPaidCount(unPaidCount)
                 .totalInvoiceAmount(totalInvoiceAmount)
                 .totalUnpaidAmount(totalUnpaidAmount)
-                .contractCount(contractCount)
+                .contractCount(member.getContractCount())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
                 .build();
@@ -189,7 +181,12 @@ public class MemberService {
 
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
+                // 첫 행인지 확인
                 if (row.getRowNum() == 0) {
+                    continue;
+                }
+                // 빈 행인지 확인
+                if (!PoiUtil.getNotBlank(row, 4)) {
                     continue;
                 }
 
@@ -207,11 +204,6 @@ public class MemberService {
                     isSuccess = false;
                     bindingResult.getAllErrors()
                             .forEach(error -> errorList.add(row.getRowNum() + "행 : " + error.getDefaultMessage()));
-                }
-
-                if (memberRepository.existsByEmail(createMemberDto.getEmail())) {
-                    isSuccess = false;
-                    errorList.add(row.getRowNum() + "행 : " + "중복된 이메일입니다.");
                 }
 
                 createMemberDtoList.add(createMemberDto);
