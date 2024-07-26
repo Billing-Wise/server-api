@@ -326,7 +326,15 @@ public class ContractServiceTest {
 
         // when
         Page<GetContractAllDto> result = contractService.getContractList(
-                itemName, memberName, isSubscription, invoiceTypeId, contractStatusId, paymentStatusId, pageable);
+                null, 
+                null, 
+                itemName, 
+                memberName, 
+                isSubscription, 
+                invoiceTypeId, 
+                contractStatusId, 
+                paymentStatusId,
+                pageable);
 
         // then
         assertEquals(1, result.getContent().size());
@@ -341,7 +349,7 @@ public class ContractServiceTest {
         when(contractRepository.save(any(Contract.class))).thenReturn(mockContract);
 
         doNothing().when(validator).validate(any(), any(BindingResult.class));
-        
+
         InputStream inputStream = getClass().getResourceAsStream("/exel/contract_test_success.xlsx");
         MockMultipartFile file = new MockMultipartFile("file", "contract_test_success.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", inputStream);
