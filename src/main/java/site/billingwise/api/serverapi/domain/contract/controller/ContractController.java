@@ -41,10 +41,10 @@ public class ContractController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
-    public BaseResponse createContract(@Valid @RequestBody CreateContractDto createContractDto) {
-        contractService.createContract(createContractDto);
+    public DataResponse<Long> createContract(@Valid @RequestBody CreateContractDto createContractDto) {
+        Long contractId = contractService.createContract(createContractDto);
 
-        return new BaseResponse(SuccessInfo.CONTRACT_CREATED);
+        return new DataResponse<>(SuccessInfo.CONTRACT_CREATED, contractId);
     }
 
     @ResponseStatus(HttpStatus.OK)

@@ -46,7 +46,7 @@ public class CreateContractDto {
     private Integer contractCycle;
 
     @NotNull(message = "납부 기한은 필수 입력값입니다.")
-    @Min(value = 1, message = "납부 기한은 1일 이상이어야합니다.")
+    @Min(value = 0, message = "납부 기한은 0일 이상이어야합니다.")
     private Integer paymentDueCycle;
     
 }

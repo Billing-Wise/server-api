@@ -44,6 +44,7 @@ import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.PoiUtil;
@@ -54,6 +55,7 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 public class ContractService {
     private final ItemService itemService;
     private final MemberService memberService;
+    private final EmailService emailService;
 
     private final ConsentAccountRepository consentAccountRepository;
     private final ContractRepository contractRepository;
@@ -61,13 +63,15 @@ public class ContractService {
     private final Validator validator;
 
     @Transactional
-    public void createContract(CreateContractDto createContractDto) {
+    public Long createContract(CreateContractDto createContractDto) {
         User user = SecurityUtil.getCurrentUser()
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Contract contract = toEntityFromCreateDto(user.getClient(), createContractDto);
 
         contractRepository.save(contract);
+
+        return contract.getId();
     }
 
     @Transactional
@@ -259,8 +263,8 @@ public class ContractService {
                 && createContractDto.getIsEasyConsent();
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, consentNeeded ? 1L : 2L);
 
-        if (createContractDto.getContractCycle() > createContractDto.getPaymentDueCycle()) {
-            throw new GlobalException(FailureInfo.INVALID_DUE_CYCLE);
+        if (consentNeeded) {
+            emailService.createMailConsent(member.getEmail());
         }
 
         Contract contract = Contract.builder()
