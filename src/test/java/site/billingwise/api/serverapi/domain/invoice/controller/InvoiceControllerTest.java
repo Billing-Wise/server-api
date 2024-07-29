@@ -2,6 +2,7 @@ package site.billingwise.api.serverapi.domain.invoice.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
@@ -256,21 +257,27 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.paymentType").description("결제 수단")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.paymentType.id").description("결제 수단 ID")
+                                fieldWithPath("data.paymentType.id")
+                                        .description("결제 수단 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.paymentType.name").description("결제 수단명")
+                                fieldWithPath("data.paymentType.name")
+                                        .description("결제 수단명")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.invoiceType").description("청구 타입")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.invoiceType.id").description("청구 타입 ID")
+                                fieldWithPath("data.invoiceType.id")
+                                        .description("청구 타입 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.invoiceType.name").description("청구 타입명")
+                                fieldWithPath("data.invoiceType.name")
+                                        .description("청구 타입명")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.paymentStatus").description("결제 상태")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.paymentStatus.id").description("결제 상태 ID")
+                                fieldWithPath("data.paymentStatus.id")
+                                        .description("결제 상태 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.paymentStatus.name").description("결제 상태명")
+                                fieldWithPath("data.paymentStatus.name")
+                                        .description("결제 상태명")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.item").description("상품 정보")
                                         .type(JsonFieldType.OBJECT),
@@ -284,17 +291,20 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.member").description("회원 정보")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.member.memberId").description("회원 ID")
+                                fieldWithPath("data.member.memberId")
+                                        .description("회원 ID")
                                         .type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.member.name").description("회원명")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.member.email").description("회원 이메일")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("data.member.phone").description("회원 전화번호")
+                                fieldWithPath("data.member.phone")
+                                        .description("회원 전화번호")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.chargeAmount").description("청구 금액")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.isSubscription").description("구독 여부")
+                                fieldWithPath("data.isSubscription")
+                                        .description("구독 여부")
                                         .type(JsonFieldType.BOOLEAN),
                                 fieldWithPath("data.contractDate").description("계약일")
                                         .type(JsonFieldType.STRING),
@@ -340,8 +350,10 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
 
         List<GetInvoiceListDto> invoiceList = Arrays.asList(getInvoiceListDto1, getInvoiceListDto2);
 
-        PageImpl<GetInvoiceListDto> page = new PageImpl<>(invoiceList, PageRequest.of(0, 20), invoiceList.size());
-        given(invoiceService.getInvoiceList(anyLong(), anyLong(), anyLong(), any(LocalDate.class), any(LocalDate.class),
+        PageImpl<GetInvoiceListDto> page = new PageImpl<>(invoiceList, PageRequest.of(0, 20),
+                invoiceList.size());
+        given(invoiceService.getInvoiceList(anyLong(), anyString(), anyString(), anyLong(), anyLong(),
+                any(LocalDate.class), any(LocalDate.class),
                 any(LocalDate.class), any(LocalDate.class), any(LocalDate.class), any(LocalDate.class),
                 any(Pageable.class)))
                 .willReturn(page);
@@ -366,77 +378,138 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                         requestCookies(
                                 cookieWithName("access").description("엑세스 토큰")),
                         pathParameters(
-                                parameterWithName("contractId").optional().description("계약 ID"),
-                                parameterWithName("paymentStatusId").optional().description("결제 상태 ID"),
-                                parameterWithName("paymentTypeId").optional().description("결제 수단 ID"),
-                                parameterWithName("startContractDate").optional().description("계약 시작일"),
-                                parameterWithName("endContractDate").optional().description("계약 종료일"),
-                                parameterWithName("startDueDate").optional().description("납부 시작일"),
-                                parameterWithName("endDueDate").optional().description("납부 종료일"),
-                                parameterWithName("startCreatedAt").optional().description("생성 시작일"),
-                                parameterWithName("endCreatedAt").optional().description("생성 종료일"),
-                                parameterWithName("page").optional().description("페이지 번호 (기본값: 0)"),
-                                parameterWithName("size").optional().description("페이지 크기 (기본값: 20)")),
+                                parameterWithName("contractId").optional()
+                                        .description("계약 ID"),
+                                parameterWithName("itmeName").optional()
+                                        .description("상품명"),
+                                parameterWithName("memberName").optional()
+                                        .description("회원명"),
+                                parameterWithName("paymentStatusId").optional()
+                                        .description("결제 상태 ID"),
+                                parameterWithName("paymentTypeId").optional()
+                                        .description("결제 수단 ID"),
+                                parameterWithName("startContractDate").optional()
+                                        .description("계약 시작일"),
+                                parameterWithName("endContractDate").optional()
+                                        .description("계약 종료일"),
+                                parameterWithName("startDueDate").optional()
+                                        .description("납부 시작일"),
+                                parameterWithName("endDueDate").optional()
+                                        .description("납부 종료일"),
+                                parameterWithName("startCreatedAt").optional()
+                                        .description("생성 시작일"),
+                                parameterWithName("endCreatedAt").optional()
+                                        .description("생성 종료일"),
+                                parameterWithName("page").optional()
+                                        .description("페이지 번호 (기본값: 0)"),
+                                parameterWithName("size").optional()
+                                        .description("페이지 크기 (기본값: 20)")),
                         responseFields(
-                                fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
-                                fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
-                                fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.content").description("페이지 청구서 목록").type(JsonFieldType.ARRAY),
-                                fieldWithPath("data.content[].invoiceId").description("청구서 ID")
+                                fieldWithPath("code").description("응답 코드")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.content[].contractId").description("계약 ID")
-                                        .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.content[].memberName").description("회원명")
+                                fieldWithPath("message").description("응답 메시지")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].itemName").description("상품명").type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].chargeAmount").description("청구 금액")
-                                        .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.content[].paymentType").description("결제 수단 정보")
+                                fieldWithPath("data").description("응답 데이터")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.content[].paymentType.id").description("결제 수단 ID")
+                                fieldWithPath("data.content").description("페이지 청구서 목록")
+                                        .type(JsonFieldType.ARRAY),
+                                fieldWithPath("data.content[].invoiceId")
+                                        .description("청구서 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.content[].paymentType.name").description("결제 수단명")
+                                fieldWithPath("data.content[].contractId")
+                                        .description("계약 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.content[].memberName")
+                                        .description("회원명")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].paymentStatus").description("결제 상태 정보")
+                                fieldWithPath("data.content[].itemName")
+                                        .description("상품명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.content[].chargeAmount")
+                                        .description("청구 금액")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.content[].paymentType")
+                                        .description("결제 수단 정보")
                                         .type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.content[].paymentStatus.id").description("결제 상태 ID")
+                                fieldWithPath("data.content[].paymentType.id")
+                                        .description("결제 수단 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.content[].paymentStatus.name").description("결제 상태명")
+                                fieldWithPath("data.content[].paymentType.name")
+                                        .description("결제 수단명")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].contractDate").description("계약일")
-                                        .type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].dueDate").description("납부 기한").type(JsonFieldType.STRING),
-                                fieldWithPath("data.content[].createdAt").description("청구서 생성일")
-                                        .type(JsonFieldType.STRING),
-                                fieldWithPath("data.pageable").description("페이징 정보").type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.pageable.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.pageable.sort.empty").description("정렬 정보 비어 있음 여부")
-                                        .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.pageable.sort.sorted").description("정렬 여부")
-                                        .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.pageable.sort.unsorted").description("정렬되지 않음 여부")
-                                        .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.pageable.offset").description("페이징 오프셋").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.pageable.pageNumber").description("페이지 번호")
+                                fieldWithPath("data.content[].paymentStatus")
+                                        .description("결제 상태 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.content[].paymentStatus.id")
+                                        .description("결제 상태 ID")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.pageable.pageSize").description("페이지 크기")
+                                fieldWithPath("data.content[].paymentStatus.name")
+                                        .description("결제 상태명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.content[].contractDate")
+                                        .description("계약일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.content[].dueDate")
+                                        .description("납부 기한")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.content[].createdAt")
+                                        .description("청구서 생성일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.pageable").description("페이징 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.pageable.sort").description("정렬 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.pageable.sort.empty")
+                                        .description("정렬 정보 비어 있음 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.pageable.sort.sorted")
+                                        .description("정렬 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.pageable.sort.unsorted")
+                                        .description("정렬되지 않음 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.pageable.offset")
+                                        .description("페이징 오프셋")
                                         .type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.pageable.paged").description("페이징 여부").type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.pageable.unpaged").description("페이징되지 않음 여부")
+                                fieldWithPath("data.pageable.pageNumber")
+                                        .description("페이지 번호")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.pageable.pageSize")
+                                        .description("페이지 크기")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.pageable.paged")
+                                        .description("페이징 여부")
                                         .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.last").description("마지막 페이지 여부").type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.totalPages").description("전체 페이지 수").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.totalElements").description("전체 요소 수").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.size").description("페이지 크기").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.number").description("현재 페이지 번호").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.sort").description("정렬 정보").type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.sort.empty").description("정렬 정보 비어 있음 여부")
+                                fieldWithPath("data.pageable.unpaged")
+                                        .description("페이징되지 않음 여부")
                                         .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.sort.sorted").description("정렬 여부").type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.sort.unsorted").description("정렬되지 않음 여부")
+                                fieldWithPath("data.last").description("마지막 페이지 여부")
                                         .type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.first").description("첫 페이지 여부").type(JsonFieldType.BOOLEAN),
-                                fieldWithPath("data.numberOfElements").description("요소 개수").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.empty").description("비어 있음 여부").type(JsonFieldType.BOOLEAN))));
+                                fieldWithPath("data.totalPages").description("전체 페이지 수")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.totalElements")
+                                        .description("전체 요소 수")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.size").description("페이지 크기")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.number").description("현재 페이지 번호")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.sort").description("정렬 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.sort.empty")
+                                        .description("정렬 정보 비어 있음 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.sort.sorted").description("정렬 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.sort.unsorted")
+                                        .description("정렬되지 않음 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.first").description("첫 페이지 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.numberOfElements")
+                                        .description("요소 개수")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.empty").description("비어 있음 여부")
+                                        .type(JsonFieldType.BOOLEAN))));
     }
 }

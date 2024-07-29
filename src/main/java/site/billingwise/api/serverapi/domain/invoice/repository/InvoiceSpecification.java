@@ -16,6 +16,8 @@ import site.billingwise.api.serverapi.global.util.EnumUtil;
 public class InvoiceSpecification {
     public static Specification<Invoice> findContract(
             Long contractId,
+            String itemName,
+            String memberName,
             Long paymentStatusId,
             Long paymentTypeId,
             LocalDate startContractDate,
@@ -38,6 +40,14 @@ public class InvoiceSpecification {
 
             if (contractId != null) {
                 predicates.add(criteriaBuilder.equal(root.get("contract").get("id"), contractId));
+            }
+
+            if (itemName != null) {
+                predicates.add(criteriaBuilder.like(root.get("contract").get("item").get("name"), "%" + itemName + "%"));
+            }
+
+            if (memberName != null) {
+                predicates.add(criteriaBuilder.like(root.get("contract").get("member").get("name"), "%" + memberName + "%"));
             }
 
             if (paymentStatusId != null) {

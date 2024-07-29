@@ -207,6 +207,8 @@ public class InvoiceService {
     @Transactional(readOnly = true)
     public Page<GetInvoiceListDto> getInvoiceList(
             Long contractId,
+            String itemName,
+            String memberName,
             Long paymentStatusId,
             Long paymentTypeId,
             LocalDate startContractDate,
@@ -220,7 +222,7 @@ public class InvoiceService {
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Specification<Invoice> spec = InvoiceSpecification.findContract(
-                contractId, paymentStatusId, paymentTypeId, startContractDate, endContractDate, startDueDate,
+                contractId, itemName, memberName, paymentStatusId, paymentTypeId, startContractDate, endContractDate, startDueDate,
                 endDueDate, startCreatedAt, endCreatedAt,
                 user.getClient().getId());
 

@@ -75,6 +75,8 @@ public class InvoiceController {
     @GetMapping()
     public DataResponse<Page<GetInvoiceListDto>> getInvoiceList(
             @RequestParam(name = "contractId", required = false) Long contractId,
+            @RequestParam(name = "itemName", required = false) String itemName,
+            @RequestParam(name = "memberName", required = false) String memberName,
             @RequestParam(name = "paymentStatusId", required = false) Long paymentStatusId,
             @RequestParam(name = "paymentTypeId", required = false) Long paymentTypeId,
             @RequestParam(name = "startContractDate", required = false) LocalDate startContractDate,
@@ -85,7 +87,7 @@ public class InvoiceController {
             @RequestParam(name = "endCreatedAt", required = false) LocalDate endCreatedAt,
             Pageable pageable) {
         Page<GetInvoiceListDto> getInvoiceList = invoiceService.getInvoiceList(
-                contractId, paymentStatusId, paymentTypeId, startContractDate, endContractDate,
+                contractId, itemName, memberName, paymentStatusId, paymentTypeId, startContractDate, endContractDate,
                 startDueDate, endDueDate, startCreatedAt, endCreatedAt, pageable);
 
         return new DataResponse<>(SuccessInfo.INVOICE_LOADED, getInvoiceList);
