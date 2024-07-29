@@ -8,7 +8,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: 1004
+      password:
 
   jpa:
     database: mysql
