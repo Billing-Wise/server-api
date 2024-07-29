@@ -34,3 +34,6 @@ app:
   auth:
     token:
       secret-key: ${JWT_SECRET_KEY}
+
+front:
+  url: https://www.billingwise.site/
