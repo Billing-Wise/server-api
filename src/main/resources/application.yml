@@ -42,3 +42,9 @@ logging:
   level:
     org:
       hibernate: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
