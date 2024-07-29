@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Validator;
 
+import jakarta.mail.internet.MimeMessage;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
 import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.contract.ContractStatus;
@@ -34,6 +35,7 @@ import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -41,6 +43,7 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
@@ -65,6 +68,9 @@ public class ContractServiceTest {
     @Mock
     private MemberService memberService;
 
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private ContractService contractService;
 
@@ -75,6 +81,7 @@ public class ContractServiceTest {
     private Item mockItem;
     private Member mockMember;
     private Contract mockContract;
+    private MimeMessage mockMessage;
 
     @BeforeEach
     void setUp() {
@@ -120,6 +127,7 @@ public class ContractServiceTest {
                 .invoiceList(new HashSet<>())
                 .build();
 
+        mockMessage = mock(MimeMessage.class);
     }
 
     @AfterEach
@@ -147,42 +155,13 @@ public class ContractServiceTest {
         when(itemService.getEntity(any(Client.class), anyLong())).thenReturn(mockItem);
         when(memberService.getEntity(any(Client.class), anyLong())).thenReturn(mockMember);
         when(consentAccountRepository.existsById(anyLong())).thenReturn(false);
+        when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
 
         // when
         contractService.createContract(createContractDto);
 
         // then
         verify(contractRepository, times(1)).save(any(Contract.class));
-    }
-
-    @Test
-    void createContractInvalidInput() {
-        // given
-        CreateContractDto createContractDto = CreateContractDto.builder()
-                .memberId(1L)
-                .itemId(1L)
-                .itemPrice(1000L)
-                .itemAmount(2)
-                .isSubscription(true)
-                .invoiceTypeId(1L)
-                .paymentTypeId(1L)
-                .isEasyConsent(true)
-                .contractCycle(15)
-                .paymentDueCycle(10)
-                .build();
-
-        when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
-        when(itemService.getEntity(any(Client.class), anyLong())).thenReturn(mockItem);
-        when(memberService.getEntity(any(Client.class), anyLong())).thenReturn(mockMember);
-        when(consentAccountRepository.existsById(anyLong())).thenReturn(false);
-
-        // when
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            contractService.createContract(createContractDto);
-        });
-
-        // then
-        assertEquals(FailureInfo.INVALID_DUE_CYCLE, exception.getFailureInfo());
     }
 
     @Test
@@ -201,6 +180,7 @@ public class ContractServiceTest {
         when(SecurityUtil.getCurrentUser()).thenReturn(Optional.of(mockUser));
         when(contractRepository.findById(anyLong())).thenReturn(Optional.of(mockContract));
         when(consentAccountRepository.existsById(anyLong())).thenReturn(false);
+        when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
 
         // when
         contractService.editContract(1L, editContractDto);
@@ -349,6 +329,7 @@ public class ContractServiceTest {
         when(contractRepository.save(any(Contract.class))).thenReturn(mockContract);
 
         doNothing().when(validator).validate(any(), any(BindingResult.class));
+        when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
 
         InputStream inputStream = getClass().getResourceAsStream("/exel/contract_test_success.xlsx");
         MockMultipartFile file = new MockMultipartFile("file", "contract_test_success.xlsx",

@@ -34,3 +34,7 @@ app:
   auth:
     token:
       secret-key: jwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocaljwtsecretkeyforlocal
+
+
+front:
+  url: http://localhost:5173/

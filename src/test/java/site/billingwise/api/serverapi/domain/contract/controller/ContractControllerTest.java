@@ -124,7 +124,7 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                 .paymentDueCycle(15)
                 .build();
 
-        willDoNothing().given(contractService).createContract(createContractDto);
+        given(contractService.createContract(createContractDto)).willReturn(1L);
 
         // when
         ResultActions result = mockMvc.perform(post(url)
@@ -166,6 +166,13 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.NUMBER),
                                 fieldWithPath("paymentDueCycle")
                                         .description("납부 기한(* required, 1~30일)")
+                                        .type(JsonFieldType.NUMBER)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("생성된 계약ID")
                                         .type(JsonFieldType.NUMBER))));
     }
 
