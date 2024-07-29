@@ -3,6 +3,8 @@ package site.billingwise.api.serverapi.domain.contract.service;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -44,6 +46,7 @@ import site.billingwise.api.serverapi.domain.member.service.MemberService;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.PoiUtil;
@@ -54,20 +57,31 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 public class ContractService {
     private final ItemService itemService;
     private final MemberService memberService;
+    private final EmailService emailService;
 
     private final ConsentAccountRepository consentAccountRepository;
     private final ContractRepository contractRepository;
 
     private final Validator validator;
 
+    private ArrayList<Contract> emailArr;
+
     @Transactional
-    public void createContract(CreateContractDto createContractDto) {
+    public Long createContract(CreateContractDto createContractDto) {
         User user = SecurityUtil.getCurrentUser()
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+        emailArr = new ArrayList<>();
 
         Contract contract = toEntityFromCreateDto(user.getClient(), createContractDto);
 
         contractRepository.save(contract);
+
+        emailArr.forEach(c -> {
+            emailService.createMailConsent(c.getMember().getEmail(), c.getId());
+        });
+
+        return contract.getId();
     }
 
     @Transactional
@@ -84,6 +98,10 @@ public class ContractService {
         boolean consentNeeded = !existConsent && editContractDto.getPaymentTypeId() == 2
                 && editContractDto.getIsEasyConsent();
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, consentNeeded ? 1L : 2L);
+
+        if (consentNeeded) {
+            emailService.createMailConsent(contract.getMember().getEmail(), contract.getId());
+        }
 
         contract.setItemPrice(editContractDto.getItemPrice());
         contract.setItemAmount(editContractDto.getItemAmount());
@@ -157,6 +175,7 @@ public class ContractService {
         boolean isSuccess = true;
         List<CreateContractDto> createContractDtoList = new ArrayList<>();
         List<String> errorList = new ArrayList<>();
+        emailArr = new ArrayList<>();
 
         // row validation test
         try (InputStream inputStream = file.getInputStream();
@@ -167,6 +186,11 @@ public class ContractService {
 
                 // 제목행 skip
                 if (row.getRowNum() == 0) {
+                    continue;
+                }
+
+                // 빈 행인지 확인
+                if (!PoiUtil.getNotBlank(row, 9)) {
                     continue;
                 }
 
@@ -212,6 +236,7 @@ public class ContractService {
                     try {
                         Contract contract = toEntityFromCreateDto(user.getClient(), createContractDto);
                         contractRepository.save(contract);
+
                     } catch (Exception e) {
                         isSuccess = false;
                         rowValidation = false;
@@ -225,6 +250,12 @@ public class ContractService {
             }
         } catch (Exception e) {
             throw new GlobalException(FailureInfo.INVALID_FILE);
+        }
+
+        if (isSuccess) {
+            emailArr.forEach(c -> {
+                emailService.createMailConsent(c.getMember().getEmail(), c.getId());
+            });
         }
 
         CreateBulkContractResultDto createBulkResultDto = CreateBulkContractResultDto.builder()
@@ -259,9 +290,7 @@ public class ContractService {
                 && createContractDto.getIsEasyConsent();
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, consentNeeded ? 1L : 2L);
 
-        if (createContractDto.getContractCycle() > createContractDto.getPaymentDueCycle()) {
-            throw new GlobalException(FailureInfo.INVALID_DUE_CYCLE);
-        }
+        boolean isEasyConsent = paymentType == PaymentType.PAYER_PAYMENT ? false : createContractDto.getIsEasyConsent();
 
         Contract contract = Contract.builder()
                 .member(member)
@@ -271,11 +300,15 @@ public class ContractService {
                 .isSubscription(createContractDto.getIsSubscription())
                 .paymentType(paymentType)
                 .invoiceType(invoiceType)
-                .isEasyConsent(createContractDto.getIsEasyConsent())
+                .isEasyConsent(isEasyConsent)
                 .contractCycle(createContractDto.getContractCycle())
                 .paymentDueCycle(createContractDto.getPaymentDueCycle())
                 .contractStatus(contractStatus)
                 .build();
+
+        if (consentNeeded) {
+            emailArr.add(contract);
+        }
 
         return contract;
     }

@@ -26,6 +26,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromMail;
 
+    @Value("${front.url}")
+    private String frontUrl;
+
     private Integer code;
 
     public void sendMailCode(String email) {
@@ -74,6 +77,30 @@ public class EmailService {
         return message;
     }
 
+    public MimeMessage createMailConsent(String email, Long contractId) {
+        MimeMessage message = mailSender.createMimeMessage();
 
+        try {
+            message.setFrom(fromMail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
+            message.setSubject("[빌링와이즈] 자동 결제 간편 동의");
+            String body = "";
+            body += "<h1>" + "안녕하세요." + "</h1>";
+            body += "<h1>" + "빌링와이즈 입니다." + "</h1>";
+            body += "<h3>" + "아래 링크를 통해 자동 결제 간편 동의를 완료해주세요" + "</h3><br>";
+            body += "<div align='center' style='border:1px solid black; font-family:verdana;'>";
+            body += "<span style='color:blue'>" + frontUrl + "m/consent/member/" + contractId + "</span>";
+            body += "</div>";
+
+            message.setText(body, "UTF-8", "html");
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("exception", e);
+            throw new GlobalException(FailureInfo.SEND_MAIL_CODE_FAIL);
+        }
+
+        return message;
+    }
 
 }
