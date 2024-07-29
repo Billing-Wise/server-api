@@ -25,9 +25,7 @@ import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -259,7 +257,7 @@ public class EasyConsentServiceTest {
         MockMultipartFile signImage = new MockMultipartFile(
                 "signImage", "sign.png", "image/png", "consent data".getBytes());
 
-        Member member = Member.builder().id(1L).name("홍길동").build();
+        Member member = Member.builder().id(1L).name("홍길동").contractList(new HashSet<Contract>()).build();
         Contract contract = Contract.builder()
                 .id(contractId)
                 .paymentType(PaymentType.AUTO_TRANSFER)
@@ -267,6 +265,8 @@ public class EasyConsentServiceTest {
                 .contractStatus(ContractStatus.PENDING)
                 .member(member)
                 .build();
+
+        member.getContractList().add(contract);
 
         when(contractRepository.findWithMemberById(contractId)).thenReturn(Optional.of(contract));
         when(consentService.uploadImage(signImage)).thenReturn("sign-url");
