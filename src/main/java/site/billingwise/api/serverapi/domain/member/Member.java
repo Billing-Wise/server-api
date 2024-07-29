@@ -41,7 +41,7 @@ public class Member extends BaseEntity {
     private String name;
 
     @Setter
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String description;
 
     @Setter

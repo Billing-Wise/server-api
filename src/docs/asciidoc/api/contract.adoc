@@ -11,7 +11,7 @@
 
 계약을 생성합니다.
 
-operation::contract/create[snippets='request-cookies,http-request,request-fields,http-response']
+operation::contract/create[snippets='request-cookies,http-request,request-fields,http-response,response-fields']
 
 
 === 계약 수정
@@ -39,7 +39,7 @@ operation::contract/get[snippets='request-cookies,http-request,path-parameters,h
 
 계약 목록의 조회합니다
 
-operation::contract/get-list[snippets='request-cookies,http-request,http-response,response-fields']\
+operation::contract/get-list[snippets='request-cookies,http-request,http-response,response-fields']
 
 
 === 계약 대량 등록
