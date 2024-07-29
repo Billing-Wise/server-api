@@ -164,7 +164,7 @@ public class InvoiceServiceTest {
         EditInvoiceDto dto = EditInvoiceDto.builder()
                 .paymentTypeId(1L)
                 .chargeAmount(2000L)
-                .contractDate(LocalDate.now().plusDays(1))
+                .contractDate(LocalDate.now().plusDays(5))
                 .dueDate(LocalDate.now().plusDays(30))
                 .build();
 

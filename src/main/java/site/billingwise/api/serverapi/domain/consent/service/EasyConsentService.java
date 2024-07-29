@@ -124,6 +124,18 @@ public class EasyConsentService {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_CONSENT);
         }
 
+        List<Contract> contractList = contractRepository
+                .findAllByMemberAndPaymentTypeAndContractStatusAndIsEasyConsent(
+                        contract.getMember(),
+                        PaymentType.AUTO_TRANSFER,
+                        ContractStatus.PENDING,
+                        true
+                );
+
+        for (Contract c : contractList) {
+            c.setContractStatus(ContractStatus.PROGRESS);
+        }
+
         consentAccountRepository.save(registerConsentDto.toEntity(
                 contract.getMember(),
                 consentService.uploadImage(multipartFile))
