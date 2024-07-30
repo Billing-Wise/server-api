@@ -43,11 +43,13 @@ public class InvoiceSpecification {
             }
 
             if (itemName != null) {
-                predicates.add(criteriaBuilder.like(root.get("contract").get("item").get("name"), "%" + itemName + "%"));
+                predicates
+                        .add(criteriaBuilder.like(root.get("contract").get("item").get("name"), "%" + itemName + "%"));
             }
 
             if (memberName != null) {
-                predicates.add(criteriaBuilder.like(root.get("contract").get("member").get("name"), "%" + memberName + "%"));
+                predicates.add(
+                        criteriaBuilder.like(root.get("contract").get("member").get("name"), "%" + memberName + "%"));
             }
 
             if (paymentStatusId != null) {

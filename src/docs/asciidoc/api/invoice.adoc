@@ -7,18 +7,25 @@
 
 청구 관련 API입니다.
 
+=== 청구서 발송
+
+이메일과 문자로 청구서를 발송합니다.
+
+operation::invoice/send[snippets='request-cookies,http-request,path-parameters,http-response']
+
+
 === 청구 생성
 
 청구 정보를 생성합니다.
 
-operation::invoice/create[snippets='request-cookies,http-request,request-fields,http-response']
+operation::invoice/create[snippets='request-cookies,http-request,request-fields,http-response,response-fields']
 
 
 === 청구 수정
 
 청구 정보를 수정합니다.
 
-operation::invoice/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response']
+operation::invoice/edit[snippets='request-cookies,http-request,path-parameters,request-fields,http-response,response-fields']
 
 
 === 청구 삭제

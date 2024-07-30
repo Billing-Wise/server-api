@@ -65,6 +65,7 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
     private PaymentTypeDto paymentTypeDto;
     private InvoiceTypeDto invoiceTypeDto;
     private PaymentStatusDto paymentStatusDto;
+    private GetInvoiceDto getInvoiceDto;
 
     @BeforeEach
     void setUp() {
@@ -97,6 +98,42 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                 .name(PaymentStatus.PENDING.getName())
                 .build();
 
+        getInvoiceDto = GetInvoiceDto.builder()
+                .contractId(1L)
+                .invoiceId(1L)
+                .paymentType(paymentTypeDto)
+                .invoiceType(invoiceTypeDto)
+                .paymentStatus(paymentStatusDto)
+                .item(itemDto)
+                .member(memberDto)
+                .chargeAmount(10000L)
+                .isSubscription(true)
+                .contractDate(LocalDateTime.of(2023, 7, 1, 0, 0))
+                .dueDate(LocalDateTime.of(2023, 7, 15, 0, 0))
+                .createdAt(LocalDateTime.of(2023, 7, 1, 0, 0))
+                .updatedAt(LocalDateTime.of(2023, 7, 10, 0, 0))
+                .build();
+    }
+
+    @Test
+    @DisplayName("청구서 발송")
+    void sendInvoice() throws Exception {
+        // given
+        String url = "/api/v1/invoices/{invoiceId}/send";
+
+        willDoNothing().given(invoiceService).sendInvoice(anyLong());
+
+        // when
+        ResultActions result = mockMvc.perform(get(url, 1L)
+                .cookie(new Cookie("access", "ACCESS_TOKEN")));
+
+        // then
+        result.andExpect(status().isOk())
+                .andDo(document("invoice/send",
+                        requestCookies(
+                                cookieWithName("access").description("엑세스 토큰")),
+                        pathParameters(
+                                parameterWithName("invoiceId").description("청구 ID"))));
     }
 
     @Test
@@ -113,7 +150,7 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                 .dueDate(LocalDate.now().plusDays(30))
                 .build();
 
-        willDoNothing().given(invoiceService).createInvoice(createInvoiceDto);
+        given(invoiceService.createInvoice(any(CreateInvoiceDto.class))).willReturn(1L);
 
         // when
         ResultActions result = mockMvc.perform(post(url)
@@ -141,23 +178,30 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("dueDate")
                                         .description("결제 기한(* required)")
-                                        .type(JsonFieldType.STRING))));
+                                        .type(JsonFieldType.STRING)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("생성된 청구ID")
+                                        .type(JsonFieldType.NUMBER))));
     }
 
     @Test
-    @DisplayName("청구 삭제")
+    @DisplayName("청구 수정")
     void editInvoice() throws Exception {
         // given
         String url = "/api/v1/invoices/{invoiceId}";
 
         EditInvoiceDto editInvoiceDto = EditInvoiceDto.builder()
-                .paymentTypeId(2L)
+                .paymentTypeId(1L)
                 .chargeAmount(10000L)
                 .contractDate(LocalDate.now().plusDays(2))
                 .dueDate(LocalDate.now().plusDays(30))
                 .build();
 
-        willDoNothing().given(invoiceService).editInvoice(anyLong(), eq(editInvoiceDto));
+        given(invoiceService.editInvoice(anyLong(), any(EditInvoiceDto.class))).willReturn(getInvoiceDto);
 
         // when
         ResultActions result = mockMvc.perform(put(url, 1L)
@@ -184,6 +228,76 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("dueDate")
                                         .description("결제 기한(* required)")
+                                        .type(JsonFieldType.STRING)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("응답 데이터")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.contractId").description("계약 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.invoiceId").description("청구서 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.paymentType").description("결제 수단")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.paymentType.id")
+                                        .description("결제 수단 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.paymentType.name")
+                                        .description("결제 수단명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.invoiceType").description("청구 타입")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.invoiceType.id")
+                                        .description("청구 타입 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.invoiceType.name")
+                                        .description("청구 타입명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.paymentStatus").description("결제 상태")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.paymentStatus.id")
+                                        .description("결제 상태 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.paymentStatus.name")
+                                        .description("결제 상태명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.item").description("상품 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.item.itemId").description("상품 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.item.name").description("상품명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.item.price").description("상품 가격")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.item.amount").description("상품 수량")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.member").description("회원 정보")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.member.memberId")
+                                        .description("회원 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.member.name").description("회원명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.member.email").description("회원 이메일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.member.phone")
+                                        .description("회원 전화번호")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.chargeAmount").description("청구 금액")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.isSubscription")
+                                        .description("구독 여부")
+                                        .type(JsonFieldType.BOOLEAN),
+                                fieldWithPath("data.contractDate").description("계약일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.dueDate").description("납부 기한")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.createdAt").description("청구 생성일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.updatedAt").description("청구 수정일")
                                         .type(JsonFieldType.STRING))));
     }
 
@@ -213,23 +327,6 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
     void getInvoice() throws Exception {
         // given
         String url = "/api/v1/invoices/{invoiceId}";
-
-        // GetInvoiceDto 객체 생성
-        GetInvoiceDto getInvoiceDto = GetInvoiceDto.builder()
-                .contractId(1L)
-                .invoiceId(1L)
-                .paymentType(paymentTypeDto)
-                .invoiceType(invoiceTypeDto)
-                .paymentStatus(paymentStatusDto)
-                .item(itemDto)
-                .member(memberDto)
-                .chargeAmount(10000L)
-                .isSubscription(true)
-                .contractDate(LocalDateTime.of(2023, 7, 1, 0, 0))
-                .dueDate(LocalDateTime.of(2023, 7, 15, 0, 0))
-                .createdAt(LocalDateTime.of(2023, 7, 1, 0, 0))
-                .updatedAt(LocalDateTime.of(2023, 7, 10, 0, 0))
-                .build();
 
         given(invoiceService.getInvoice(anyLong())).willReturn(getInvoiceDto);
 
@@ -362,6 +459,8 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
         ResultActions result = mockMvc.perform(get(url)
                 .param("contractId", "1")
                 .param("paymentStatusId", "1")
+                .param("itemName", "item")
+                .param("memberName", "member")
                 .param("paymentTypeId", "2")
                 .param("startContractDate", "2023-07-01")
                 .param("endContractDate", "2023-07-31")
