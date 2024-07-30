@@ -39,20 +39,28 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping()
-    public BaseResponse createInvoice(@Valid @RequestBody CreateInvoiceDto createInvoiceDto) {
-        invoiceService.createInvoice(createInvoiceDto);
+    @GetMapping("/{invoiceId}/send")
+    public BaseResponse sendInvoice(@PathVariable("invoiceId") Long invoiceId) {
+        invoiceService.sendInvoice(invoiceId);
 
-        return new BaseResponse(SuccessInfo.INVOICE_CREATED);
+        return new BaseResponse(SuccessInfo.INVOICE_SENDED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping()
+    public DataResponse<Long> createInvoice(@Valid @RequestBody CreateInvoiceDto createInvoiceDto) {
+        Long invoiceId = invoiceService.createInvoice(createInvoiceDto);
+
+        return new DataResponse<>(SuccessInfo.INVOICE_CREATED, invoiceId);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{invoiceId}")
-    public BaseResponse editInvoice(@PathVariable("invoiceId") Long invoiceId,
+    public DataResponse<GetInvoiceDto> editInvoice(@PathVariable("invoiceId") Long invoiceId,
             @Valid @RequestBody EditInvoiceDto editInvoiceDto) {
-        invoiceService.editInvoice(invoiceId, editInvoiceDto);
+        GetInvoiceDto getInvoiceDto = invoiceService.editInvoice(invoiceId, editInvoiceDto);
 
-        return new BaseResponse(SuccessInfo.INVOICE_UPDATED);
+        return new DataResponse<>(SuccessInfo.INVOICE_UPDATED, getInvoiceDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -75,6 +83,8 @@ public class InvoiceController {
     @GetMapping()
     public DataResponse<Page<GetInvoiceListDto>> getInvoiceList(
             @RequestParam(name = "contractId", required = false) Long contractId,
+            @RequestParam(name = "itemName", required = false) String itemName,
+            @RequestParam(name = "memberName", required = false) String memberName,
             @RequestParam(name = "paymentStatusId", required = false) Long paymentStatusId,
             @RequestParam(name = "paymentTypeId", required = false) Long paymentTypeId,
             @RequestParam(name = "startContractDate", required = false) LocalDate startContractDate,
@@ -85,7 +95,7 @@ public class InvoiceController {
             @RequestParam(name = "endCreatedAt", required = false) LocalDate endCreatedAt,
             Pageable pageable) {
         Page<GetInvoiceListDto> getInvoiceList = invoiceService.getInvoiceList(
-                contractId, paymentStatusId, paymentTypeId, startContractDate, endContractDate,
+                contractId, itemName, memberName, paymentStatusId, paymentTypeId, startContractDate, endContractDate,
                 startDueDate, endDueDate, startCreatedAt, endCreatedAt, pageable);
 
         return new DataResponse<>(SuccessInfo.INVOICE_LOADED, getInvoiceList);

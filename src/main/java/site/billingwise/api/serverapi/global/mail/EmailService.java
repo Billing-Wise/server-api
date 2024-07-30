@@ -103,4 +103,30 @@ public class EmailService {
         return message;
     }
 
+    public MimeMessage createMailInvoice(String email, Long invoiceId) {
+        MimeMessage message = mailSender.createMimeMessage();
+        String url = frontUrl + "m/payment/" + invoiceId + "/info";
+
+        try {
+            message.setFrom(fromMail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
+            message.setSubject("[빌링와이즈] 납부자 결제");
+            String body = "";
+            body += "<h1>" + "안녕하세요." + "</h1>";
+            body += "<h1>" + "빌링와이즈 입니다." + "</h1>";
+            body += "<h3>" + "아래 링크를 통해 결제를 완료해주세요" + "</h3><br>";
+            body += "<div align='center' style='border:1px solid black; font-family:verdana;'>";
+            body += "<a href='" + url + "' style='color:blue'>" + "결제 링크" + "</a>";
+            body += "</div>";
+
+            message.setText(body, "UTF-8", "html");
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("exception", e);
+            throw new GlobalException(FailureInfo.SEND_MAIL_CODE_FAIL);
+        }
+
+        return message;
+    }
 }
