@@ -70,13 +70,18 @@ public class InvoiceService {
 
     // 청구 생성
     @Transactional
-    public void createInvoice(CreateInvoiceDto createInvoiceDto) {
+    public Long createInvoice(CreateInvoiceDto createInvoiceDto) {
         User user = SecurityUtil.getCurrentUser()
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Contract contract = contractService.getEntity(user.getClient(), createInvoiceDto.getContractId());
         PaymentType paymentType = EnumUtil.toEnum(PaymentType.class, createInvoiceDto.getPaymentTypeId());
 
+        if (contract.getContractStatus() != ContractStatus.PROGRESS) {
+            throw new GlobalException(FailureInfo.NOT_PROGRESS_CONTRACT);
+        }
+
+        // 중지된 계약인지 확인
         if (contract.getContractStatus() != ContractStatus.PROGRESS) {
             throw new GlobalException(FailureInfo.NOT_PROGRESS_CONTRACT);
         }
@@ -117,8 +122,15 @@ public class InvoiceService {
                 .contractDate(createInvoiceDto.getContractDate().atStartOfDay())
                 .dueDate(createInvoiceDto.getDueDate().atStartOfDay())
                 .build();
-
+    
         invoiceRepository.save(invoice);
+
+        // 단건 계약 종료
+        if (!contract.getIsSubscription()) {
+            contract.setContractStatus(ContractStatus.END);
+        }
+
+        return invoice.getId();
     }
 
     // 청구 수정

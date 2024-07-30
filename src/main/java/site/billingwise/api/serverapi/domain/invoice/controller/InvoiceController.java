@@ -48,10 +48,10 @@ public class InvoiceController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping()
-    public BaseResponse createInvoice(@Valid @RequestBody CreateInvoiceDto createInvoiceDto) {
-        invoiceService.createInvoice(createInvoiceDto);
+    public DataResponse<Long> createInvoice(@Valid @RequestBody CreateInvoiceDto createInvoiceDto) {
+        Long invoiceId = invoiceService.createInvoice(createInvoiceDto);
 
-        return new BaseResponse(SuccessInfo.INVOICE_CREATED);
+        return new DataResponse<>(SuccessInfo.INVOICE_CREATED, invoiceId);
     }
 
     @ResponseStatus(HttpStatus.OK)
