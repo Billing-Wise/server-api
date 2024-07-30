@@ -39,6 +39,14 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{invoiceId}/send")
+    public BaseResponse sendInvoice(@PathVariable("invoiceId") Long invoiceId) {
+        invoiceService.sendInvoice(invoiceId);
+
+        return new BaseResponse(SuccessInfo.INVOICE_SENDED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping()
     public BaseResponse createInvoice(@Valid @RequestBody CreateInvoiceDto createInvoiceDto) {
         invoiceService.createInvoice(createInvoiceDto);
@@ -48,11 +56,11 @@ public class InvoiceController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{invoiceId}")
-    public BaseResponse editInvoice(@PathVariable("invoiceId") Long invoiceId,
+    public DataResponse<GetInvoiceDto> editInvoice(@PathVariable("invoiceId") Long invoiceId,
             @Valid @RequestBody EditInvoiceDto editInvoiceDto) {
-        invoiceService.editInvoice(invoiceId, editInvoiceDto);
+        GetInvoiceDto getInvoiceDto = invoiceService.editInvoice(invoiceId, editInvoiceDto);
 
-        return new BaseResponse(SuccessInfo.INVOICE_UPDATED);
+        return new DataResponse<>(SuccessInfo.INVOICE_UPDATED, getInvoiceDto);
     }
 
     @ResponseStatus(HttpStatus.OK)

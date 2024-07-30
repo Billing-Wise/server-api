@@ -55,6 +55,7 @@ public enum SuccessInfo {
     INVOICE_UPDATED("청구 정보가 성공적으로 수정되었습니다."),
     INVOICE_DELETED("청구 정보가 성공적으로 삭제되었습니다."),
     INVOICE_LOADED("청구 정보를 성공적으로 조회하였습니다."),
+    INVOICE_SENDED("청구서를 성공적으로 발송하였습니다."),
 
     // Consent
     CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),

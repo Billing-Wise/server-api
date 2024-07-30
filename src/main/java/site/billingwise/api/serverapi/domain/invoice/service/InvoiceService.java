@@ -28,10 +28,12 @@ import site.billingwise.api.serverapi.domain.invoice.dto.response.InvoiceTypeDto
 import site.billingwise.api.serverapi.domain.invoice.dto.response.PaymentStatusDto;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceRepository;
 import site.billingwise.api.serverapi.domain.invoice.repository.InvoiceSpecification;
+import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.payment.repository.PaymentRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
+import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -41,9 +43,30 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 public class InvoiceService {
 
     private final ContractService contractService;
+    private final EmailService emailService;
 
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
+
+    // 청구서 전송
+    public void sendInvoice(Long invoiceId) {
+        User user = SecurityUtil.getCurrentUser()
+                .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+        Invoice invoice = getEntity(user.getClient(), invoiceId);
+
+        if (invoice.getPaymentType() == PaymentType.AUTO_TRANSFER) {
+            throw new GlobalException(FailureInfo.INVALID_PAYMENTTYPE);
+        }
+
+        if (invoice.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new GlobalException(FailureInfo.PAID_INVOICE);
+        }
+
+        Member member = invoice.getContract().getMember();
+
+        emailService.createMailInvoice(member.getEmail(), invoiceId);
+    }
 
     // 청구 생성
     @Transactional
@@ -100,7 +123,7 @@ public class InvoiceService {
 
     // 청구 수정
     @Transactional
-    public void editInvoice(Long invoiceId, EditInvoiceDto editInvoiceDto) {
+    public GetInvoiceDto editInvoice(Long invoiceId, EditInvoiceDto editInvoiceDto) {
         User user = SecurityUtil.getCurrentUser()
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
@@ -142,6 +165,8 @@ public class InvoiceService {
         invoice.setChargeAmount(editInvoiceDto.getChargeAmount());
         invoice.setContractDate(editInvoiceDto.getContractDate().atStartOfDay());
         invoice.setDueDate(editInvoiceDto.getDueDate().atStartOfDay());
+
+        return toGetDtoFromEntity(invoice);
     }
 
     // 청구 삭제
@@ -168,39 +193,7 @@ public class InvoiceService {
 
         Invoice invoice = getEntity(user.getClient(), invoiceId);
 
-        Contract contract = invoice.getContract();
-
-        InvoiceItemDto invoiceItemDto = InvoiceItemDto.builder()
-                .itemId(contract.getItem().getId())
-                .name(contract.getItem().getName())
-                .price(invoice.getContract().getItemPrice())
-                .amount(invoice.getContract().getItemAmount())
-                .build();
-
-        InvoiceMemberDto invoiceMemberDto = InvoiceMemberDto.builder()
-                .memberId(contract.getMember().getId())
-                .name(contract.getMember().getName())
-                .email(contract.getMember().getEmail())
-                .phone(contract.getMember().getPhone())
-                .build();
-
-        GetInvoiceDto getInvoiceDto = GetInvoiceDto.builder()
-                .contractId(invoice.getContract().getId())
-                .invoiceId(invoiceId)
-                .paymentType(PaymentTypeDto.fromEnum(invoice.getPaymentType()))
-                .invoiceType(InvoiceTypeDto.fromEnum(invoice.getInvoiceType()))
-                .paymentStatus(PaymentStatusDto.fromEnum(invoice.getPaymentStatus()))
-                .item(invoiceItemDto)
-                .member(invoiceMemberDto)
-                .chargeAmount(invoice.getChargeAmount())
-                .isSubscription(contract.getIsSubscription())
-                .contractDate(invoice.getContractDate())
-                .dueDate(invoice.getDueDate())
-                .createdAt(invoice.getCreatedAt())
-                .updatedAt(invoice.getUpdatedAt())
-                .build();
-
-        return getInvoiceDto;
+        return toGetDtoFromEntity(invoice);
     }
 
     // 청구 목록 조회
@@ -222,7 +215,8 @@ public class InvoiceService {
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
 
         Specification<Invoice> spec = InvoiceSpecification.findContract(
-                contractId, itemName, memberName, paymentStatusId, paymentTypeId, startContractDate, endContractDate, startDueDate,
+                contractId, itemName, memberName, paymentStatusId, paymentTypeId, startContractDate, endContractDate,
+                startDueDate,
                 endDueDate, startCreatedAt, endCreatedAt,
                 user.getClient().getId());
 
@@ -243,6 +237,43 @@ public class InvoiceService {
         }
 
         return invoice;
+    }
+
+    // 상세 DTO로 변환
+    private GetInvoiceDto toGetDtoFromEntity(Invoice invoice) {
+        Contract contract = invoice.getContract();
+
+        InvoiceItemDto invoiceItemDto = InvoiceItemDto.builder()
+                .itemId(contract.getItem().getId())
+                .name(contract.getItem().getName())
+                .price(invoice.getContract().getItemPrice())
+                .amount(invoice.getContract().getItemAmount())
+                .build();
+
+        InvoiceMemberDto invoiceMemberDto = InvoiceMemberDto.builder()
+                .memberId(contract.getMember().getId())
+                .name(contract.getMember().getName())
+                .email(contract.getMember().getEmail())
+                .phone(contract.getMember().getPhone())
+                .build();
+
+        GetInvoiceDto getInvoiceDto = GetInvoiceDto.builder()
+                .contractId(invoice.getContract().getId())
+                .invoiceId(invoice.getId())
+                .paymentType(PaymentTypeDto.fromEnum(invoice.getPaymentType()))
+                .invoiceType(InvoiceTypeDto.fromEnum(invoice.getInvoiceType()))
+                .paymentStatus(PaymentStatusDto.fromEnum(invoice.getPaymentStatus()))
+                .item(invoiceItemDto)
+                .member(invoiceMemberDto)
+                .chargeAmount(invoice.getChargeAmount())
+                .isSubscription(contract.getIsSubscription())
+                .contractDate(invoice.getContractDate())
+                .dueDate(invoice.getDueDate())
+                .createdAt(invoice.getCreatedAt())
+                .updatedAt(invoice.getUpdatedAt())
+                .build();
+
+        return getInvoiceDto;
     }
 
     // 목록 DTO로 변환
