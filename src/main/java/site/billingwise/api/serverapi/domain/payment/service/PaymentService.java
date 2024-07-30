@@ -59,7 +59,7 @@ public class PaymentService {
                 throw new GlobalException(FailureInfo.PAY_FAIL);
         }
 
-        Payment payment = savePayment(invoice);
+        Payment payment = savePayment(invoice, PaymentMethod.CARD);
 
         paymentCardRepository.save(payerPayCardDto.toEntity(payment));
 
@@ -85,7 +85,7 @@ public class PaymentService {
                 throw new GlobalException(FailureInfo.PAY_FAIL);
         }
 
-        Payment payment = savePayment(invoice);
+        Payment payment = savePayment(invoice, PaymentMethod.ACCOUNT);
 
         paymentAccountRepository.save(payerPayAccountDto.toEntity(payment));
 
@@ -120,12 +120,12 @@ public class PaymentService {
         }
     }
 
-    private Payment savePayment(Invoice invoice) {
+    private Payment savePayment(Invoice invoice, PaymentMethod paymentMethod) {
         return paymentRepository.save(
                 Payment.builder()
                         .id(invoice.getId())
                         .invoice(invoice)
-                        .paymentMethod(PaymentMethod.CARD)
+                        .paymentMethod(paymentMethod)
                         .payAmount(invoice.getChargeAmount())
                         .build());
     }

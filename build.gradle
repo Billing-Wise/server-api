@@ -41,7 +41,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // spring data
@@ -87,6 +86,10 @@ dependencies {
     
     // sms
     implementation 'net.nurigo:sdk:4.3.0'
+
+    // prometheus
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
 
 }
 
