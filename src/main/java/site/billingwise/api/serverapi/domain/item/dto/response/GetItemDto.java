@@ -30,6 +30,7 @@ public class GetItemDto {
                 .createdAt(item.getCreatedAt())
                 .updatedAt(item.getUpdatedAt())
                 .contractCount(item.getContractCount())
+                .isBasic(item.getIsBasic())
                 .build();
 
         return getItemDto;
