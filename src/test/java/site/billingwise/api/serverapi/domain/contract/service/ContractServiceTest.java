@@ -172,7 +172,7 @@ public class ContractServiceTest {
                 .itemAmount(2)
                 .invoiceTypeId(1L)
                 .paymentTypeId(1L)
-                .isEasyConsent(true)
+                .isEasyConsent(false)
                 .contractCycle(10)
                 .paymentDueCycle(10)
                 .build();

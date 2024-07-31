@@ -125,11 +125,10 @@ public class EasyConsentService {
         }
 
         List<Contract> contractList = contractRepository
-                .findAllByMemberAndPaymentTypeAndContractStatusAndIsEasyConsent(
+                .findAllByMemberAndPaymentTypeAndContractStatus(
                         contract.getMember(),
                         PaymentType.AUTO_TRANSFER,
-                        ContractStatus.PENDING,
-                        true
+                        ContractStatus.PENDING
                 );
 
         for (Contract c : contractList) {

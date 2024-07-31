@@ -95,11 +95,13 @@ public class ContractService {
         InvoiceType invoiceType = EnumUtil.toEnum(InvoiceType.class, editContractDto.getInvoiceTypeId());
 
         boolean existConsent = consentAccountRepository.existsById(contract.getMember().getId());
-        boolean consentNeeded = !existConsent && editContractDto.getPaymentTypeId() == 2
-                && editContractDto.getIsEasyConsent();
+
+        boolean consentNeeded = !existConsent && editContractDto.getPaymentTypeId() == 2;
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, consentNeeded ? 1L : 2L);
 
-        if (consentNeeded) {
+        boolean isEasyConsent = paymentType == PaymentType.PAYER_PAYMENT ? false : editContractDto.getIsEasyConsent();
+
+        if (consentNeeded && isEasyConsent) {
             emailService.createMailConsent(contract.getMember().getEmail(), contract.getId());
         }
 
@@ -107,7 +109,7 @@ public class ContractService {
         contract.setItemAmount(editContractDto.getItemAmount());
         contract.setPaymentType(paymentType);
         contract.setInvoiceType(invoiceType);
-        contract.setIsEasyConsent(editContractDto.getIsEasyConsent());
+        contract.setIsEasyConsent(isEasyConsent);
         contract.setContractCycle(editContractDto.getContractCycle());
         contract.setPaymentDueCycle(editContractDto.getPaymentDueCycle());
         contract.setContractStatus(contractStatus);
@@ -286,8 +288,7 @@ public class ContractService {
         InvoiceType invoiceType = EnumUtil.toEnum(InvoiceType.class, createContractDto.getInvoiceTypeId());
 
         boolean existConsent = consentAccountRepository.existsById(member.getId());
-        boolean consentNeeded = !existConsent && createContractDto.getPaymentTypeId() == 2
-                && createContractDto.getIsEasyConsent();
+        boolean consentNeeded = !existConsent && createContractDto.getPaymentTypeId() == 2;
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, consentNeeded ? 1L : 2L);
 
         boolean isEasyConsent = paymentType == PaymentType.PAYER_PAYMENT ? false : createContractDto.getIsEasyConsent();
@@ -306,7 +307,7 @@ public class ContractService {
                 .contractStatus(contractStatus)
                 .build();
 
-        if (consentNeeded) {
+        if (consentNeeded && isEasyConsent) {
             emailArr.add(contract);
         }
 
