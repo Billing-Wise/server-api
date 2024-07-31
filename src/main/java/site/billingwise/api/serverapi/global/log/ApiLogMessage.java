@@ -1,7 +1,9 @@
 package site.billingwise.api.serverapi.global.log;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class HttpLogMessage {
+public class ApiLogMessage {
     String httpMethod;
     String requestUri;
     String httpStatus;
@@ -26,7 +28,7 @@ public class HttpLogMessage {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static HttpLogMessage createFrom(
+    public static ApiLogMessage createFrom(
             ContentCachingRequestWrapper requestWrapper,
             ContentCachingResponseWrapper responseWrapper,
             Double elapsedTime
@@ -38,10 +40,10 @@ public class HttpLogMessage {
 
         String headers = getRequestHeaders(requestWrapper);
         String requestParam = getRequestParams(requestWrapper);
-        String requestBody = getRequestBody(requestWrapper);
+        String requestBody = maskSensitiveInfo(getRequestBody(requestWrapper));
         String responseBody = getResponseBody(responseWrapper);
 
-        return new HttpLogMessage(
+        return new ApiLogMessage(
                 httpMethod,
                 requestUri,
                 httpStatus,
@@ -72,6 +74,19 @@ public class HttpLogMessage {
 
     private static String getResponseBody(ContentCachingResponseWrapper response) {
         return new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+    }
+
+    private static String maskSensitiveInfo(String content) {
+        try {
+            JsonNode jsonNode = objectMapper.readTree(content);
+            if (jsonNode.has("password")) {
+                ((ObjectNode) jsonNode).put("password", "*****");
+            }
+            return objectMapper.writeValueAsString(jsonNode);
+        } catch (Exception e) {
+            // JSON 파싱에 실패한 경우, 간단한 문자열 치환
+            return content.replaceAll("\"password\"\\s*:\\s*\"[^\"]*\"", "\"password\":\"*****\"");
+        }
     }
 
     public String toJsonLog() {

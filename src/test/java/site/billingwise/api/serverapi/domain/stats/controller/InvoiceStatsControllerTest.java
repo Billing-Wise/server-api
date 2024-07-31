@@ -68,7 +68,7 @@ public class InvoiceStatsControllerTest extends AbstractRestDocsTests {
 
         // then
         result.andExpect(status().isOk())
-                .andDo(document("stats/get-invoice-stats",
+                .andDo(document("stats/get",
                         requestCookies(
                                 cookieWithName("access").description("엑세스 토큰")),
                         pathParameters(
