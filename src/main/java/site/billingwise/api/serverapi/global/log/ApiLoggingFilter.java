@@ -19,10 +19,10 @@ import java.util.UUID;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ReqResLoggingFilter extends OncePerRequestFilter {
-    private static final Logger log = LoggerFactory.getLogger(ReqResLoggingFilter.class);
+public class ApiLoggingFilter extends OncePerRequestFilter {
+    private static final Logger log = LoggerFactory.getLogger(ApiLoggingFilter.class);
     private static final String REQUEST_ID = "request_id";
-    private static final String ACTUATOR_PATH = "/actuator";
+    private static final String API_PATH = "/api";
 
     @Override
     protected void doFilterInternal(
@@ -30,7 +30,7 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        if (isActuatorRequest(request)) {
+        if (!isApiRequest(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -51,8 +51,8 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isActuatorRequest(HttpServletRequest request) {
-        return request.getRequestURI().startsWith(ACTUATOR_PATH);
+    private boolean isApiRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(API_PATH);
     }
 
     private String generateRequestId() {
@@ -64,7 +64,7 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
                             long startTime, long endTime) {
         try {
             double elapsedTime = (endTime - startTime) / 1000.0;
-            HttpLogMessage logMessage = HttpLogMessage.createFrom(requestWrapper, responseWrapper, elapsedTime);
+            ApiLogMessage logMessage = ApiLogMessage.createFrom(requestWrapper, responseWrapper, elapsedTime);
             log.info("REQUEST_LOG: " + logMessage.toJsonLog());
             responseWrapper.copyBodyToResponse();
         } catch (Exception e) {
