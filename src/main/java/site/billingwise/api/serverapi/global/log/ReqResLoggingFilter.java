@@ -22,6 +22,7 @@ import java.util.UUID;
 public class ReqResLoggingFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(ReqResLoggingFilter.class);
     private static final String REQUEST_ID = "request_id";
+    private static final String ACTUATOR_PATH = "/actuator";
 
     @Override
     protected void doFilterInternal(
@@ -29,6 +30,11 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        if (isActuatorRequest(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper cachingResponseWrapper = new ContentCachingResponseWrapper(response);
 
@@ -43,6 +49,10 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
             logRequest(cachingRequestWrapper, cachingResponseWrapper, startTime, endTime);
             MDC.remove(REQUEST_ID);
         }
+    }
+
+    private boolean isActuatorRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(ACTUATOR_PATH);
     }
 
     private String generateRequestId() {
