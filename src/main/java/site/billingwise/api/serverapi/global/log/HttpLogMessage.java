@@ -1,60 +1,56 @@
 package site.billingwise.api.serverapi.global.log;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Value
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class HttpLogMessage {
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
-    private static final String EMPTY_BODY = "   <empty>";
-    private static final String LOG_FORMAT = """
-            
-            [REQUEST] %s %s %s (%.3f)
-            >> CLIENT_IP: %s
-            >> HEADERS:
-            %s
-            >> REQUEST_PARAM: %s
-            >> REQUEST_BODY:
-            %s
-            >> RESPONSE_BODY:
-            %s
-            """;
-
     String httpMethod;
     String requestUri;
-    HttpStatus httpStatus;
-    String clientIp;
+    String httpStatus;
     Double elapsedTime;
+    String clientIp;
     String headers;
     String requestParam;
     String requestBody;
     String responseBody;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static HttpLogMessage createFrom(
             ContentCachingRequestWrapper requestWrapper,
             ContentCachingResponseWrapper responseWrapper,
             Double elapsedTime
     ) {
+        String httpMethod = requestWrapper.getMethod();
+        String requestUri = requestWrapper.getRequestURI();
+        String httpStatus = HttpStatus.valueOf(responseWrapper.getStatus()).toString();
+        String clientIp = requestWrapper.getRemoteAddr();
+
+        String headers = getRequestHeaders(requestWrapper);
+        String requestParam = getRequestParams(requestWrapper);
+        String requestBody = getRequestBody(requestWrapper);
+        String responseBody = getResponseBody(responseWrapper);
+
         return new HttpLogMessage(
-                requestWrapper.getMethod(),
-                requestWrapper.getRequestURI(),
-                HttpStatus.valueOf(responseWrapper.getStatus()),
-                requestWrapper.getRemoteAddr(),
+                httpMethod,
+                requestUri,
+                httpStatus,
                 elapsedTime,
-                getRequestHeaders(requestWrapper),
-                getRequestParams(requestWrapper),
-                getRequestBody(requestWrapper),
-                getResponseBody(responseWrapper)
+                clientIp,
+                headers,
+                requestParam,
+                requestBody,
+                responseBody
         );
     }
 
@@ -75,31 +71,14 @@ public class HttpLogMessage {
     }
 
     private static String getResponseBody(ContentCachingResponseWrapper response) {
-        String rawBody = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+        return new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+    }
+
+    public String toJsonLog() {
         try {
-            return objectMapper.writeValueAsString(objectMapper.readTree(rawBody));
+            return objectMapper.writeValueAsString(this);
         } catch (Exception e) {
-            return rawBody;
+            return "Error creating JSON log: " + e.getMessage();
         }
-    }
-
-    public String toPrettierLog() {
-        return String.format(LOG_FORMAT,
-                this.httpMethod, this.requestUri, this.httpStatus, this.elapsedTime,
-                this.clientIp,
-                formatMultiline(this.headers),
-                this.requestParam,
-                formatMultiline(this.requestBody),
-                formatMultiline(this.responseBody)
-        );
-    }
-
-    private String formatMultiline(String content) {
-        if (content == null || content.isEmpty()) {
-            return EMPTY_BODY;
-        }
-        return Arrays.stream(content.split("\n"))
-                .map(line -> "   " + line)
-                .collect(Collectors.joining("\n"));
     }
 }
