@@ -41,21 +41,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 
 import jakarta.servlet.http.Cookie;
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
-import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
-import site.billingwise.api.serverapi.domain.user.Client;
-import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.repository.ClientRepository;
 import site.billingwise.api.serverapi.global.service.S3Service;
-import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
 @WebMvcTest(ItemController.class)
 @AutoConfigureMockMvc
