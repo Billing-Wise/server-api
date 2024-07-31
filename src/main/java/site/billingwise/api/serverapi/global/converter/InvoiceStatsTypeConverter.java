@@ -6,7 +6,7 @@ import site.billingwise.api.serverapi.domain.stats.InvoiceStatsType;
 
 @Converter
 @Slf4j
-public class InvoiceStatsTypeConverter extends AbstractConverter<InvoiceStatsType>{
+public class InvoiceStatsTypeConverter extends AbstractConverter<InvoiceStatsType> {
     public InvoiceStatsTypeConverter() {
         super(InvoiceStatsType.class);
     }
