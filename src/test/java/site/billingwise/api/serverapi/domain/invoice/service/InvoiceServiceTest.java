@@ -236,7 +236,7 @@ public class InvoiceServiceTest {
         when(invoiceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(invoicePage);
 
         Page<GetInvoiceListDto> result = invoiceService.getInvoiceList(
-                contractId, paymentStatusId, paymentTypeId, startContractDate, endContractDate, startDueDate,
+                contractId, "", "", paymentStatusId, paymentTypeId, startContractDate, endContractDate, startDueDate,
                 endDueDate, startCreatedAt, endCreatedAt, pageable);
 
         assertEquals(1, result.getTotalElements());

@@ -50,7 +50,7 @@ public class ContractController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{contractId}")
     public BaseResponse editContract(@PathVariable("contractId") Long contractId,
-            @RequestBody EditContractDto editContractDto) {
+            @Valid @RequestBody EditContractDto editContractDto) {
         contractService.editContract(contractId, editContractDto);
 
         return new BaseResponse(SuccessInfo.CONTRACT_EDITED);

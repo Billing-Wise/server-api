@@ -55,6 +55,7 @@ public enum SuccessInfo {
     INVOICE_UPDATED("청구 정보가 성공적으로 수정되었습니다."),
     INVOICE_DELETED("청구 정보가 성공적으로 삭제되었습니다."),
     INVOICE_LOADED("청구 정보를 성공적으로 조회하였습니다."),
+    INVOICE_SENDED("청구서를 성공적으로 발송하였습니다."),
 
     // Consent
     CONSENT_REGISTERED("동의정보 등록이 완료되었습니다."),
@@ -74,7 +75,10 @@ public enum SuccessInfo {
     PAYMENT_LOADED("납부 내역을 성공적으로 조회하였습니다."),
     PAYER_PAY_CARD("납부자 결제(카드)가 성공하였습니다."),
     PAYER_PAY_ACCOUNT("납부자 결제(계좌)가 성공하였습니다."),
-    GET_PAYER_PAY_INVOICE("납부자 결제 청구정보 조회가 성공하였습니다.");
+    GET_PAYER_PAY_INVOICE("납부자 결제 청구정보 조회가 성공하였습니다."),
+
+    // Static
+    Stats_LOADED("통계 정보 조회에 성공하였습니다.");
 
     private final Integer code = 200;
     private final String message;

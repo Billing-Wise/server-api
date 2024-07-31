@@ -13,6 +13,7 @@ import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetConsentDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
+import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.service.ItemService;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -38,6 +40,8 @@ public class ConsentServiceTest {
     private ConsentAccountRepository consentAccountRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private ContractRepository contractRepository;
     @Mock
     private S3Service s3Service;
 
@@ -82,7 +86,6 @@ public class ConsentServiceTest {
                 "image/jpeg",
                 "test image content".getBytes());
 
-
         Member member = Member.builder().client(mockClient).build();
 
         ConsentAccount consentAccount = registerConsentDto.toEntity(member, " ");
@@ -90,6 +93,8 @@ public class ConsentServiceTest {
         when(SecurityUtil.getCurrentClient()).thenReturn(mockClient);
 
         when(memberRepository.findById(any())).thenReturn(Optional.of(member));
+
+        when(consentAccountRepository.save(any(ConsentAccount.class))).thenReturn(consentAccount);
 
         when(s3Service.upload(eq(multipartFile), eq(signImageDirectory))).thenReturn("s3://bucket/test.jpg");
 

@@ -1,5 +1,8 @@
 package site.billingwise.api.serverapi.domain.payment.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +62,7 @@ public class PaymentService {
                 throw new GlobalException(FailureInfo.PAY_FAIL);
         }
 
-        Payment payment = savePayment(invoice);
+        Payment payment = savePayment(invoice, PaymentMethod.CARD);
 
         paymentCardRepository.save(payerPayCardDto.toEntity(payment));
 
@@ -85,7 +88,7 @@ public class PaymentService {
                 throw new GlobalException(FailureInfo.PAY_FAIL);
         }
 
-        Payment payment = savePayment(invoice);
+        Payment payment = savePayment(invoice, PaymentMethod.ACCOUNT);
 
         paymentAccountRepository.save(payerPayAccountDto.toEntity(payment));
 
@@ -120,12 +123,12 @@ public class PaymentService {
         }
     }
 
-    private Payment savePayment(Invoice invoice) {
+    private Payment savePayment(Invoice invoice, PaymentMethod paymentMethod) {
         return paymentRepository.save(
                 Payment.builder()
                         .id(invoice.getId())
                         .invoice(invoice)
-                        .paymentMethod(PaymentMethod.CARD)
+                        .paymentMethod(paymentMethod)
                         .payAmount(invoice.getChargeAmount())
                         .build());
     }
@@ -138,6 +141,7 @@ public class PaymentService {
 
         Payment payment = getEntity(user.getClient(), invoiceId);
 
+        // 카드 혹은 계좌 내역 삭제
         if (payment.getPaymentMethod().equals(PaymentMethod.CARD)) {
             PaymentCard paymentCard = paymentCardRepository.findById(invoiceId)
                     .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_CARD));
@@ -148,7 +152,19 @@ public class PaymentService {
             paymentAccountRepository.delete(paymentAccount);
         }
 
+        // 납부 내역 삭제
         paymentRepository.delete(payment);
+
+        // 청구 데이터 납부 상태 변경
+        Invoice invoice = payment.getInvoice();
+        LocalDate dueDate = invoice.getDueDate().toLocalDate();
+        LocalDate today = LocalDate.now();
+
+        if (dueDate.isBefore(today)) {
+            invoice.setPaymentStatus(PaymentStatus.UNPAID);
+        } else {
+            invoice.setPaymentStatus(PaymentStatus.PENDING);
+        }
     }
 
     // 납부 조회
@@ -162,16 +178,16 @@ public class PaymentService {
         if (payment.getPaymentMethod().equals(PaymentMethod.ACCOUNT)) {
             PaymentAccount paymentAccount = paymentAccountRepository.findById(invoiceId)
                     .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_PAYMENT_ACCOUNT));
-            
+
             GetPaymentDto getPaymentDto = GetPaymentAccountDto.builder()
-                        .invoiceId(invoiceId)
-                        .payAmount(payment.getPayAmount())
-                        .paymentMethod(payment.getPaymentMethod())
-                        .createAt(payment.getCreatedAt())
-                        .number(paymentAccount.getNumber())
-                        .bank(paymentAccount.getBank())
-                        .owner(paymentAccount.getOwner())
-                        .build();
+                    .invoiceId(invoiceId)
+                    .payAmount(payment.getPayAmount())
+                    .paymentMethod(payment.getPaymentMethod())
+                    .createAt(payment.getCreatedAt())
+                    .number(paymentAccount.getNumber())
+                    .bank(paymentAccount.getBank())
+                    .owner(paymentAccount.getOwner())
+                    .build();
 
             return getPaymentDto;
 
@@ -189,9 +205,9 @@ public class PaymentService {
                     .owner(paymentCard.getOwner())
                     .build();
 
-            return getPaymentDto;      
+            return getPaymentDto;
         }
-        
+
         throw new GlobalException(FailureInfo.INVALID_INPUT);
     }
 

@@ -1,6 +1,8 @@
 package site.billingwise.api.serverapi.domain.consent.controller;
 
 import jakarta.servlet.http.Cookie;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -9,12 +11,22 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.multipart.MultipartFile;
+
 import site.billingwise.api.serverapi.docs.restdocs.AbstractRestDocsTests;
 import site.billingwise.api.serverapi.domain.auth.controller.AuthController;
 import site.billingwise.api.serverapi.domain.auth.service.AuthService;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetConsentDto;
 import site.billingwise.api.serverapi.domain.consent.service.ConsentService;
+import site.billingwise.api.serverapi.domain.contract.ContractStatus;
+import site.billingwise.api.serverapi.domain.contract.PaymentType;
+import site.billingwise.api.serverapi.domain.contract.dto.response.ContractInvoiceTypeDto;
+import site.billingwise.api.serverapi.domain.contract.dto.response.ContractItemDto;
+import site.billingwise.api.serverapi.domain.contract.dto.response.ContractMemberDto;
+import site.billingwise.api.serverapi.domain.contract.dto.response.ContractStatusDto;
+import site.billingwise.api.serverapi.domain.contract.dto.response.PaymentTypeDto;
+import site.billingwise.api.serverapi.domain.invoice.InvoiceType;
 import site.billingwise.api.serverapi.domain.item.dto.request.CreateItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.request.EditItemDto;
 import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
@@ -22,6 +34,7 @@ import site.billingwise.api.serverapi.domain.item.dto.response.GetItemDto;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -32,7 +45,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ConsentController.class)
@@ -40,6 +52,22 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
 
     @MockBean
     ConsentService consentService;
+
+    private GetConsentDto getConsentDto;
+
+    @BeforeEach
+    void setUp() {
+        getConsentDto = GetConsentDto.builder()
+                .memberId(1L)
+                .owner("홍길동")
+                .bank("신한")
+                .number("111222333444")
+                .signUrl("SIGN_URL")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+    }
 
     @Test
     @DisplayName("동의서 등록")
@@ -63,7 +91,10 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
         MockMultipartFile signImage = new MockMultipartFile(
                 "signImage", "sign.png", "image/png", "consent data".getBytes());
 
-        willDoNothing().given(consentService).registerConsent(memberId, registerConsentDto, signImage);
+        given(consentService.registerConsent(anyLong(), any(RegisterConsentDto.class), any(MultipartFile.class)))
+                .willReturn(getConsentDto);
+        // given(consentService.registerConsent(1L, registerConsentDto, signImage))
+        // .willReturn(getConsentDto);
 
         // when
         ResultActions result = mockMvc.perform(multipart(url, memberId)
@@ -76,18 +107,43 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
         result.andExpect(status().isOk())
                 .andDo(document("consent/register",
                         requestCookies(
-                                cookieWithName("access").description("엑세스 토큰 (* required)")),
+                                cookieWithName("access")
+                                        .description("엑세스 토큰 (* required)")),
                         requestParts(
-                                partWithName("data").description("동의 계좌 정보 (* required)"),
-                                partWithName("signImage").description("동의 서명 이미지 (* required)")),
+                                partWithName("data")
+                                        .description("동의 계좌 정보 (* required)"),
+                                partWithName("signImage")
+                                        .description("동의 서명 이미지 (* required)")),
                         requestPartFields("data",
-                                fieldWithPath("owner").description("계좌 소유주 (* required)")
+                                fieldWithPath("owner")
+                                        .description("계좌 소유주 (* required)")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("bank").description("은행 (* required)")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("number").description("계좌 번호 (* required)")
+                                fieldWithPath("number")
+                                        .description("계좌 번호 (* required)")
+                                        .type(JsonFieldType.STRING)),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("응답 데이터")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.memberId").description("회원 아이디")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.owner").description("계좌 소유주")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.bank").description("은행")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.number").description("계좌번호")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.signUrl").description("서명 이미지 URL")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.createdAt").description("동의서 생성일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.updatedAt").description("동의서 수정일")
                                         .type(JsonFieldType.STRING))));
-
     }
 
     @Test
@@ -95,16 +151,6 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
     void getConsent() throws Exception {
         // given
         String url = "/api/v1/consents/{memberId}";
-
-        GetConsentDto getConsentDto = GetConsentDto.builder()
-                .memberId(1L)
-                .owner("홍길동")
-                .bank("신한")
-                .number("111222333444")
-                .signUrl("SIGN_URL")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
 
         given(consentService.getConsent(anyLong())).willReturn(getConsentDto);
 
@@ -120,14 +166,20 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
                         pathParameters(
                                 parameterWithName("memberId").description("회원 아이디")),
                         responseFields(
-                                fieldWithPath("code").description("응답 코드").type(JsonFieldType.NUMBER),
-                                fieldWithPath("message").description("응답 메시지").type(JsonFieldType.STRING),
-                                fieldWithPath("data").description("응답 데이터").type(JsonFieldType.OBJECT),
-                                fieldWithPath("data.memberId").description("회원 아이디").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.owner").description("계좌 소유주").type(JsonFieldType.STRING),
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("응답 데이터")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.memberId").description("회원 아이디")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.owner").description("계좌 소유주")
+                                        .type(JsonFieldType.STRING),
                                 fieldWithPath("data.bank").description("은행")
                                         .type(JsonFieldType.STRING),
-                                fieldWithPath("data.number").description("계좌번호").type(JsonFieldType.STRING),
+                                fieldWithPath("data.number").description("계좌번호")
+                                        .type(JsonFieldType.STRING),
                                 fieldWithPath("data.signUrl").description("서명 이미지 URL")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.createdAt").description("동의서 생성일")
@@ -149,7 +201,9 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
                 .number("111222333444")
                 .build();
 
-        willDoNothing().given(consentService).editConsent(anyLong(), eq(editConsentDto));
+        given(consentService.editConsent(anyLong(), any(RegisterConsentDto.class))).willReturn(getConsentDto);
+        // willDoNothing().given(consentService).editConsent(anyLong(),
+        // eq(editConsentDto));
 
         // when
         ResultActions result = mockMvc.perform(put(url, 1L)
@@ -164,9 +218,33 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
                 pathParameters(
                         parameterWithName("memberId").description("회원 아이디")),
                 requestFields(
-                        fieldWithPath("owner").description("계좌 소유주 (* required)").type(JsonFieldType.STRING),
-                        fieldWithPath("bank").description("은행 (* required)").type(JsonFieldType.STRING),
-                        fieldWithPath("number").description("계좌번호 (* required)").type(JsonFieldType.STRING))));
+                        fieldWithPath("owner").description("계좌 소유주 (* required)")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("bank").description("은행 (* required)")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("number").description("계좌번호 (* required)")
+                                .type(JsonFieldType.STRING)),
+                responseFields(
+                        fieldWithPath("code").description("응답 코드")
+                                .type(JsonFieldType.NUMBER),
+                        fieldWithPath("message").description("응답 메시지")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data").description("응답 데이터")
+                                .type(JsonFieldType.OBJECT),
+                        fieldWithPath("data.memberId").description("회원 아이디")
+                                .type(JsonFieldType.NUMBER),
+                        fieldWithPath("data.owner").description("계좌 소유주")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.bank").description("은행")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.number").description("계좌번호")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.signUrl").description("서명 이미지 URL")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.createdAt").description("동의서 생성일")
+                                .type(JsonFieldType.STRING),
+                        fieldWithPath("data.updatedAt").description("동의서 수정일")
+                                .type(JsonFieldType.STRING))));
     }
 
     @Test
@@ -178,7 +256,8 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
         MockMultipartFile signImage = new MockMultipartFile(
                 "signImage", "sign.png", "image/png", "consent data".getBytes());
 
-        willDoNothing().given(consentService).editConsentSignImage(anyLong(), eq(signImage));
+        given(consentService.editConsentSignImage(anyLong(), any(MultipartFile.class))).willReturn(getConsentDto);
+        // willDoNothing().given(consentService).editConsentSignImage(anyLong(), eq(signImage));
 
         // when
         ResultActions result = mockMvc.perform(multipart(url, 1L)
@@ -197,7 +276,28 @@ public class ConsentControllerTest extends AbstractRestDocsTests {
                         pathParameters(
                                 parameterWithName("memberId").description("회원 아이디")),
                         requestParts(
-                                partWithName("signImage").description("서명 이미지"))));
+                                partWithName("signImage").description("서명 이미지")),
+                        responseFields(
+                                fieldWithPath("code").description("응답 코드")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("message").description("응답 메시지")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data").description("응답 데이터")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.memberId").description("회원 아이디")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.owner").description("계좌 소유주")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.bank").description("은행")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.number").description("계좌번호")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.signUrl").description("서명 이미지 URL")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.createdAt").description("동의서 생성일")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.updatedAt").description("동의서 수정일")
+                                        .type(JsonFieldType.STRING))));
     }
 
     @Test

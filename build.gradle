@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'site.billingwise.api'
-version = '1.0.1'
+version = '1.0.3'
 
 java {
     toolchain {
@@ -90,7 +90,11 @@ dependencies {
     // prometheus
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-
+    // query dsl
+    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
 
 jar {
@@ -138,7 +142,10 @@ tasks.withType(Checkstyle) {
 checkstyle {
     configFile = file("config/checkstyle/naver-checkstyle-rules.xml")
     configProperties = ["suppressionFile": "config/checkstyle/naver-checkstyle-suppressions.xml"]
+    sourceSets = [sourceSets.main]
 }
+
+checkstyleMain.source = fileTree('src/main/java')
 
 jacocoTestReport {
     reports {
@@ -164,3 +171,24 @@ asciidoctor {
 }
 
 
+def querydslDir = "src/main/generated"
+
+sourceSets {
+    main.java.srcDirs += [ querydslDir ]
+}
+
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+
+clean.doLast {
+    file(querydslDir).deleteDir()
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+bootJar {
+    duplicatesStrategy = 'exclude'
+}

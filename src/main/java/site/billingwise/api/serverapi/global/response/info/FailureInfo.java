@@ -55,7 +55,7 @@ public enum FailureInfo {
 
     // consent
     ALREADY_EXIST_CONSENT(409, "이미 동의서가 존재합니다."),
-    NOT_EXIST_CONSENT(404, "동의서가 존재하지 않습니다."),
+    NOT_EXIST_CONSENT(400, "동의서가 존재하지 않습니다."),
 
     // easy consent
     NOT_CMS(400, "실시간 CMS 계약이 아닙니다."),

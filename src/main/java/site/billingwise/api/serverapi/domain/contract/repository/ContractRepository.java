@@ -30,6 +30,10 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSp
             Member member,
             PaymentType paymentType,
             ContractStatus contractStatus,
-            Boolean isEasyConsent
-    );
+            Boolean isEasyConsent);
+
+    List<Contract> findAllByMemberAndPaymentTypeAndContractStatus(
+            Member member,
+            PaymentType paymentType,
+            ContractStatus contractStatus);
 }
