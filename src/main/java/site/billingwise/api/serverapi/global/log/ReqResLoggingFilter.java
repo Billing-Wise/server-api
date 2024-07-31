@@ -65,7 +65,7 @@ public class ReqResLoggingFilter extends OncePerRequestFilter {
         try {
             double elapsedTime = (endTime - startTime) / 1000.0;
             HttpLogMessage logMessage = HttpLogMessage.createFrom(requestWrapper, responseWrapper, elapsedTime);
-            log.info("REQUEST_LOG: " + logMessage.toJsonLog());
+            log.info("REQUEST_LOG " + logMessage.toLogString());
             responseWrapper.copyBodyToResponse();
         } catch (Exception e) {
             log.error("Failed to log request", e);

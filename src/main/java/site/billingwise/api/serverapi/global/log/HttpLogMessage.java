@@ -74,11 +74,17 @@ public class HttpLogMessage {
         return new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
     }
 
-    public String toJsonLog() {
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (Exception e) {
-            return "Error creating JSON log: " + e.getMessage();
-        }
+    public String toLogString() {
+        return String.format("method=%s uri=%s status=%s time=%.3f ip=%s headers=%s params=%s body=%s response=%s",
+                httpMethod,
+                requestUri,
+                httpStatus,
+                elapsedTime,
+                clientIp,
+                headers.replace("\n", "\\n"),
+                requestParam,
+                requestBody.replace("\n", "\\n").replace("\r", ""),
+                responseBody.replace("\n", "\\n").replace("\r", "")
+        );
     }
 }
