@@ -4,6 +4,9 @@ server:
 spring:
   profiles:
     active: dev
+  security:
+    filter:
+      order: 10
   mail:
     host: smtp.gmail.com
     port: 587
