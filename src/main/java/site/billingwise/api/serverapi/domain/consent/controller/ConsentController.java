@@ -21,12 +21,14 @@ public class ConsentController {
 
     @PostMapping("/{memberId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse registerConsent(
+    public DataResponse<GetConsentDto> registerConsent(
             @PathVariable Long memberId,
             @Valid @RequestPart(name = "data") RegisterConsentDto registerConsentDto,
             @RequestPart(name = "signImage") MultipartFile multipartFile) {
-        consentService.registerConsent(memberId, registerConsentDto, multipartFile);
-        return new BaseResponse(SuccessInfo.CONSENT_REGISTERED);
+
+        GetConsentDto getConsentDto = consentService.registerConsent(memberId, registerConsentDto, multipartFile);
+
+        return new DataResponse<>(SuccessInfo.CONSENT_REGISTERED, getConsentDto);
     }
 
     @GetMapping("/{memberId}")
@@ -38,18 +40,21 @@ public class ConsentController {
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{memberId}")
-    public BaseResponse editConsent(@PathVariable Long memberId,
-                                    @Valid @RequestBody RegisterConsentDto editConsentDto) {
-        consentService.editConsent(memberId, editConsentDto);
-        return new BaseResponse(SuccessInfo.CONSENT_EDITED);
+    public DataResponse<GetConsentDto> editConsent(@PathVariable Long memberId,
+            @Valid @RequestBody RegisterConsentDto editConsentDto) {
+
+        GetConsentDto getConsentDto = consentService.editConsent(memberId, editConsentDto);
+        return new DataResponse<>(SuccessInfo.CONSENT_EDITED, getConsentDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{memberId}/image")
-    public BaseResponse editItemImage(@PathVariable Long memberId,
-                                      @RequestPart(name = "signImage") MultipartFile multipartFile) {
-        consentService.editConsentSignImage(memberId, multipartFile);
-        return new BaseResponse(SuccessInfo.CONSENT_SIGN_IMAGE_EDITED);
+    public DataResponse<GetConsentDto> editItemImage(@PathVariable Long memberId,
+            @RequestPart(name = "signImage") MultipartFile multipartFile) {
+
+        GetConsentDto getConsentDto = consentService.editConsentSignImage(memberId, multipartFile);
+
+        return new DataResponse<>(SuccessInfo.CONSENT_SIGN_IMAGE_EDITED, getConsentDto);
     }
 
     @ResponseStatus(HttpStatus.OK)

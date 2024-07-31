@@ -2,6 +2,9 @@ package site.billingwise.api.serverapi.domain.consent.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +13,10 @@ import site.billingwise.api.serverapi.domain.consent.ConsentAccount;
 import site.billingwise.api.serverapi.domain.consent.dto.request.RegisterConsentDto;
 import site.billingwise.api.serverapi.domain.consent.dto.response.GetConsentDto;
 import site.billingwise.api.serverapi.domain.consent.repository.ConsentAccountRepository;
+import site.billingwise.api.serverapi.domain.contract.Contract;
+import site.billingwise.api.serverapi.domain.contract.ContractStatus;
+import site.billingwise.api.serverapi.domain.contract.PaymentType;
+import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
@@ -25,22 +32,34 @@ public class ConsentService {
 
     private final ConsentAccountRepository consentAccountRepository;
     private final MemberRepository memberRepository;
+    private final ContractRepository contractRepository;
     private final S3Service s3Service;
     @Value("${aws.s3.sign-directory}")
     private String signImageDirectory;
 
-    public void registerConsent(Long memberId,
-                                RegisterConsentDto registerConsentDto,
-                                MultipartFile multipartFile) {
+    public GetConsentDto registerConsent(Long memberId,
+            RegisterConsentDto registerConsentDto,
+            MultipartFile multipartFile) {
         Member member = checkMemberPermission(memberId);
 
         if (consentAccountRepository.existsById(memberId)) {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_CONSENT);
         }
 
-        String signUrl = uploadImage(multipartFile);
-        consentAccountRepository.save(registerConsentDto.toEntity(member, signUrl));
+        List<Contract> contractList = contractRepository
+                .findAllByMemberAndPaymentTypeAndContractStatus(
+                        member,
+                        PaymentType.AUTO_TRANSFER,
+                        ContractStatus.PENDING);
 
+        for (Contract c : contractList) {
+            c.setContractStatus(ContractStatus.PROGRESS);
+        }
+
+        String signUrl = uploadImage(multipartFile);
+        ConsentAccount consentAccount =  consentAccountRepository.save(registerConsentDto.toEntity(member, signUrl));
+
+        return GetConsentDto.toDto(consentAccount);
     }
 
     public String uploadImage(MultipartFile multipartFile) {
@@ -61,13 +80,15 @@ public class ConsentService {
     }
 
     @Transactional
-    public void editConsent(Long memberId, RegisterConsentDto editConsentDto) {
+    public GetConsentDto editConsent(Long memberId, RegisterConsentDto editConsentDto) {
         checkMemberPermission(memberId);
 
         ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONSENT));
 
         consentAccount.update(editConsentDto);
+
+        return GetConsentDto.toDto(consentAccount);
     }
 
     public Member checkMemberPermission(Long memberId) {
@@ -84,7 +105,7 @@ public class ConsentService {
     }
 
     @Transactional
-    public void editConsentSignImage(Long memberId, MultipartFile multipartFile) {
+    public GetConsentDto editConsentSignImage(Long memberId, MultipartFile multipartFile) {
         checkMemberPermission(memberId);
 
         ConsentAccount consentAccount = consentAccountRepository.findById(memberId)
@@ -95,6 +116,8 @@ public class ConsentService {
 
         String newSignUrl = uploadImage(multipartFile);
         consentAccount.setSignUrl(newSignUrl);
+
+        return GetConsentDto.toDto(consentAccount);
     }
 
     public void deleteConsent(Long memberId) {
