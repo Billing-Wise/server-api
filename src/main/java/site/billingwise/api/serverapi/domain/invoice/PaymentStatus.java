@@ -23,5 +23,4 @@ public enum PaymentStatus implements EnumField {
     private final Long id;
     private final String name;
 
-
 }

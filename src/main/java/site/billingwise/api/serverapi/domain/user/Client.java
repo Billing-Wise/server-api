@@ -5,14 +5,11 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import site.billingwise.api.serverapi.domain.common.BaseEntity;
 import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
+import site.billingwise.api.serverapi.domain.stats.InvoiceStats;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static jakarta.persistence.CascadeType.ALL;
@@ -48,5 +45,8 @@ public class Client extends BaseEntity {
 
     @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
     private Set<Item> itemList;
+
+    @OneToMany(mappedBy = "client", cascade = ALL, orphanRemoval = true)
+    private Set<InvoiceStats> invoiceStatsList;
 
 }

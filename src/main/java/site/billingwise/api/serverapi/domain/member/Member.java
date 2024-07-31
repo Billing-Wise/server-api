@@ -20,9 +20,6 @@ import static jakarta.persistence.CascadeType.ALL;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = { "client_id", "email" })
-})
 @SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id = ?")
 @Where(clause = "is_deleted = false")
 public class Member extends BaseEntity {
