@@ -46,7 +46,7 @@ public enum FailureInfo {
     NOT_EXIST_CLIENT(404, "존재하지 않는 고객입니다."),
     
     // item
-    ITEM_NOT_FOUND(400, "해당 상품은 존재하지 않습니다."),
+    ITEM_NOT_FOUND(404, "해당 상품은 존재하지 않습니다."),
 
     // member
     NOT_EXIST_MEMBER(404, "존재하지 않는 회원입니다."),
@@ -72,7 +72,7 @@ public enum FailureInfo {
     INVALID_DUE_DATE(400, "납부 기한은 약정일과 같거나 이후여야합니다."),
     INVALID_INVOICE_PAYMENTTYPE(400, "납부자 결제인 계약은 실시간 CMS를 결제 수단으로 선택할 수 없습니다."),
     DUPLICATE_INVOICE(400, "해당 월에 이미 청구 건이 존재합니다."),
-    NOT_EXIST_INVOICE(400, "존재하지 않는 청구 정보입니다."),
+    NOT_EXIST_INVOICE(404, "존재하지 않는 청구 정보입니다."),
     PAID_INVOICE(400, "이미 결제된 청구입니다."),
     DIFFERENT_MONTH(400, "약정일 수정 범위는 해당 연월입니다."),
 
