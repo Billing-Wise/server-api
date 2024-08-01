@@ -38,12 +38,14 @@ public class EasyConsentService {
     private final MemberRepository memberRepository;
     private final ConsentAccountRepository consentAccountRepository;
 
+    @Transactional(readOnly = true)
     public List<GetBasicItemDto> getBasicItemList(Long clientId) {
         return itemRepository.findAllByClientIdAndIsBasic(clientId, true)
                 .stream().map((item) -> GetBasicItemDto.toDto(item))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public GetContractInfoDto getContractInfo(Long contractId) {
         Contract contract = contractRepository.findWithItemWithMemberById(contractId)
                 .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_CONTRACT));

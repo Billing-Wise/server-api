@@ -71,6 +71,7 @@ public class ConsentService {
         return s3Service.upload(multipartFile, signImageDirectory);
     }
 
+    @Transactional(readOnly = true)
     public GetConsentDto getConsent(Long memberId) {
         checkMemberPermission(memberId);
 

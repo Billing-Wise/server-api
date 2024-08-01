@@ -95,6 +95,7 @@ public class PaymentService {
         invoice.setPaymentStatus(PaymentStatus.PAID);
     }
 
+    @Transactional(readOnly = true)
     public GetPayerPayInvoiceDto getPayerPayInvoice(Long invoiceId) {
         return GetPayerPayInvoiceDto.toDto(checkInvoiceValidation(invoiceId));
     }
