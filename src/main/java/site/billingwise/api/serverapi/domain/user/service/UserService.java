@@ -2,6 +2,7 @@ package site.billingwise.api.serverapi.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.domain.user.dto.response.GetCurrentUserDto;
@@ -15,6 +16,8 @@ import site.billingwise.api.serverapi.global.util.SecurityUtil;
 @Service
 public class UserService {
     private final ClientRepository clientRepository;
+
+    @Transactional(readOnly = true)
     public GetCurrentUserDto getCurrentUser() {
         User user = SecurityUtil.getCurrentUser()
                         .orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
