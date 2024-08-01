@@ -5,10 +5,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
-import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
+import site.billingwise.api.serverapi.domain.user.CustomUserDetails;
 import site.billingwise.api.serverapi.domain.user.User;
-
-import static com.amazonaws.services.ec2.model.PrincipalType.Role;
 
 public class WithMockCustomUserSecurityContextFactory implements
         WithSecurityContextFactory<WithMockCustomUser> {

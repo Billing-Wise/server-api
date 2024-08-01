@@ -1,4 +1,4 @@
-package site.billingwise.api.serverapi.domain.auth;
+package site.billingwise.api.serverapi.domain.user;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

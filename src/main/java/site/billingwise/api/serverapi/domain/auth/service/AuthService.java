@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import site.billingwise.api.serverapi.domain.auth.CustomUserDetails;
+import site.billingwise.api.serverapi.domain.user.CustomUserDetails;
 import site.billingwise.api.serverapi.domain.auth.dto.request.*;
 import site.billingwise.api.serverapi.domain.user.Client;
 import site.billingwise.api.serverapi.domain.user.User;
@@ -116,6 +116,7 @@ public class AuthService {
         jwtProvider.addRefreshToken(authentication, response);
     }
 
+    @Transactional(readOnly = true)
     public void checkEmailDuplication(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new GlobalException(FailureInfo.ALREADY_EXIST_EMAIL);
@@ -141,6 +142,7 @@ public class AuthService {
         }
     }
 
+    @Transactional(readOnly = true)
     public EmailDto findEmail(FindEmailDto findEmailDto) {
 
         authenticatePhone(findEmailDto.getPhone(), findEmailDto.getCode());
