@@ -36,6 +36,8 @@ public class InvoiceStatsRepositoryCustomImpl implements InvoiceStatsRepositoryC
 
         return queryFactory
                 .selectFrom(invoiceStats)
+                .orderBy(invoiceStats.year.asc())
+                .orderBy(invoiceStats.month.asc())
                 .orderBy(invoiceStats.week.asc())
                 .where(builder)
                 .fetch();
