@@ -48,6 +48,7 @@ import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.PoiUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
@@ -58,6 +59,7 @@ public class ContractService {
     private final ItemService itemService;
     private final MemberService memberService;
     private final EmailService emailService;
+    private final SmsService smsService;
 
     private final ConsentAccountRepository consentAccountRepository;
     private final ContractRepository contractRepository;
@@ -79,6 +81,7 @@ public class ContractService {
 
         emailArr.forEach(c -> {
             emailService.createMailConsent(c.getMember().getEmail(), c.getId());
+            smsService.sendConsent(c.getMember().getPhone(), c.getId());
         });
 
         return contract.getId();
@@ -103,6 +106,7 @@ public class ContractService {
 
         if (consentNeeded && isEasyConsent) {
             emailService.createMailConsent(contract.getMember().getEmail(), contract.getId());
+            smsService.sendConsent(contract.getMember().getPhone(), contract.getId());
         }
 
         contract.setItemPrice(editContractDto.getItemPrice());
@@ -115,6 +119,7 @@ public class ContractService {
         contract.setContractStatus(contractStatus);
     }
 
+    @Transactional
     public void deleteContract(Long contractId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
@@ -254,9 +259,11 @@ public class ContractService {
             throw new GlobalException(FailureInfo.INVALID_FILE);
         }
 
+        // 간편동의 링크 전송
         if (isSuccess) {
             emailArr.forEach(c -> {
                 emailService.createMailConsent(c.getMember().getEmail(), c.getId());
+                smsService.sendConsent(c.getMember().getPhone(), c.getId());
             });
         }
 
