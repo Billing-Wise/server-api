@@ -1,7 +1,6 @@
 package site.billingwise.api.serverapi.domain.consent.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ import site.billingwise.api.serverapi.domain.contract.Contract;
 import site.billingwise.api.serverapi.domain.contract.ContractStatus;
 import site.billingwise.api.serverapi.domain.contract.PaymentType;
 import site.billingwise.api.serverapi.domain.contract.repository.ContractRepository;
-import site.billingwise.api.serverapi.domain.item.Item;
 import site.billingwise.api.serverapi.domain.member.Member;
 import site.billingwise.api.serverapi.domain.member.repository.MemberRepository;
 import site.billingwise.api.serverapi.domain.user.Client;
@@ -49,7 +47,7 @@ public class ConsentService {
         List<Contract> contractList = contractRepository
                 .findAllByMemberAndPaymentTypeAndContractStatus(
                         member,
-                        PaymentType.AUTO_TRANSFER,
+                        PaymentType.REALTIME_CMS,
                         ContractStatus.PENDING);
 
         for (Contract c : contractList) {

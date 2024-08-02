@@ -120,7 +120,7 @@ public class ContractServiceTest {
                 .member(mockMember)
                 .item(mockItem)
                 .invoiceType(InvoiceType.AUTO)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .contractStatus(ContractStatus.PROGRESS)
                 .isSubscription(true)
                 .itemPrice(1000L)
