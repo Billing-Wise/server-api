@@ -81,6 +81,7 @@ public class ItemService {
         return GetItemDto.toDto(item);
     }
 
+    @Transactional
     public void deleteItem(Long itemId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
