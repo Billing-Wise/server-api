@@ -67,6 +67,7 @@ public class MemberService {
         return toGetDtoFromEntity(member);
     }
 
+    @Transactional
     public void deleteMember(Long memberId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(() -> new GlobalException(FailureInfo.NOT_EXIST_USER));
         Member member = getEntity(user.getClient(), memberId);

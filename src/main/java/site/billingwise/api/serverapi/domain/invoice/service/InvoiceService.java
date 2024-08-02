@@ -35,6 +35,7 @@ import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
@@ -44,6 +45,7 @@ public class InvoiceService {
 
     private final ContractService contractService;
     private final EmailService emailService;
+    private final SmsService smsService;
 
     private final InvoiceRepository invoiceRepository;
     private final PaymentRepository paymentRepository;
@@ -66,6 +68,7 @@ public class InvoiceService {
         Member member = invoice.getContract().getMember();
 
         emailService.createMailInvoice(member.getEmail(), invoiceId);
+        smsService.sendConsent(member.getPhone(), invoiceId);
     }
 
     // 청구 생성

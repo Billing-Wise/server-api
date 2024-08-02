@@ -37,6 +37,9 @@ public class SmsService {
     @Value("${coolsms.api.url}")
     private String url;
 
+    @Value("${front.url}")
+    private String frontUrl;
+
 
     @PostConstruct
     private void init() {
@@ -64,6 +67,32 @@ public class SmsService {
         message.setFrom(sender);
         message.setTo(to);
         message.setText("[빌링와이즈] 아래의 인증번호를 입력해주세요\n" + verificationCode);
+
+        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
+        return response;
+    }
+
+    public SingleMessageSentResponse sendConsent(String to, Long contractId) {
+        Message message = new Message();
+
+        String url = frontUrl + "m/consent/member/contract-confirmation/" + contractId;
+
+        message.setFrom(sender);
+        message.setTo(to);
+        message.setText("[빌링와이즈] 아래 링크에 접속하여 간편 동의를 진행해주세요.\n\n" + url);
+
+        SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
+        return response;
+    }
+
+    public SingleMessageSentResponse sendPayment(String to, Long invoiceId) {
+        Message message = new Message();
+
+        String url = frontUrl + "m/payment/" + invoiceId + "/info";
+
+        message.setFrom(sender);
+        message.setTo(to);
+        message.setText("[빌링와이즈] 아래 링크에 접속하여 결제를 진행해주세요.\n\n" + url);
 
         SingleMessageSentResponse response = this.messageService.sendOne(new SingleMessageSendingRequest(message));
         return response;

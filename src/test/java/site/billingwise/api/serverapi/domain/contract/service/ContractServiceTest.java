@@ -37,6 +37,7 @@ import site.billingwise.api.serverapi.domain.user.User;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.mail.EmailService;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
+import site.billingwise.api.serverapi.global.sms.SmsService;
 import site.billingwise.api.serverapi.global.util.EnumUtil;
 import site.billingwise.api.serverapi.global.util.SecurityUtil;
 
@@ -70,6 +71,9 @@ public class ContractServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private SmsService smsService;
 
     @InjectMocks
     private ContractService contractService;
@@ -156,6 +160,7 @@ public class ContractServiceTest {
         when(memberService.getEntity(any(Client.class), anyLong())).thenReturn(mockMember);
         when(consentAccountRepository.existsById(anyLong())).thenReturn(false);
         when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
+        when(smsService.sendConsent(anyString(), anyLong())).thenReturn(null);
 
         // when
         contractService.createContract(createContractDto);
@@ -181,6 +186,7 @@ public class ContractServiceTest {
         when(contractRepository.findById(anyLong())).thenReturn(Optional.of(mockContract));
         when(consentAccountRepository.existsById(anyLong())).thenReturn(false);
         when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
+        when(smsService.sendConsent(anyString(), anyLong())).thenReturn(null);
 
         // when
         contractService.editContract(1L, editContractDto);
@@ -330,6 +336,7 @@ public class ContractServiceTest {
 
         doNothing().when(validator).validate(any(), any(BindingResult.class));
         when(emailService.createMailConsent(anyString(), anyLong())).thenReturn(mockMessage);
+        when(smsService.sendConsent(anyString(), anyLong())).thenReturn(null);
 
         InputStream inputStream = getClass().getResourceAsStream("/exel/contract_test_success.xlsx");
         MockMultipartFile file = new MockMultipartFile("file", "contract_test_success.xlsx",
