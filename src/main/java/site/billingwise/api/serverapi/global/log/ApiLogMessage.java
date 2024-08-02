@@ -36,7 +36,7 @@ public class ApiLogMessage {
         String httpMethod = requestWrapper.getMethod();
         String requestUri = requestWrapper.getRequestURI();
         String httpStatus = HttpStatus.valueOf(responseWrapper.getStatus()).toString();
-        String clientIp = requestWrapper.getRemoteAddr();
+        String clientIp = getClientIp(requestWrapper);
 
         String headers = getRequestHeaders(requestWrapper);
         String requestParam = getRequestParams(requestWrapper);
@@ -87,6 +87,14 @@ public class ApiLogMessage {
             // JSON 파싱에 실패한 경우, 간단한 문자열 치환
             return content.replaceAll("\"password\"\\s*:\\s*\"[^\"]*\"", "\"password\":\"*****\"");
         }
+    }
+
+    private static String getClientIp(ContentCachingRequestWrapper request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0];
     }
 
     public String toJsonLog() {
