@@ -68,7 +68,7 @@ public class InvoiceService {
         Member member = invoice.getContract().getMember();
 
         emailService.createMailInvoice(member.getEmail(), invoiceId);
-        smsService.sendConsent(member.getPhone(), invoiceId);
+        smsService.sendPayment(member.getPhone(), invoiceId);
     }
 
     // 청구 생성
