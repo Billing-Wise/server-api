@@ -57,7 +57,7 @@ public class InvoiceService {
 
         Invoice invoice = getEntity(user.getClient(), invoiceId);
 
-        if (invoice.getPaymentType() == PaymentType.AUTO_TRANSFER) {
+        if (invoice.getPaymentType() == PaymentType.REALTIME_CMS) {
             throw new GlobalException(FailureInfo.INVALID_PAYMENTTYPE);
         }
 
@@ -102,7 +102,7 @@ public class InvoiceService {
         }
 
         // 납부자 결제인 계약에서 실시간 CMS 청구 등록 불가능
-        if (contract.getPaymentType() == PaymentType.PAYER_PAYMENT && paymentType == PaymentType.AUTO_TRANSFER) {
+        if (contract.getPaymentType() == PaymentType.PAYER_PAYMENT && paymentType == PaymentType.REALTIME_CMS) {
             throw new GlobalException(FailureInfo.INVALID_INVOICE_PAYMENTTYPE);
         }
 
@@ -171,7 +171,7 @@ public class InvoiceService {
 
         // 납부자 결제인 계약에서 실시간 CMS 청구 등록 불가능
         if (invoice.getContract().getPaymentType() == PaymentType.PAYER_PAYMENT
-                && paymentType == PaymentType.AUTO_TRANSFER) {
+                && paymentType == PaymentType.REALTIME_CMS) {
             throw new GlobalException(FailureInfo.INVALID_INVOICE_PAYMENTTYPE);
         }
 

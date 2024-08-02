@@ -97,7 +97,7 @@ public class EasyConsentService {
                 .member(member)
                 .item(item)
                 .invoiceType(InvoiceType.AUTO)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .contractStatus(ContractStatus.PROGRESS)
                 .isSubscription(dto.getIsSubscription())
                 .itemPrice(item.getPrice())
@@ -129,7 +129,7 @@ public class EasyConsentService {
         List<Contract> contractList = contractRepository
                 .findAllByMemberAndPaymentTypeAndContractStatus(
                         contract.getMember(),
-                        PaymentType.AUTO_TRANSFER,
+                        PaymentType.REALTIME_CMS,
                         ContractStatus.PENDING
                 );
 
@@ -145,7 +145,7 @@ public class EasyConsentService {
     }
 
     private void validateEasyConsentContract(Contract contract) {
-        if (contract.getPaymentType() != PaymentType.AUTO_TRANSFER) {
+        if (contract.getPaymentType() != PaymentType.REALTIME_CMS) {
             throw new GlobalException(FailureInfo.NOT_CMS);
         }
 
