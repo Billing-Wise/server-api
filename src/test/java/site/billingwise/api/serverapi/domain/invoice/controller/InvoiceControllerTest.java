@@ -84,8 +84,8 @@ public class InvoiceControllerTest extends AbstractRestDocsTests {
                 .build();
 
         paymentTypeDto = PaymentTypeDto.builder()
-                .id(PaymentType.AUTO_TRANSFER.getId())
-                .name(PaymentType.AUTO_TRANSFER.getName())
+                .id(PaymentType.REALTIME_CMS.getId())
+                .name(PaymentType.REALTIME_CMS.getName())
                 .build();
 
         invoiceTypeDto = InvoiceTypeDto.builder()

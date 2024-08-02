@@ -106,7 +106,7 @@ public class EasyConsentServiceTest {
         // Given
         Contract contract = Contract.builder()
                 .id(contractId)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .isEasyConsent(true)
                 .contractStatus(ContractStatus.PENDING)
                 .member(Member.builder().id(1L).name("홍길동").build())
@@ -166,7 +166,7 @@ public class EasyConsentServiceTest {
         // Given
         Contract contract = Contract.builder()
                 .id(contractId)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .isEasyConsent(false)
                 .contractStatus(ContractStatus.PENDING)
                 .build();
@@ -186,7 +186,7 @@ public class EasyConsentServiceTest {
         // Given
         Contract contract = Contract.builder()
                 .id(contractId)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .isEasyConsent(true)
                 .contractStatus(ContractStatus.PROGRESS)
                 .build();
@@ -260,7 +260,7 @@ public class EasyConsentServiceTest {
         Member member = Member.builder().id(1L).name("홍길동").contractList(new HashSet<Contract>()).build();
         Contract contract = Contract.builder()
                 .id(contractId)
-                .paymentType(PaymentType.AUTO_TRANSFER)
+                .paymentType(PaymentType.REALTIME_CMS)
                 .isEasyConsent(true)
                 .contractStatus(ContractStatus.PENDING)
                 .member(member)
