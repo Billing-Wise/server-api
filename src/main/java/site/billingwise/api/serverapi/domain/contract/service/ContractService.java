@@ -120,6 +120,21 @@ public class ContractService {
     }
 
     @Transactional
+    public void editContractStatus(Long contractId, Long contractStatusId) {
+        User user = SecurityUtil.getCurrentUser().orElseThrow(
+                () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
+
+        Contract contract = getEntity(user.getClient(), contractId);
+        ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, contractStatusId);
+
+        if (contractStatus == ContractStatus.PENDING) {
+            throw new GlobalException(FailureInfo.PENDING_IMPOSSIBLE);
+        }
+
+        contract.setContractStatus(contractStatus);
+    }
+
+    @Transactional
     public void deleteContract(Long contractId) {
         User user = SecurityUtil.getCurrentUser().orElseThrow(
                 () -> new GlobalException(FailureInfo.NOT_EXIST_USER));
@@ -356,6 +371,11 @@ public class ContractService {
                 .name(contract.getPaymentType().getName())
                 .build();
 
+        ContractStatusDto contractStatus = ContractStatusDto.builder()
+                .id(contract.getContractStatus().getId())
+                .name(contract.getContractStatus().getName())
+                .build();
+
         GetContractDto getContractDto = GetContractDto.builder()
                 .id(contract.getId())
                 .member(member)
@@ -369,6 +389,7 @@ public class ContractService {
                 .paymentType(paymentType)
                 .contractCycle(contract.getContractCycle())
                 .paymentDueCycle(contract.getPaymentDueCycle())
+                .contractStatus(contractStatus)
                 .createdAt(contract.getCreatedAt())
                 .updatedAt(contract.getUpdatedAt())
                 .build();

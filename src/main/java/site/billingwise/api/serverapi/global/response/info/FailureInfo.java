@@ -66,6 +66,7 @@ public enum FailureInfo {
     NOT_PROGRESS_CONTRACT(400, "진행 중인 계약이 아닙니다."),
     INVALID_DUE_CYCLE(400, "납부 기한은 약정일 이후여야합니다."),
     NOT_EXIST_CONTRACT(404, "존재하지 않는 계약입니다."),
+    PENDING_IMPOSSIBLE(404, "계약 대기 상태로의 변경은 불가능합니다."),
 
     // invoice
     INVALID_CONTRACT_DATE(400, "약정일은 현재로부터 다음 날 이후여야합니다."),

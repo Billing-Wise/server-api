@@ -49,6 +49,7 @@ public enum SuccessInfo {
     CONTRACT_EDITED("계약 정보가 성공적으로 수정되었습니다."),
     CONTRACT_DELETED("계약 정보가 성공적으로 삭제되었습니다."),
     CONTRACT_LOADED("계약 정보를 성공적으로 조회하였습니다."),
+    CONTRACT_STATUS_EDITED("계약 상태가 성공적으로 변경되었습니다."),
 
     // Invoice
     INVOICE_CREATED("청구 정보가 성공적으로 등록되었습니다."),
