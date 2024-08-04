@@ -127,7 +127,7 @@ public class ContractService {
         Contract contract = getEntity(user.getClient(), contractId);
         ContractStatus contractStatus = EnumUtil.toEnum(ContractStatus.class, contractStatusId);
 
-        if (contractStatus == ContractStatus.PENDING) {
+        if (contractStatus == ContractStatus.PENDING || contract.getContractStatus() == ContractStatus.PENDING) {
             throw new GlobalException(FailureInfo.PENDING_IMPOSSIBLE);
         }
 
