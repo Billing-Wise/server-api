@@ -1,5 +1,6 @@
 package site.billingwise.api.serverapi.global.util;
 
+import lombok.experimental.UtilityClass;
 import site.billingwise.api.serverapi.domain.common.EnumField;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
@@ -7,6 +8,7 @@ import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
 
+@UtilityClass
 public class EnumUtil {
 
     public static <T extends Enum<T> & EnumField> Long toId(T enumClass) {

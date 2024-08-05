@@ -57,6 +57,15 @@ public class ContractController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{contractId}/status")
+    public BaseResponse changeContractStatus(@PathVariable("contractId") Long contractId,
+            @RequestBody Long statusId) {
+        contractService.editContractStatus(contractId, statusId);
+
+        return new BaseResponse(SuccessInfo.CONTRACT_STATUS_EDITED);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{contractId}")
     public BaseResponse deleteContract(@PathVariable("contractId") Long contractId) {
         contractService.deleteContract(contractId);

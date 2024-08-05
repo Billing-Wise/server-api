@@ -57,10 +57,13 @@ public class InvoiceService {
 
         Invoice invoice = getEntity(user.getClient(), invoiceId);
 
-        if (invoice.getPaymentType() == PaymentType.REALTIME_CMS) {
+        // 미납되기 전의 실시간CMS는 청구서 발송 불가
+        if (invoice.getPaymentType() == PaymentType.REALTIME_CMS
+                && invoice.getPaymentStatus() != PaymentStatus.UNPAID) {
             throw new GlobalException(FailureInfo.INVALID_PAYMENTTYPE);
         }
 
+        // 이미 결제된 청구건은 청구서 발송 불가
         if (invoice.getPaymentStatus() == PaymentStatus.PAID) {
             throw new GlobalException(FailureInfo.PAID_INVOICE);
         }
@@ -125,7 +128,7 @@ public class InvoiceService {
                 .contractDate(createInvoiceDto.getContractDate().atStartOfDay())
                 .dueDate(createInvoiceDto.getDueDate().atStartOfDay())
                 .build();
-    
+
         invoiceRepository.save(invoice);
 
         // 단건 계약 종료
