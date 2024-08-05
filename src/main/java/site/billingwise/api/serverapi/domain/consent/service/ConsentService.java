@@ -119,6 +119,7 @@ public class ConsentService {
         return GetConsentDto.toDto(consentAccount);
     }
 
+    @Transactional
     public void deleteConsent(Long memberId) {
         checkMemberPermission(memberId);
 
