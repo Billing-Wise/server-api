@@ -27,5 +27,6 @@ public class GetContractDto {
     private Integer paymentDueCycle;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private ContractStatusDto contractStatus;
+    
 }

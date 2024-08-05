@@ -269,6 +269,7 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                 .totalUnpaidAmount(50000L)
                 .invoiceType(invoiceTypeDto)
                 .paymentType(paymentTypeDto)
+                .contractStatus(contractStatusDto)
                 .contractCycle(30)
                 .paymentDueCycle(15)
                 .createdAt(LocalDateTime.now())
@@ -340,6 +341,14 @@ public class ContractControllerTest extends AbstractRestDocsTests {
                                         .type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.invoiceType.name")
                                         .description("청구 타입명")
+                                        .type(JsonFieldType.STRING),
+                                fieldWithPath("data.contractStatus").description("계약 상태")
+                                        .type(JsonFieldType.OBJECT),
+                                fieldWithPath("data.contractStatus.id")
+                                        .description("계약 상태 ID")
+                                        .type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.contractStatus.name")
+                                        .description("계약 상태명")
                                         .type(JsonFieldType.STRING),
                                 fieldWithPath("data.paymentType").description("결제 수단")
                                         .type(JsonFieldType.OBJECT),
