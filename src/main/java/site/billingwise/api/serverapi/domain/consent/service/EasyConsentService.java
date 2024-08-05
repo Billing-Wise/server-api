@@ -68,10 +68,6 @@ public class EasyConsentService {
         Item item = itemRepository.findByIdAndClientIdAndIsBasic(dto.getItemId(), clientId, true)
                 .orElseThrow(() -> new GlobalException(FailureInfo.ITEM_NOT_FOUND));
 
-        if (memberRepository.existsByClientIdAndEmail(clientId, dto.getMemberEmail())) {
-            throw new GlobalException(FailureInfo.ALREADY_EXIST_MEMBER);
-        }
-
         Member member = Member.builder()
                 .client(client)
                 .email(dto.getMemberEmail())
