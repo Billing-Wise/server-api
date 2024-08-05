@@ -41,7 +41,9 @@ jobs:
         with:
           path: ./server-api/build/jib-cache
           key: ${{ runner.os }}-jib-${{ github.job }}-${{ hashFiles('**/build.gradle') }}
-          restore-keys: ${{ runner.os }}-jib-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-jib-${{ github.job }}
+            ${{ runner.os }}-jib
 
       - name: Build and push image to Amazon ECR
         run: ./gradlew jib -x test
