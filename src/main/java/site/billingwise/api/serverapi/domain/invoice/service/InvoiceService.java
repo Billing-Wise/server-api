@@ -83,10 +83,6 @@ public class InvoiceService {
         Contract contract = contractService.getEntity(user.getClient(), createInvoiceDto.getContractId());
         PaymentType paymentType = EnumUtil.toEnum(PaymentType.class, createInvoiceDto.getPaymentTypeId());
 
-        if (contract.getContractStatus() != ContractStatus.PROGRESS) {
-            throw new GlobalException(FailureInfo.NOT_PROGRESS_CONTRACT);
-        }
-
         // 중지된 계약인지 확인
         if (contract.getContractStatus() != ContractStatus.PROGRESS) {
             throw new GlobalException(FailureInfo.NOT_PROGRESS_CONTRACT);
