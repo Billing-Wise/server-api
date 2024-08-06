@@ -22,6 +22,8 @@ import java.util.UUID;
 public class ApiLoggingFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(ApiLoggingFilter.class);
     private static final String REQUEST_ID = "request_id";
+    private static final String API_PATH = "/api/v1";
+
 
     @Override
     protected void doFilterInternal(
@@ -29,6 +31,10 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        if (!isApiRequest(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         ContentCachingRequestWrapper cachingRequestWrapper = new ContentCachingRequestWrapper(request);
         ContentCachingResponseWrapper cachingResponseWrapper = new ContentCachingResponseWrapper(response);
@@ -44,6 +50,10 @@ public class ApiLoggingFilter extends OncePerRequestFilter {
             logRequest(cachingRequestWrapper, cachingResponseWrapper, startTime, endTime);
             MDC.remove(REQUEST_ID);
         }
+    }
+
+    private boolean isApiRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith(API_PATH);
     }
 
     private String generateRequestId() {
