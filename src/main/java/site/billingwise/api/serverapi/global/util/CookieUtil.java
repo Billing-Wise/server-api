@@ -3,10 +3,13 @@ package site.billingwise.api.serverapi.global.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
 
+@UtilityClass
 public class CookieUtil {
+
     public static Cookie getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -16,6 +19,7 @@ public class CookieUtil {
                 }
             }
         }
+        System.out.println("hi");
         return null;
     }
 

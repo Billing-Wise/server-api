@@ -1,5 +1,6 @@
 package site.billingwise.api.serverapi.global.util;
 
+import lombok.experimental.UtilityClass;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -7,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import site.billingwise.api.serverapi.global.exception.GlobalException;
 import site.billingwise.api.serverapi.global.response.info.FailureInfo;
 
+@UtilityClass
 public class PoiUtil {
 
     public static String getCellValue(Cell cell) {
