@@ -35,6 +35,7 @@ public class ConsentService {
     @Value("${aws.s3.sign-directory}")
     private String signImageDirectory;
 
+    @Transactional
     public GetConsentDto registerConsent(Long memberId,
             RegisterConsentDto registerConsentDto,
             MultipartFile multipartFile) {
